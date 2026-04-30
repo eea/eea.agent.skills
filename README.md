@@ -17,17 +17,28 @@ eea.agent.skills/
 ├── CHANGELOG.md                   # Version history
 ├── catalog.yaml                   # Machine-readable skill index
 │
-├── skills/                        # One subdirectory per skill
+├── skills/                        # Source: one subdirectory per skill
 │   ├── docker-expert/
-│   │   ├── SKILL.md               # Core skill (upstream base)
+│   │   ├── SKILL.md               # Upstream base
 │   │   ├── EEA-OVERRIDES.md       # EEA-specific customizations
 │   │   └── references/            # Deep reference material
 │   └── <future-skills>/
+│
+├── dist/                          # Pre-built merged skills (gitignored)
+│   └── skills/
+│       └── docker-expert/
+│           └── SKILL.md           # Merged: upstream + EEA overrides
+│
+├── scripts/                       # Build automation
+│   └── build.sh                   # Merges SKILL.md + EEA-OVERRIDES.md
 │
 ├── shared/                        # Cross-skill reusable fragments
 │   ├── design-foundations.md      # Design tokens, color palettes
 │   ├── eea-style-guide.md          # EEA brand/tone guidance for LLM outputs
 │   └── data-schemas.md             # Common EEA data structures/formats
+│
+├── docs/                          # Documentation
+│   └── SYNC-STRATEGY.md           # Upstream sync strategy
 │
 └── workflows/                     # Multi-skill orchestration recipes
     └── data-report.md             # chart + doc + xlsx chained workflow
@@ -37,24 +48,22 @@ eea.agent.skills/
 
 ### Adding a skill to your agent
 
-**Option 1: Copy the pre-built merged skill (recommended)**
+**Option 1: Download from release (easiest)**
 
-The `dist/` directory contains merged skills (`SKILL.md` + `EEA-OVERRIDES.md` combined):
-
-```bash
-# Copy merged skill to your agent's skills directory
-cp dist/skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
-```
-
-**Option 2: Install via npm (if available)**
+Pre-built merged skills are attached to every [GitHub Release](https://github.com/eea/eea.agent.skills/releases):
 
 ```bash
-npx skills add eea/eea.agent.skills --skill docker-expert
+# Download latest release
+curl -L -o eea-skills.zip https://github.com/eea/eea.agent.skills/releases/latest/download/eea-agent-skills.zip
+unzip eea-skills.zip
+
+# Copy merged skill (upstream + EEA overrides combined)
+cp skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
 ```
 
-**Option 3: Build from source**
+**Option 2: Build from source**
 
-If you want the latest development version with your own modifications:
+If you want the latest development version or to customize overrides:
 
 ```bash
 # Clone and build
@@ -64,6 +73,12 @@ cd eea.agent.skills
 
 # Copy built skill
 cp dist/skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
+```
+
+**Option 3: Install via npm (if available)**
+
+```bash
+npx skills add eea/eea.agent.skills --skill docker-expert
 ```
 
 ### Using a skill
