@@ -56,25 +56,38 @@ Use doc skill to generate technical docs for the API
 
 ### Using with OpenCode
 
-For [OpenCode](https://github.com/opencode-ai/opencode) users, copy skills into your agent's skills directory:
+For [OpenCode](https://github.com/opencode-ai/opencode) users, skills are auto-discovered from standard paths. Place them in any of these locations:
 
 ```bash
-# Clone or pull latest skills
-git clone https://github.com/eea/eea.agent.skills.git /tmp/eea-skills
+# Global paths (available across all projects)
+~/.config/opencode/skills/<name>/SKILL.md
+~/.claude/skills/<name>/SKILL.md
+~/.agents/skills/<name>/SKILL.md
 
-# Copy desired skill to OpenCode skills directory
-cp /tmp/eea-skills/skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
-cp /tmp/eea-skills/skills/docker-expert/EEA-OVERRIDES.md ~/.claude/skills/docker-expert/EEA-OVERRIDES.md
-
-# Or symlink for always-up-to-date access
-ln -s /tmp/eea-skills/skills/docker-expert ~/.claude/skills/docker-expert
+# Project-local paths (only within the project)
+.opencode/skills/<name>/SKILL.md
+.claude/skills/<name>/SKILL.md
+.agents/skills/<name>/SKILL.md
 ```
 
-Then invoke in OpenCode:
+**Quick install:**
+
+```bash
+# Copy a skill to your global OpenCode skills directory
+mkdir -p ~/.config/opencode/skills/docker-expert
+cp skills/docker-expert/SKILL.md ~/.config/opencode/skills/docker-expert/SKILL.md
+
+# Or install via npm (if the skill supports it)
+npx skills add eea/eea.agent.skills --skill docker-expert
+```
+
+**Invoke in OpenCode:**
 
 ```
 Use docker-expert to review this Dockerfile
 ```
+
+OpenCode loads skills on-demand via the native `skill` tool. The agent sees available skills in the `<available_skills>` section and loads the full content when needed.
 
 ## Available Skills
 
