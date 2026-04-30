@@ -1,0 +1,28 @@
+skills:
+  - id: docker-expert
+    name: Docker Expert
+    description: Advanced Docker containerization expert for multi-stage builds, security hardening, and production deployment patterns
+    category: devops
+    upstream:
+      source: sickn33/antigravity-awesome-skills
+      path: skills/docker-expert
+      url: https://github.com/sickn33/antigravity-awesome-skills
+    triggers:
+      - docker
+      - container
+      - containerize
+      - dockerfile
+      - docker-compose
+      - multi-stage
+      - buildkit
+    version: "1.0"
+    eeaspecific: true
+    added_date: "2026-04-21"
+    notes: Two-file overlay pattern with EEA-OVERRIDES.md for EEA-specific patterns
+
+# Future skills placeholder
+# - chart: Data visualization and chart generation
+# - doc: Technical documentation generation
+# - xlsx: Excel spreadsheet operations
+# - slides: Presentation generation
+# - website-building: Static site and web app creation

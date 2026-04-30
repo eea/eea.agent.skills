@@ -1,0 +1,17 @@
+# CODEOWNERS for EEA Agent Skills
+
+# Default owner for everything
+* @eea/ai-architecture-team
+
+# Skills directory
+skills/ @eea/ai-architecture-team
+
+# CI/CD
+.github/ @eea/ai-architecture-team @eea/devops-team
+
+# Shared resources
+shared/ @eea/ai-architecture-team @eea/design-team
+
+# Documentation
+README.md @eea/ai-architecture-team
+CONTRIBUTING.md @eea/ai-architecture-team

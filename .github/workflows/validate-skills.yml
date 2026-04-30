@@ -1,0 +1,50 @@
+name: Validate Skills
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - 'skills/**/*.md'
+      - 'catalog.yaml'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check SKILL.md files exist
+        run: |
+          for skill in skills/*/; do
+            if [ ! -f "${skill}SKILL.md" ]; then
+              echo "Missing SKILL.md in ${skill}"
+              exit 1
+            fi
+          done
+
+      - name: Check token count
+        run: |
+          for skill in skills/*/SKILL.md; do
+            tokens=$(wc -c < "$skill")
+            if [ "$tokens" -gt 5500 ]; then
+              echo "WARNING: $skill exceeds 5k token limit ($tokens bytes)"
+            fi
+          done
+
+      - name: Validate catalog.yaml
+        run: |
+          python3 -c "import yaml; yaml.safe_load(open('catalog.yaml'))" \
+            || echo "catalog.yaml validation failed"
+
+  upstream-sync:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check upstream for docker-expert
+        run: |
+          UPSTREAM_SHA=$(curl -s https://api.github.com/repos/sickn33/antigravity-awesome-skills/commits/main | jq -r '.[0].sha')
+          echo "Upstream main: $UPSTREAM_SHA"
+          # TODO: Compare with last known SHA and create issue if changed
