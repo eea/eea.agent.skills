@@ -37,12 +37,33 @@ eea.agent.skills/
 
 ### Adding a skill to your agent
 
-```bash
-# Using npm installer (if available)
-npx skills add eea/eea.agent.skills --skill docker-expert
+**Option 1: Copy the pre-built merged skill (recommended)**
 
-# Or manually: copy SKILL.md into your agent's skills directory
-cp skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
+The `dist/` directory contains merged skills (`SKILL.md` + `EEA-OVERRIDES.md` combined):
+
+```bash
+# Copy merged skill to your agent's skills directory
+cp dist/skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
+```
+
+**Option 2: Install via npm (if available)**
+
+```bash
+npx skills add eea/eea.agent.skills --skill docker-expert
+```
+
+**Option 3: Build from source**
+
+If you want the latest development version with your own modifications:
+
+```bash
+# Clone and build
+git clone https://github.com/eea/eea.agent.skills.git
+cd eea.agent.skills
+./scripts/build.sh docker-expert
+
+# Copy built skill
+cp dist/skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
 ```
 
 ### Using a skill
@@ -73,9 +94,9 @@ For [OpenCode](https://github.com/opencode-ai/opencode) users, skills are auto-d
 **Quick install:**
 
 ```bash
-# Copy a skill to your global OpenCode skills directory
+# Copy the pre-built merged skill (includes upstream + EEA overrides)
 mkdir -p ~/.config/opencode/skills/docker-expert
-cp skills/docker-expert/SKILL.md ~/.config/opencode/skills/docker-expert/SKILL.md
+cp dist/skills/docker-expert/SKILL.md ~/.config/opencode/skills/docker-expert/SKILL.md
 
 # Or install via npm (if the skill supports it)
 npx skills add eea/eea.agent.skills --skill docker-expert

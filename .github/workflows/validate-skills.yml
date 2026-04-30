@@ -6,6 +6,7 @@ on:
   pull_request:
     paths:
       - 'skills/**/*.md'
+      - 'scripts/**'
       - 'catalog.yaml'
 
 jobs:
@@ -14,9 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check SKILL.md files exist
+      - name: Check source SKILL.md files exist
         run: |
           for skill in skills/*/; do
+            if [ -f "${skill}SKILL.md" ] && [ ! -f "${skill}EEA-OVERRIDES.md" ]; then
+              echo "WARNING: ${skill} missing EEA-OVERRIDES.md"
+            fi
             if [ ! -f "${skill}SKILL.md" ]; then
               echo "Missing SKILL.md in ${skill}"
               exit 1
@@ -36,6 +40,38 @@ jobs:
         run: |
           python3 -c "import yaml; yaml.safe_load(open('catalog.yaml'))" \
             || echo "catalog.yaml validation failed"
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run build script
+        run: |
+          chmod +x scripts/build.sh
+          ./scripts/build.sh
+
+      - name: Verify merged output
+        run: |
+          if [ ! -f "dist/skills/docker-expert/SKILL.md" ]; then
+            echo "ERROR: Merged SKILL.md not found for docker-expert"
+            exit 1
+          fi
+
+          # Check that merged file contains upstream + overrides markers
+          if ! grep -q "BEGIN EEA-OVERRIDES" "dist/skills/docker-expert/SKILL.md"; then
+            echo "ERROR: Merged file missing EEA-OVERRIDES section"
+            exit 1
+          fi
+
+          echo "✓ Build validation passed"
+
+      - name: Check merged token count
+        run: |
+          for skill in dist/skills/*/SKILL.md; do
+            tokens=$(wc -c < "$skill")
+            echo "Merged skill: $(basename $(dirname $skill)) - $tokens bytes"
+          done
 
   upstream-sync:
     runs-on: ubuntu-latest

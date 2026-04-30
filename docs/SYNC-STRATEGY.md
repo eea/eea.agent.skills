@@ -13,9 +13,53 @@ skills/<skill>/
 
 1. Fetch latest upstream `SKILL.md` → overwrite local `SKILL.md`
 2. `EEA-OVERRIDES.md` stays untouched — no merge conflicts
-3. Agent loads both files sequentially: base first, then overrides
+3. Run `./scripts/build.sh` to merge into `dist/skills/<skill>/SKILL.md`
+4. Users install the **merged** file from `dist/`, not the source files
 
 **Key rule:** Overrides are **additive only** — extend patterns, don't modify core upstream logic.
+
+## Build Process
+
+Agent frameworks expect a single `SKILL.md` per skill. To deliver both upstream + EEA content in one file, we use an automated build step:
+
+```
+skills/docker-expert/
+├── SKILL.md           ← upstream base
+├── EEA-OVERRIDES.md   ← EEA additions
+└── references/
+
+        ↓ ./scripts/build.sh
+
+dist/skills/docker-expert/
+├── SKILL.md           ← merged upstream + EEA
+└── references/
+```
+
+**Build command:**
+
+```bash
+# Build all skills
+./scripts/build.sh
+
+# Build specific skill
+./scripts/build.sh docker-expert
+```
+
+The merged file includes:
+- Original upstream `SKILL.md` content
+- A `---` separator
+- `EEA-OVERRIDES.md` content wrapped in `<!-- BEGIN/END EEA-OVERRIDES -->` markers
+
+**Users install from `dist/`:**
+
+```bash
+cp dist/skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
+```
+
+**CI validates:**
+- Source files parse correctly
+- Build script runs without errors
+- Merged output is structurally valid
 
 ## EEA Override Rules
 
