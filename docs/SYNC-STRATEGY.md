@@ -20,7 +20,7 @@ skills/<skill>/
 
 ## Build Process
 
-Agent frameworks expect a single `SKILL.md` per skill. To deliver both upstream + EEA content in one file, we use an automated build step:
+Agent frameworks expect a single `SKILL.md` per skill. To deliver both upstream + EEA content in one file, we use an automated build step. The `dist/` directory is **committed to the repository** so users can install skills immediately without running the build themselves.
 
 ```
 skills/docker-expert/
@@ -31,7 +31,7 @@ skills/docker-expert/
         ↓ ./scripts/build.sh
 
 dist/skills/docker-expert/
-├── SKILL.md           ← merged upstream + EEA
+├── SKILL.md           ← merged upstream + EEA (committed)
 └── references/
 ```
 
@@ -50,16 +50,20 @@ The merged file includes:
 - A `---` separator
 - `EEA-OVERRIDES.md` content wrapped in `<!-- BEGIN/END EEA-OVERRIDES -->` markers
 
-**Users install from `dist/`:**
+**Users install from committed `dist/`:**
 
 ```bash
-cp dist/skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
+git clone https://github.com/eea/eea.agent.skills.git
+cp eea.agent.skills/dist/skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
 ```
 
-**CI validates:**
+**CI safeguards:**
 - Source files parse correctly
 - Build script runs without errors
+- **Committed `dist/` matches what would be built from source** (fails CI if out of sync)
 - Merged output is structurally valid
+
+**⚠️ Important:** Always run `./scripts/build.sh` and commit `dist/` changes when modifying `SKILL.md` or `EEA-OVERRIDES.md`. The CI check `build-sync` will fail if `dist/` is stale.
 
 ## EEA Override Rules
 

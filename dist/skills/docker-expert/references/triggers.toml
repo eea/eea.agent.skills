@@ -1,0 +1,14 @@
+[builds]
+triggers = ["docker build", "docker-compose build", "build container"]
+
+[security]
+triggers = ["security", "vulnerability", "scan", "non-root", "secrets"]
+
+[orchestration]
+triggers = ["docker-compose", "multi-container", "service discovery", "health check"]
+
+[optimization]
+triggers = ["image size", "layer cache", "multi-stage", "distroless"]
+
+[development]
+triggers = ["hot reload", "debug", "dev container", "volume mount"]

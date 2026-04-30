@@ -48,22 +48,34 @@ eea.agent.skills/
 
 ### Adding a skill to your agent
 
-**Option 1: Download from release (easiest)**
+**Option 1: Clone and copy (easiest)**
 
-Pre-built merged skills are attached to every [GitHub Release](https://github.com/eea/eea.agent.skills/releases):
+The `dist/` directory contains pre-built merged skills (upstream + EEA overrides combined):
+
+```bash
+# Clone the repository
+git clone https://github.com/eea/eea.agent.skills.git
+
+# Copy merged skill to your agent's skills directory
+cp eea.agent.skills/dist/skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
+```
+
+**Option 2: Download from release**
+
+Pre-built merged skills are also attached to every [GitHub Release](https://github.com/eea/eea.agent.skills/releases):
 
 ```bash
 # Download latest release
 curl -L -o eea-skills.zip https://github.com/eea/eea.agent.skills/releases/latest/download/eea-agent-skills.zip
 unzip eea-skills.zip
 
-# Copy merged skill (upstream + EEA overrides combined)
+# Copy merged skill
 cp skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
 ```
 
-**Option 2: Build from source**
+**Option 3: Build from source**
 
-If you want the latest development version or to customize overrides:
+If you want to customize overrides or contribute:
 
 ```bash
 # Clone and build
@@ -73,12 +85,6 @@ cd eea.agent.skills
 
 # Copy built skill
 cp dist/skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
-```
-
-**Option 3: Install via npm (if available)**
-
-```bash
-npx skills add eea/eea.agent.skills --skill docker-expert
 ```
 
 ### Using a skill
@@ -111,7 +117,7 @@ For [OpenCode](https://github.com/opencode-ai/opencode) users, skills are auto-d
 ```bash
 # Copy the pre-built merged skill (includes upstream + EEA overrides)
 mkdir -p ~/.config/opencode/skills/docker-expert
-cp dist/skills/docker-expert/SKILL.md ~/.config/opencode/skills/docker-expert/SKILL.md
+cp eea.agent.skills/dist/skills/docker-expert/SKILL.md ~/.config/opencode/skills/docker-expert/SKILL.md
 
 # Or install via npm (if the skill supports it)
 npx skills add eea/eea.agent.skills --skill docker-expert

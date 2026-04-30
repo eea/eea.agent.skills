@@ -107,10 +107,32 @@ skills/<skill-name>/
 
 ### EEA-OVERRIDES.md Requirements
 
-- Clearly marked sections (## EEA-Specific)
+- Version tag: `<!-- EEA-Overrides-Version: 1.0 -->` at top of file
+- Clear section headers: `## EEA-Specific Patterns`
 - No duplication of upstream content
 - Only additive: extend, don't modify core upstream patterns
 - Version-stamped: `<!-- EEA-Overrides: v1.0 -->` at top
+
+---
+
+## Committing Changes
+
+### Always rebuild and commit `dist/`
+
+The `dist/` directory contains pre-built merged skills and is **committed to the repository**. This allows users to install skills directly without running the build script.
+
+**After modifying any `SKILL.md` or `EEA-OVERRIDES.md`:**
+
+```bash
+# Rebuild all merged skills
+./scripts/build.sh
+
+# Stage both source and built files
+git add skills/ dist/
+git commit -m "feat: update docker-expert with EEA proxy configuration"
+```
+
+**CI will fail if `dist/` is out of sync.** The `build-sync` job rebuilds from source and checks that the committed `dist/` matches.
 
 ---
 
