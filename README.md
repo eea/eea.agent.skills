@@ -54,6 +54,28 @@ Use docker-expert to containerize this Python app
 Use doc skill to generate technical docs for the API
 ```
 
+### Using with OpenCode
+
+For [OpenCode](https://github.com/opencode-ai/opencode) users, copy skills into your agent's skills directory:
+
+```bash
+# Clone or pull latest skills
+git clone https://github.com/eea/eea.agent.skills.git /tmp/eea-skills
+
+# Copy desired skill to OpenCode skills directory
+cp /tmp/eea-skills/skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
+cp /tmp/eea-skills/skills/docker-expert/EEA-OVERRIDES.md ~/.claude/skills/docker-expert/EEA-OVERRIDES.md
+
+# Or symlink for always-up-to-date access
+ln -s /tmp/eea-skills/skills/docker-expert ~/.claude/skills/docker-expert
+```
+
+Then invoke in OpenCode:
+
+```
+Use docker-expert to review this Dockerfile
+```
+
 ## Available Skills
 
 | Skill | Description | Upstream Source |
