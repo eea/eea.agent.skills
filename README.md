@@ -84,6 +84,8 @@ Each skill follows a two-file overlay pattern:
 - EEA customizations never lost during upstream updates
 - Clear separation of "what's upstream" vs "what's EEA"
 
+📄 **Full sync strategy documentation:** [docs/SYNC-STRATEGY.md](docs/SYNC-STRATEGY.md)
+
 ## Catalog Schema
 
 Each skill has an entry in `catalog.yaml`:
