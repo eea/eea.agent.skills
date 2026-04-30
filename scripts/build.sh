@@ -7,8 +7,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
-SKILLS_DIR="$REPO_ROOT/skills"
-DIST_DIR="$REPO_ROOT/dist/skills"
+SKILLS_DIR="$REPO_ROOT/src/skills"
+DIST_DIR="$REPO_ROOT/skills"
 
 build_skill() {
     local skill_name="$1"

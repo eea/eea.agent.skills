@@ -5,7 +5,8 @@ on:
     branches: [main]
   pull_request:
     paths:
-      - 'skills/**/*.md'
+      - 'src/skills/**/*.md'
+      - 'skills/**'
       - 'scripts/**'
       - 'catalog.yaml'
       - '.github/workflows/validate-skills.yml'
@@ -18,7 +19,7 @@ jobs:
 
       - name: Check source SKILL.md files exist
         run: |
-          for skill in skills/*/; do
+          for skill in src/skills/*/; do
             if [ -f "${skill}SKILL.md" ] && [ ! -f "${skill}EEA-OVERRIDES.md" ]; then
               echo "WARNING: ${skill} missing EEA-OVERRIDES.md"
             fi
@@ -30,7 +31,7 @@ jobs:
 
       - name: Check token count
         run: |
-          for skill in skills/*/SKILL.md; do
+          for skill in src/skills/*/SKILL.md; do
             tokens=$(wc -c < "$skill")
             if [ "$tokens" -gt 5500 ]; then
               echo "WARNING: $skill exceeds 5k token limit ($tokens bytes)"
@@ -54,34 +55,34 @@ jobs:
 
       - name: Verify merged output
         run: |
-          if [ ! -f "dist/skills/docker-expert/SKILL.md" ]; then
+          if [ ! -f "skills/docker-expert/SKILL.md" ]; then
             echo "ERROR: Merged SKILL.md not found for docker-expert"
             exit 1
           fi
 
           # Check that merged file contains upstream + overrides markers
-          if ! grep -q "BEGIN EEA-OVERRIDES" "dist/skills/docker-expert/SKILL.md"; then
+          if ! grep -q "BEGIN EEA-OVERRIDES" "skills/docker-expert/SKILL.md"; then
             echo "ERROR: Merged file missing EEA-OVERRIDES section"
             exit 1
           fi
 
           echo "✓ Build validation passed"
 
-      - name: Check dist/ is up-to-date
+      - name: Check skills/ is up-to-date
         run: |
-          if [ -n "$(git status --porcelain dist/)" ]; then
-            echo "ERROR: dist/ is out of sync with source files"
+          if [ -n "$(git status --porcelain skills/)" ]; then
+            echo "ERROR: skills/ is out of sync with source files"
             echo ""
-            echo "Please run ./scripts/build.sh and commit the changes to dist/"
+            echo "Please run ./scripts/build.sh and commit the changes to skills/"
             echo ""
-            git diff --stat dist/
+            git diff --stat skills/
             exit 1
           fi
-          echo "✓ dist/ is up-to-date"
+          echo "✓ skills/ is up-to-date"
 
       - name: Check merged token count
         run: |
-          for skill in dist/skills/*/SKILL.md; do
+          for skill in skills/*/SKILL.md; do
             tokens=$(wc -c < "$skill")
             echo "Merged skill: $(basename $(dirname $skill)) - $tokens bytes"
           done

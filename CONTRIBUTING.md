@@ -10,20 +10,20 @@ When adding a skill that exists upstream:
 
 1. **Create the skill directory:**
    ```bash
-   mkdir -p skills/<skill-name>/references
+   mkdir -p src/skills/<skill-name>/references
    ```
 
 2. **Fetch upstream content into `SKILL.md`:**
    ```bash
    # Example for docker-expert
    curl -s https://raw.githubusercontent.com/sickn33/antigravity-awesome-skills/main/skills/docker-expert/SKILL.md \
-     > skills/docker-expert/SKILL.md
+     > src/skills/docker-expert/SKILL.md
    ```
 
 3. **Create `EEA-OVERRIDES.md`:**
    ```bash
    echo "# EEA-Specific Overrides\n\nAdd EEA customizations here." \
-     > skills/docker-expert/EEA-OVERRIDES.md
+     > src/skills/docker-expert/EEA-OVERRIDES.md
    ```
 
 4. **Update `catalog.yaml`:**
@@ -36,7 +36,7 @@ When adding a skill that exists upstream:
 When creating a skill without upstream:
 
 ```bash
-mkdir -p skills/<new-skill>/references
+mkdir -p src/skills/<new-skill>/references
 ```
 
 Create `SKILL.md` following the skill template below.
@@ -52,7 +52,7 @@ When upstream has new content you want to pull:
 ```bash
 # 1. Fetch latest upstream
 curl -s https://raw.githubusercontent.com/<upstream>/main/skills/<skill>/SKILL.md \
-  > skills/<skill>/SKILL.md
+  > src/skills/<skill>/SKILL.md
 
 # 2. Verify EEA-OVERRIDES.md still exists and is valid
 # 3. Run validation: npm run validate
@@ -87,7 +87,7 @@ EEA-specific security requirements:
 Each skill directory follows this structure:
 
 ```
-skills/<skill-name>/
+src/skills/<skill-name>/
 ├── SKILL.md              # Required: Core skill instructions
 ├── EEA-OVERRIDES.md       # Required (for forked skills): EEA customizations
 ├── references/            # Optional: Deep reference material
@@ -117,9 +117,9 @@ skills/<skill-name>/
 
 ## Committing Changes
 
-### Always rebuild and commit `dist/`
+### Always rebuild and commit `skills/`
 
-The `dist/` directory contains pre-built merged skills and is **committed to the repository**. This allows users to install skills directly without running the build script.
+The `skills/` directory contains pre-built merged skills and is **committed to the repository**. This allows users and agentget to install/discover skills directly without running the build script.
 
 **After modifying any `SKILL.md` or `EEA-OVERRIDES.md`:**
 
@@ -128,11 +128,11 @@ The `dist/` directory contains pre-built merged skills and is **committed to the
 ./scripts/build.sh
 
 # Stage both source and built files
-git add skills/ dist/
+git add src/skills/ skills/
 git commit -m "feat: update docker-expert with EEA proxy configuration"
 ```
 
-**CI will fail if `dist/` is out of sync.** The `build-sync` job rebuilds from source and checks that the committed `dist/` matches.
+**CI will fail if `skills/` is out of sync.** The `build-sync` job rebuilds from source and checks that the committed `skills/` matches.
 
 ---
 

@@ -17,17 +17,17 @@ eea.agent.skills/
 ├── CHANGELOG.md                   # Version history
 ├── catalog.yaml                   # Machine-readable skill index
 │
-├── skills/                        # Source: one subdirectory per skill
-│   ├── docker-expert/
-│   │   ├── SKILL.md               # Upstream base
-│   │   ├── EEA-OVERRIDES.md       # EEA-specific customizations
-│   │   └── references/            # Deep reference material
-│   └── <future-skills>/
+├── skills/                        # Distributable: merged skills for agentget
+│   └── docker-expert/
+│       └── SKILL.md               # Merged: upstream + EEA overrides
 │
-├── dist/                          # Pre-built merged skills (gitignored)
-│   └── skills/
-│       └── docker-expert/
-│           └── SKILL.md           # Merged: upstream + EEA overrides
+├── src/                           # Source code and assets
+│   └── skills/                    # Source: one subdirectory per skill
+│       ├── docker-expert/
+│       │   ├── SKILL.md           # Upstream base
+│       │   ├── EEA-OVERRIDES.md   # EEA-specific customizations
+│       │   └── references/        # Deep reference material
+│       └── <future-skills>/
 │
 ├── scripts/                       # Build automation
 │   └── build.sh                   # Merges SKILL.md + EEA-OVERRIDES.md
@@ -40,8 +40,13 @@ eea.agent.skills/
 ├── docs/                          # Documentation
 │   └── SYNC-STRATEGY.md           # Upstream sync strategy
 │
-└── workflows/                     # Multi-skill orchestration recipes
-    └── data-report.md             # chart + doc + xlsx chained workflow
+├── workflows/                     # Multi-skill orchestration recipes
+│   └── data-report.md             # chart + doc + xlsx chained workflow
+│
+├── agents/                        # Agent definitions (*.agent.md)
+├── instructions/                  # Instruction files (*.instructions.md)
+├── rules/                         # Rule files (*.rules.md)
+└── plugins/                       # Plugin directories
 ```
 
 ## Quick Start
@@ -50,17 +55,25 @@ eea.agent.skills/
 
 **Option 1: Clone and copy (easiest)**
 
-The `dist/` directory contains pre-built merged skills (upstream + EEA overrides combined):
+The `skills/` directory contains pre-built merged skills (upstream + EEA overrides combined), ready for agent discovery:
 
 ```bash
 # Clone the repository
 git clone https://github.com/eea/eea.agent.skills.git
 
 # Copy merged skill to your agent's skills directory
-cp eea.agent.skills/dist/skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
+cp eea.agent.skills/skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
 ```
 
-**Option 2: Download from release**
+**Option 2: Agentget (auto-discovery)**
+
+For [agentget](https://github.com/joeyism/agentget) users, skills are auto-discovered from standard paths:
+
+```bash
+agentget add eea/eea.agent.skills
+```
+
+**Option 3: Download from release**
 
 Pre-built merged skills are also attached to every [GitHub Release](https://github.com/eea/eea.agent.skills/releases):
 
@@ -73,7 +86,7 @@ unzip eea-skills.zip
 cp skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
 ```
 
-**Option 3: Build from source**
+**Option 4: Build from source**
 
 If you want to customize overrides or contribute:
 
@@ -84,7 +97,7 @@ cd eea.agent.skills
 ./scripts/build.sh docker-expert
 
 # Copy built skill
-cp dist/skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
+cp skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
 ```
 
 ### Using a skill
@@ -117,7 +130,7 @@ For [OpenCode](https://github.com/opencode-ai/opencode) users, skills are auto-d
 ```bash
 # Copy the pre-built merged skill (includes upstream + EEA overrides)
 mkdir -p ~/.config/opencode/skills/docker-expert
-cp eea.agent.skills/dist/skills/docker-expert/SKILL.md ~/.config/opencode/skills/docker-expert/SKILL.md
+cp eea.agent.skills/skills/docker-expert/SKILL.md ~/.config/opencode/skills/docker-expert/SKILL.md
 
 # Or install via npm (if the skill supports it)
 npx skills add eea/eea.agent.skills --skill docker-expert
@@ -141,8 +154,8 @@ OpenCode loads skills on-demand via the native `skill` tool. The agent sees avai
 
 Each skill follows a two-file overlay pattern:
 
-1. **`SKILL.md`** — Upstream base content (auto-updated from upstream source)
-2. **`EEA-OVERRIDES.md`** — EEA-specific customizations that extend the upstream
+1. **`src/skills/<name>/SKILL.md`** — Upstream base content (auto-updated from upstream source)
+2. **`src/skills/<name>/EEA-OVERRIDES.md`** — EEA-specific customizations that extend the upstream
 
 ```
 ┌─────────────────────────────────────────┐
@@ -152,8 +165,13 @@ Each skill follows a two-file overlay pattern:
          ↓                    ↓
 ┌─────────────────┐  ┌─────────────────────┐
 │   Upstream      │  │   EEA Overrides    │
-│   (upstream/)   │  │   (eea/)           │
+│   (src/skills/) │  │   (src/skills/)    │
 └─────────────────┘  └─────────────────────┘
+         ↓
+┌─────────────────────────────────────────┐
+│   Merged output → skills/<name>/        │
+│   (agentget discovers from here)        │
+└─────────────────────────────────────────┘
 ```
 
 **Benefits:**

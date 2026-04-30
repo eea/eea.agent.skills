@@ -3,7 +3,10 @@
 # Default owner for everything
 * @eea/ai-architecture-team
 
-# Skills directory
+# Source skills directory
+src/skills/ @eea/ai-architecture-team
+
+# Distributable skills directory (auto-generated)
 skills/ @eea/ai-architecture-team
 
 # CI/CD

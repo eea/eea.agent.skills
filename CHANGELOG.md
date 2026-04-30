@@ -2,6 +2,21 @@
 
 All notable changes to this repository are documented here.
 
+## [1.2.0] - 2026-04-30
+
+### Changed
+- Restructure repository for [agentget](https://github.com/joeyism/agentget) compatibility
+- Move source skills from `skills/` to `src/skills/`
+- Move merged distributable skills from `dist/skills/` to `skills/`
+- Remove `dist/` directory entirely
+- Update all CI workflows, build scripts, and documentation to reflect new paths
+- Add scaffolding directories for agentget content types: `agents/`, `instructions/`, `rules/`, `plugins/`
+
+### Documentation
+- Update `README.md`, `CONTRIBUTING.md`, and `docs/SYNC-STRATEGY.md` with new paths
+- Add `docs/RESTRUCTURE-PLAN.md` tracking the restructure
+- Add README files to all new and renamed directories
+
 ## [1.1.0] - 2026-04-21
 
 ### Changed

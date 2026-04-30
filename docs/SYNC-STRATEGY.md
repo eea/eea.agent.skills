@@ -3,7 +3,7 @@
 ## Two-File Overlay Pattern
 
 ```
-skills/<skill>/
+src/skills/<skill>/
 ├── SKILL.md           ← Upstream base (replaced during sync)
 ├── EEA-OVERRIDES.md   ← EEA additions (never touched by upstream)
 └── references/
@@ -11,26 +11,26 @@ skills/<skill>/
 
 ## How Sync Works
 
-1. Fetch latest upstream `SKILL.md` → overwrite local `SKILL.md`
+1. Fetch latest upstream `SKILL.md` → overwrite local `src/skills/<skill>/SKILL.md`
 2. `EEA-OVERRIDES.md` stays untouched — no merge conflicts
-3. Run `./scripts/build.sh` to merge into `dist/skills/<skill>/SKILL.md`
-4. Users install the **merged** file from `dist/`, not the source files
+3. Run `./scripts/build.sh` to merge into `skills/<skill>/SKILL.md`
+4. Users and agentget install/discover the **merged** file from `skills/`, not the source files
 
 **Key rule:** Overrides are **additive only** — extend patterns, don't modify core upstream logic.
 
 ## Build Process
 
-Agent frameworks expect a single `SKILL.md` per skill. To deliver both upstream + EEA content in one file, we use an automated build step. The `dist/` directory is **committed to the repository** so users can install skills immediately without running the build themselves.
+Agent frameworks expect a single `SKILL.md` per skill. To deliver both upstream + EEA content in one file, we use an automated build step. The `skills/` directory is **committed to the repository** so users can install skills immediately without running the build themselves.
 
 ```
-skills/docker-expert/
+src/skills/docker-expert/
 ├── SKILL.md           ← upstream base
 ├── EEA-OVERRIDES.md   ← EEA additions
 └── references/
 
         ↓ ./scripts/build.sh
 
-dist/skills/docker-expert/
+skills/docker-expert/
 ├── SKILL.md           ← merged upstream + EEA (committed)
 └── references/
 ```
@@ -50,20 +50,26 @@ The merged file includes:
 - A `---` separator
 - `EEA-OVERRIDES.md` content wrapped in `<!-- BEGIN/END EEA-OVERRIDES -->` markers
 
-**Users install from committed `dist/`:**
+**Users install from committed `skills/`:**
 
 ```bash
 git clone https://github.com/eea/eea.agent.skills.git
-cp eea.agent.skills/dist/skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
+cp eea.agent.skills/skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
+```
+
+**Agentget auto-discovery:**
+
+```bash
+agentget add eea/eea.agent.skills
 ```
 
 **CI safeguards:**
 - Source files parse correctly
 - Build script runs without errors
-- **Committed `dist/` matches what would be built from source** (fails CI if out of sync)
+- **Committed `skills/` matches what would be built from source** (fails CI if out of sync)
 - Merged output is structurally valid
 
-**⚠️ Important:** Always run `./scripts/build.sh` and commit `dist/` changes when modifying `SKILL.md` or `EEA-OVERRIDES.md`. The CI check `build-sync` will fail if `dist/` is stale.
+**⚠️ Important:** Always run `./scripts/build.sh` and commit `skills/` changes when modifying `src/skills/<skill>/SKILL.md` or `src/skills/<skill>/EEA-OVERRIDES.md`. The CI check `build-sync` will fail if `skills/` is stale.
 
 ## EEA Override Rules
 
@@ -100,7 +106,7 @@ Three mechanisms prevent contradictions between skills:
 ```bash
 # Weekly sync check (also runs in CI)
 curl -s https://raw.githubusercontent.com/<upstream>/main/skills/docker-expert/SKILL.md \
-  > skills/docker-expert/SKILL.md
+  > src/skills/docker-expert/SKILL.md
 
 # Verify EEA-OVERRIDES.md still valid
 # Open PR with sync
