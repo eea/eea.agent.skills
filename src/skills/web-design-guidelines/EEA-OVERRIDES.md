@@ -1,0 +1,50 @@
+# EEA-Specific Overrides
+<!-- EEA-Overrides-Version: 1.0 -->
+<!-- Last-Sync: 2026-05-04 -->
+
+## EEA-Specific Patterns
+
+### EEA Design System
+
+When applying web design guidelines in EEA contexts, refer to the EEA Design System:
+
+- **EEA Design System**: https://eea.github.io/volto-eea-design-system/
+  - EEA-specific color palette, typography, and spacing tokens
+  - Component library built on top of Semantic UI React
+  - Volto (Plone 6) integration patterns
+
+- **EEA Web Design Guidelines**: Follow EEA's corporate identity and branding
+  requirements for all public-facing web applications.
+
+### EEA Accessibility Standards
+
+EEA follows WCAG 2.1 Level AA as the minimum accessibility standard:
+
+- All web applications must comply with **WCAG 2.1 Level AA**
+- Reference: [WCAG 2.1 Quick Reference](https://www.w3.org/WAI/WCAG21/quickref/)
+- EEA-specific accessibility checklist:
+  - Keyboard navigation must work for all interactive elements
+  - Color contrast ratios must meet 4.5:1 for normal text, 3:1 for large text
+  - All images must have meaningful alt text
+  - Forms must have proper labels and error handling
+  - Focus indicators must be visible
+  - Screen reader compatibility is required
+
+### EEA Multilingual Requirements
+
+- EEA web applications must support multiple languages (EN, DE, FR, ES, IT, etc.)
+- Follow i18n best practices for all UI text
+- Consider RTL (right-to-left) language support where applicable
+
+## Handoff to Other EEA Skills
+
+When web design tasks are complete, consider these EEA skills:
+
+- **`eea-volto`** (future): EEA's Volto/Plone 6 frontend development
+- **`eea-design-system`** (future): EEA-specific component library
+- **`eea-accessibility`** (future): Detailed EEA accessibility compliance
+
+## Notes
+
+- Upstream source: https://github.com/vercel-labs/agent-skills
+- License: MIT

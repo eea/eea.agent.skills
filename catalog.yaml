@@ -20,6 +20,108 @@ skills:
     added_date: "2026-04-21"
     notes: Two-file overlay pattern with EEA-OVERRIDES.md for EEA-specific patterns
 
+  - id: composition-patterns
+    name: React Composition Patterns
+    description: React composition patterns that scale. Helps avoid boolean prop proliferation through compound components, state lifting, and internal composition.
+    category: frontend
+    upstream:
+      source: vercel-labs/agent-skills
+      path: skills/composition-patterns
+      url: https://github.com/vercel-labs/agent-skills
+    triggers:
+      - composition
+      - compound components
+      - react patterns
+      - component architecture
+      - state lifting
+    version: "1.0.0"
+    eeaspecific: false
+    added_date: "2026-05-04"
+    notes: Upstream copy with placeholder EEA-OVERRIDES.md
+
+  - id: react-best-practices
+    name: React Best Practices
+    description: React and Next.js performance optimization guidelines from Vercel Engineering. Contains 70+ rules across 8 categories, prioritized by impact.
+    category: frontend
+    upstream:
+      source: vercel-labs/agent-skills
+      path: skills/react-best-practices
+      url: https://github.com/vercel-labs/agent-skills
+    triggers:
+      - react
+      - nextjs
+      - performance
+      - optimization
+      - bundle size
+      - data fetching
+      - rendering
+      - re-render
+    version: "1.0.0"
+    eeaspecific: false
+    added_date: "2026-05-04"
+    notes: Upstream copy with placeholder EEA-OVERRIDES.md. Full compiled guide in AGENTS.md.
+
+  - id: react-native-skills
+    name: React Native Best Practices
+    description: React Native and Expo best practices for building performant mobile apps. Contains rules covering performance, animations, UI patterns, and platform-specific optimizations.
+    category: mobile
+    upstream:
+      source: vercel-labs/agent-skills
+      path: skills/react-native-skills
+      url: https://github.com/vercel-labs/agent-skills
+    triggers:
+      - react native
+      - expo
+      - mobile
+      - ios
+      - android
+      - animation
+      - list performance
+    version: "1.0.0"
+    eeaspecific: false
+    added_date: "2026-05-04"
+    notes: Upstream copy with placeholder EEA-OVERRIDES.md
+
+  - id: react-view-transitions
+    name: React View Transitions
+    description: Guide for implementing smooth, native-feeling animations using React's View Transition API. Covers ViewTransition component, addTransitionType, CSS pseudo-elements, shared element transitions, and Next.js integration.
+    category: frontend
+    upstream:
+      source: vercel-labs/agent-skills
+      path: skills/react-view-transitions
+      url: https://github.com/vercel-labs/agent-skills
+    triggers:
+      - view transitions
+      - animation
+      - page transitions
+      - shared element
+      - react transitions
+      - startViewTransition
+    version: "1.0.0"
+    eeaspecific: false
+    added_date: "2026-05-04"
+    notes: Upstream copy with placeholder EEA-OVERRIDES.md
+
+  - id: web-design-guidelines
+    name: Web Design Guidelines
+    description: Review UI code for compliance with web interface best practices. Audits code for 100+ rules covering accessibility, performance, and UX.
+    category: design
+    upstream:
+      source: vercel-labs/agent-skills
+      path: skills/web-design-guidelines
+      url: https://github.com/vercel-labs/agent-skills
+    triggers:
+      - design review
+      - accessibility
+      - UX
+      - UI review
+      - web design
+      - best practices
+    version: "1.0.0"
+    eeaspecific: false
+    added_date: "2026-05-04"
+    notes: Upstream copy with EEA-OVERRIDES.md referencing EEA Design System and WCAG 2.1 AA accessibility standards
+
 # Future skills placeholder
 # - chart: Data visualization and chart generation
 # - doc: Technical documentation generation
