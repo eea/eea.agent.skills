@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/opencode-ai/opencode/main/packages/core/src/config/schema.json",
+  "instructions": [
+    "https://raw.githubusercontent.com/eea/eea.agent.skills/main/harness/EEA-HARNESS.md"
+  ],
+  "skills": {
+    "docker-expert": {
+      "source": "https://raw.githubusercontent.com/eea/eea.agent.skills/main/skills/docker-expert/SKILL.md"
+    }
+  }
+}

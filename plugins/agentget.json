@@ -1,0 +1,53 @@
+{
+  "name": "eea.agent.skills",
+  "version": "1.0.0",
+  "description": "EEA AI Harness — Organization-wide agent rules, skills, and workflows",
+  "repository": "https://github.com/eea/eea.agent.skills",
+  "license": "MIT",
+  "harness": {
+    "canonicalFile": "harness/EEA-HARNESS.md",
+    "version": "1.0.0",
+    "updated": "2026-05-14"
+  },
+  "install": {
+    "script": "scripts/install.sh",
+    "defaultPath": "~/.eea/agent-harness",
+    "symlinks": [
+      {
+        "source": "harness/EEA-HARNESS.md",
+        "targets": [
+          "~/.claude/CLAUDE.md",
+          "~/.hermes/HERMES.md"
+        ]
+      }
+    ],
+    "configFiles": [
+      {
+        "template": "docs/opencode-examples/global-opencode.json",
+        "target": "~/.config/opencode/opencode.json"
+      }
+    ]
+  },
+  "skills": {
+    "sourceDir": "skills/",
+    "installPaths": [
+      "~/.config/opencode/skills/",
+      "~/.claude/skills/",
+      "~/.agents/skills/"
+    ]
+  },
+  "rules": {
+    "sourceDir": "rules/",
+    "pattern": "*.rules.md"
+  },
+  "agents": {
+    "sourceDir": "agents/",
+    "profiles": [
+      "opencode",
+      "claudecode",
+      "hermes",
+      "gemini",
+      "pi"
+    ]
+  }
+}
