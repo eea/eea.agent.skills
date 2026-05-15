@@ -1,161 +1,213 @@
-# EEA Agent Skills
+# EEA AI Harness
 
-Centralized repository for agentic skills used across EEA's unified dev workflow with AI coding assistants.
+> **The canonical organization-wide AI harness for all EEA coding agents.**
+
+This repository is the single source of truth for how AI coding agents (OpenCode, Claude Code, Gemini, Copilot, etc.) behave across all European Environment Agency (EEA) projects.
+
+It contains org-wide rules, reusable skills, mandatory protocols, shared knowledge, and tool-specific wiring instructions.
 
 > The Initial Owner of the Original Code is [European Environment Agency (EEA)](https://www.eea.europa.eu/).
 
-## Overview
+---
 
-This repo contains reusable `SKILL.md` playbooks that extend AI coding assistants (Claude Code, Cursor, OpenCode, GitHub Copilot, etc.) with EEA-specific capabilities. Each skill is self-contained, versioned, and designed for incremental disclosure of complexity.
+## Quick Start
+
+### For Developers
+
+Add the EEA harness to your project in 30 seconds:
+
+**OpenCode (recommended):**
+```bash
+# Create opencode.json in your project root
+cat > opencode.json << 'EOF'
+{
+  "instructions": [
+    "https://raw.githubusercontent.com/eea/eea.agent.skills/main/harness/EEA-HARNESS.md"
+  ]
+}
+EOF
+```
+
+**Claude Code:**
+```bash
+# One-time setup
+mkdir -p ~/.claude
+ln -sf ~/.eea/agent-harness/harness/EEA-HARNESS.md ~/.claude/CLAUDE.md
+```
+
+**All agents:**
+```bash
+# Or use the install script
+git clone https://github.com/eea/eea.agent.skills.git ~/.eea/agent-harness
+~/.eea/agent-harness/scripts/install.sh
+```
+
+Full bootstrap guide: [`docs/BOOTSTRAP.md`](docs/BOOTSTRAP.md)
+
+### For Project Maintainers
+
+Create project-local instructions that add to the org harness:
+
+```bash
+mkdir -p .agents
+cp ~/.eea/agent-harness/templates/dot-agents/AGENTS.md .agents/AGENTS.md
+# Edit .agents/AGENTS.md with project-specific rules
+cp ~/.eea/agent-harness/templates/dot-agents/opencode.json opencode.json
+```
+
+---
 
 ## Repository Structure
 
 ```
-eea.agent.skills/
-├── README.md                      # This file
-├── CONTRIBUTING.md                # How to add/update skills
-├── CHANGELOG.md                   # Version history
-├── catalog.yaml                   # Machine-readable skill index
+ea.agent.skills/
+├── harness/
+│   └── EEA-HARNESS.md           # ORG-WIDE: canonical harness for all EEA projects
+│                                  # Loaded by all agents via URL or symlink
 │
-├── skills/                        # Distributable: merged skills for agentget
+├── AGENTS.md                    # REPO-LOCAL: how to work on THIS repo
+│
+├── skills/                      # Distributable merged skills (upstream + EEA overrides)
 │   └── docker-expert/
-│       └── SKILL.md               # Merged: upstream + EEA overrides
+│       └── SKILL.md
 │
-├── src/                           # Source code and assets
-│   └── skills/                    # Source: one subdirectory per skill
-│       ├── docker-expert/
-│       │   ├── SKILL.md           # Upstream base
-│       │   ├── EEA-OVERRIDES.md   # EEA-specific customizations
-│       │   └── references/        # Deep reference material
-│       └── <future-skills>/
+├── src/skills/                  # Source: upstream + EEA-OVERRIDES.md
+│   ├── docker-expert/
+│   │   ├── SKILL.md             # Upstream base
+│   │   ├── EEA-OVERRIDES.md     # EEA-specific customizations
+│   │   └── references/          # Deep reference material
+│   └── <future-skills>/
 │
-├── scripts/                       # Build automation
-│   └── build.sh                   # Merges SKILL.md + EEA-OVERRIDES.md
+├── rules/                       # Org-wide prohibitions & mandatory behaviors
+│   ├── eeaprohibitions.rules.md # What agents must NEVER do
+│   └── eeamandatory.rules.md    # What agents MUST do
 │
-├── shared/                        # Cross-skill reusable fragments
-│   ├── design-foundations.md      # Design tokens, color palettes
-│   ├── eea-style-guide.md          # EEA brand/tone guidance for LLM outputs
-│   └── data-schemas.md             # Common EEA data structures/formats
+├── agents/                      # Per-tool agent profiles
+│   ├── opencode.md              # OpenCode wiring instructions
+│   ├── claudecode.md            # Claude Code wiring instructions
+│   ├── hermes.md                # Hermes Agent wiring instructions
+│   ├── gemini.md                # Gemini wiring instructions
+│   └── pi.md                    # Pi wiring instructions
 │
-├── docs/                          # Documentation
-│   └── SYNC-STRATEGY.md           # Upstream sync strategy
+├── shared/                      # Cross-project knowledge base
+│   ├── eea-style-guide.md       # EEA brand/tone guidance for LLM outputs
+│   ├── design-foundations.md    # Design tokens, color palettes
+│   ├── data-schemas.md          # Common EEA data structures/formats
+│   ├── glossary.md              # EEA acronyms and terminology
+│   └── architecture/            # Architecture decision records (ADRs)
 │
-├── workflows/                     # Multi-skill orchestration recipes
-│   └── data-report.md             # chart + doc + xlsx chained workflow
+├── instructions/                # Generic org-wide instruction templates
+├── workflows/                   # Multi-skill orchestration recipes
 │
-├── agents/                        # Agent definitions (*.agent.md)
-├── instructions/                  # Instruction files (*.instructions.md)
-├── rules/                         # Rule files (*.rules.md)
-└── plugins/                       # Plugin directories
+├── plugins/
+│   └── agentget.json            # Manifest for agentget installer
+│
+├── scripts/                     # Build + install automation
+│   ├── build.sh                 # Merges SKILL.md + EEA-OVERRIDES.md
+│   └── install.sh               # One-shot harness installer
+│
+├── docs/
+│   ├── BOOTSTRAP.md             # Onboarding guide for EEA developers
+│   ├── opencode-examples/       # opencode.json templates
+│   └── SYNC-STRATEGY.md         # Upstream sync strategy
+│
+├── templates/                   # Templates for project-local .agents/ setup
+│   └── dot-agents/
+│       ├── AGENTS.md            # Project-local instructions template
+│       └── opencode.json        # Project opencode.json template
+│
+└── catalog.yaml                 # Machine-readable skill index
 ```
 
-## Quick Start
+### Key Design Decision: Two-Layer Harness
 
-### Adding a skill to your agent
+| Layer | File | Purpose |
+|-------|------|---------|
+| **Org-wide** | `harness/EEA-HARNESS.md` | Loaded by ALL EEA projects. Contains routing, prohibitions, mandatory actions, skill references. |
+| **Repo-local** | `AGENTS.md` (root) | Only for this repo. Describes how to maintain the harness itself. |
+| **Project-local** | `{repo}/AGENTS.md` | Per-project rules that add to org harness. |
 
-**Option 1: Clone and copy (easiest)**
+This separation ensures:
+- **Org rules** are version-controlled and distributed automatically
+- **Repo rules** don't leak into other projects
+- **Project rules** can add context without duplicating org standards
 
-The `skills/` directory contains pre-built merged skills (upstream + EEA overrides combined), ready for agent discovery:
+---
 
+## The Harness
+
+### What It Contains
+
+The canonical org harness ([`harness/EEA-HARNESS.md`](harness/EEA-HARNESS.md)) includes:
+
+1. **Context Routing Rules** — when to load which skills
+2. **Global Prohibitions** — security, operational safety, code quality rules that apply everywhere
+3. **Mandatory Actions** — required behaviors (show git status, propose commit message, ask for confirmation)
+4. **Knowledge Accumulation Protocol** — how to capture decisions and gotchas
+5. **Skill Library Reference** — catalog of available skills with usage instructions
+6. **Tool-Specific Wiring** — how to connect OpenCode, Claude, Gemini, etc.
+
+### Distribution Options
+
+| Method | Best For | Command |
+|--------|----------|---------|
+| **Remote URL** (OpenCode) | Zero-install, always up to date | Add URL to `opencode.json` |
+| **Git clone + symlink** (Claude, Hermes) | Offline use, manual control | `git clone ... && ln -s ...` |
+| **Install script** | Automated setup | `./scripts/install.sh` |
+| **agentget** | Unified installer across tools | `agentget install eea/eea.agent.skills` |
+
+---
+
+## Skills
+
+### Available Skills
+
+| Skill | Description | Category | Upstream Source |
+|-------|-------------|----------|-----------------|
+| `docker-expert` | Advanced Docker containerization, multi-stage builds, security hardening | devops | [sickn33/antigravity-awesome-skills](https://github.com/sickn33/antigravity-awesome-skills) |
+| `react-best-practices` | React/Next.js performance optimization (70+ rules) | frontend | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) |
+| `composition-patterns` | React composition patterns, compound components | frontend | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) |
+| `web-design-guidelines` | UI review, accessibility, UX audit | design | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) |
+| `react-native-skills` | React Native/Expo best practices | mobile | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) |
+| `react-view-transitions` | View transitions, animations, shared elements | frontend | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) |
+
+### Installing Skills
+
+**Option 1: Copy from cloned repo**
 ```bash
-# Clone the repository
 git clone https://github.com/eea/eea.agent.skills.git
-
-# Copy merged skill to your agent's skills directory
-cp eea.agent.skills/skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
+cp eea.agent.skills/skills/docker-expert/SKILL.md ~/.config/opencode/skills/docker-expert/SKILL.md
 ```
 
-**Option 2: Agentget (auto-discovery)**
-
-For [agentget](https://github.com/joeyism/agentget) users, skills are auto-discovered from standard paths:
-
+**Option 2: agentget**
 ```bash
-agentget add eea/eea.agent.skills
+agentget install eea/eea.agent.skills
 ```
 
 **Option 3: Download from release**
-
-Pre-built merged skills are also attached to every [GitHub Release](https://github.com/eea/eea.agent.skills/releases):
-
 ```bash
-# Download latest release
 curl -L -o eea-skills.zip https://github.com/eea/eea.agent.skills/releases/latest/download/eea-agent-skills.zip
 unzip eea-skills.zip
-
-# Copy merged skill
 cp skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
 ```
 
-**Option 4: Build from source**
+### Using Skills
 
-If you want to customize overrides or contribute:
-
-```bash
-# Clone and build
-git clone https://github.com/eea/eea.agent.skills.git
-cd eea.agent.skills
-./scripts/build.sh docker-expert
-
-# Copy built skill
-cp skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
-```
-
-### Using a skill
-
-Once installed, invoke skills naturally:
-
+Invoke naturally in any agent:
 ```
 Use docker-expert to containerize this Python app
-Use doc skill to generate technical docs for the API
+Use react-best-practices to optimize this component
+Use web-design-guidelines to audit accessibility
 ```
 
-### Using with OpenCode
-
-For [OpenCode](https://github.com/opencode-ai/opencode) users, skills are auto-discovered from standard paths. Place them in any of these locations:
-
-```bash
-# Global paths (available across all projects)
-~/.config/opencode/skills/<name>/SKILL.md
-~/.claude/skills/<name>/SKILL.md
-~/.agents/skills/<name>/SKILL.md
-
-# Project-local paths (only within the project)
-.opencode/skills/<name>/SKILL.md
-.claude/skills/<name>/SKILL.md
-.agents/skills/<name>/SKILL.md
-```
-
-**Quick install:**
-
-```bash
-# Copy the pre-built merged skill (includes upstream + EEA overrides)
-mkdir -p ~/.config/opencode/skills/docker-expert
-cp eea.agent.skills/skills/docker-expert/SKILL.md ~/.config/opencode/skills/docker-expert/SKILL.md
-
-# Or install via npm (if the skill supports it)
-npx skills add eea/eea.agent.skills --skill docker-expert
-```
-
-**Invoke in OpenCode:**
-
-```
-Use docker-expert to review this Dockerfile
-```
-
-OpenCode loads skills on-demand via the native `skill` tool. The agent sees available skills in the `<available_skills>` section and loads the full content when needed.
-
-## Available Skills
-
-| Skill | Description | Upstream Source |
-|-------|-------------|-----------------|
-| `docker-expert` | Advanced Docker containerization, multi-stage builds, security hardening | [sickn33/antigravity-awesome-skills](https://github.com/sickn33/antigravity-awesome-skills) |
+---
 
 ## Sync Strategy: Two-File Overlay
 
 Each skill follows a two-file overlay pattern:
 
 1. **`src/skills/<name>/SKILL.md`** — Upstream base content (auto-updated from upstream source)
-2. **`src/skills/<name>/EEA-OVERRIDES.md`** — EEA-specific customizations that extend the upstream
+2. **`src/skills/<name>/EEA-OVERRIDES.md`** — EEA-specific customizations
 
 ```
 ┌─────────────────────────────────────────┐
@@ -179,60 +231,84 @@ Each skill follows a two-file overlay pattern:
 - EEA customizations never lost during upstream updates
 - Clear separation of "what's upstream" vs "what's EEA"
 
-📄 **Full sync strategy documentation:** [docs/SYNC-STRATEGY.md](docs/SYNC-STRATEGY.md)
+📄 **Full sync strategy:** [docs/SYNC-STRATEGY.md](docs/SYNC-STRATEGY.md)
 
-## Catalog Schema
+---
 
-Each skill has an entry in `catalog.yaml`:
+## Adding Skills to the Harness
 
-```yaml
-skills:
-  - id: docker-expert
-    name: Docker Expert
-    description: Advanced Docker containerization for multi-stage builds, security, and orchestration
-    category: devops
-    upstream:
-      source: sickn33/antigravity-awesome-skills
-      path: skills/docker-expert
-      url: https://github.com/sickn33/antigravity-awesome-skills
-    triggers:
-      - docker
-      - container
-      - dockerfile
-      - docker-compose
-    version: "1.0"
-    eeaspecific: true
-```
+### Adding a New Skill
 
-## CI/CD
+1. **Create skill directory** under `src/skills/{skill-name}/`
+2. **Add upstream `SKILL.md`** (if based on upstream source)
+3. **Create `EEA-OVERRIDES.md`** with EEA-specific customizations
+4. **Add `metadata.json`** with skill metadata
+5. **Update `catalog.yaml`** with new skill entry
+6. **Build merged skill**: `./scripts/build.sh {skill-name}`
+7. **Validate**: `./scripts/build.sh --validate`
+8. **Commit**: `skill: add {skill-name}`
 
-### Validation Workflow
+### Updating an Existing Skill
 
-`.github/workflows/validate-skills.yml` runs on every push:
+1. **Sync upstream** changes to `src/skills/{name}/SKILL.md`
+2. **Update `EEA-OVERRIDES.md`** if upstream changes affect EEA customizations
+3. **Rebuild**: `./scripts/build.sh {name}`
+4. **Update `catalog.yaml`** version if applicable
+5. **Commit**: `skill: update {name} to v{X.Y.Z}`
 
-- Lint `SKILL.md` files for structural conformance
-- Check token count (warn if > 500 lines / 5k tokens)
-- Validate `catalog.yaml` schema
-- Detect upstream sync opportunities
-
-### Upstream Sync Check
-
-```yaml
-# Runs weekly to detect upstream changes
-schedule:
-  - cron: '0 8 * * 1'  # Monday 8am
-```
-
-Checks if upstream repo has new commits and alerts via GitHub Issues.
+---
 
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 - Adding new skills
 - Updating existing skills
+- Updating the org harness (`harness/EEA-HARNESS.md`)
+- Adding new agent profiles
 - Sync workflow documentation
-- Override file conventions
+
+### Commit Convention
+
+Use [Conventional Commits](https://www.conventionalcommits.org/):
+
+| Type | Use For |
+|------|---------|
+| `skill:` | Adding or updating a skill |
+| `harness:` | Changes to `harness/EEA-HARNESS.md` or org-wide rules |
+| `docs:` | Documentation updates |
+| `build:` | Build script or CI changes |
+| `chore:` | Maintenance, dependencies, formatting |
+
+---
+
+## CI/CD
+
+### Validation Workflow
+
+`.github/workflows/validate-skills.yml` runs on every push:
+- Lint `SKILL.md` files for structural conformance
+- Check token count (warn if > 500 lines / 5k tokens)
+- Validate `catalog.yaml` schema
+- Detect upstream sync opportunities
+
+### Harness Validation
+
+`.github/workflows/validate-harness.yml` runs when harness files change:
+- Verify `harness/EEA-HARNESS.md` exists and is valid
+- Check all referenced files exist
+- Scan for accidental secrets
+- Validate agent profiles
+
+### Upstream Sync Check
+
+Runs weekly to detect upstream changes and alerts via GitHub Issues.
+
+---
 
 ## License
 
 MIT — See [LICENSE](LICENSE)
+
+---
+
+*Last updated: 2026-05-14 after harness v1.0 initialization*

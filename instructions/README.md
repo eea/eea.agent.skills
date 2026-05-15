@@ -1,27 +1,37 @@
 # Instructions
 
-This directory is for **instruction files** used by the [agentget](https://github.com/joeyism/agentget)
-framework.
+This directory contains **generic organization-wide instruction templates** used by all EEA AI agents.
 
-## Expected Pattern
+## What Goes Here
+
+- Reusable instruction sets (e.g., "how to do a security review")
+- Prompt fragments that apply across multiple skills
+- Standard procedures that don't fit in a single skill
+
+## What Does NOT Go Here
+
+- Skill-specific instructions (those belong in `skills/` or `src/skills/`)
+- Project-specific instructions (those belong in `{repo}/.agents/`)
+- Tool-specific configuration (those belong in `agents/`)
+- Prohibitions and mandatory rules (those belong in `rules/`)
+
+## File Naming Convention
 
 ```
-instructions/*.instructions.md
-```
-
-Each `.instructions.md` file contains a reusable instruction set or prompt
-fragment.
-
-## Example
-
-```
-instructions/
-├── code-review.instructions.md
-├── security-check.instructions.md
-└── accessibility-audit.instructions.md
+instructions/{topic}.instructions.md
 ```
 
 ## Usage
 
-Agentget auto-discovers `.instructions.md` files from this directory when the
-repo is added as a source.
+Instruction files are loaded by agents when the topic is relevant. They can be:
+- Referenced from `harness/EEA-HARNESS.md` routing rules
+- Loaded by skills that need standard procedures
+- Used by workflows as building blocks
+
+## Available Instructions
+
+*(None yet — add as needed)*
+
+---
+
+*Last updated: 2026-05-14*

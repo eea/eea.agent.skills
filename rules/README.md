@@ -1,27 +1,51 @@
 # Rules
 
-This directory is for **rule files** used by the [agentget](https://github.com/joeyism/agentget)
-framework.
+This directory contains **organization-wide rule files** that constrain and guide AI agent behavior across all EEA projects.
 
-## Expected Pattern
+## What Goes Here
+
+- **Prohibitions** — what agents must never do (security, compliance, operational safety)
+- **Mandatory behaviors** — what agents must always do (end-of-session actions, verification steps)
+- **Style constraints** — coding standards that apply org-wide
+- **Process rules** — workflow requirements (PR review, commit conventions, etc.)
+
+## What Does NOT Go Here
+
+- Project-specific rules (those belong in `{repo}/.agents/`)
+- Skill-specific guidance (those belong in `src/skills/{name}/`)
+- Tool-specific configuration (those belong in `agents/`)
+
+## File Naming Convention
 
 ```
-rules/*.rules.md
+rules/{domain}.{type}.md
 ```
 
-Each `.rules.md` file defines a set of constraints, guidelines, or rules that
-agents should follow.
+| Type | Suffix | Example |
+|------|--------|---------|
+| Prohibitions | `.prohibitions.md` | `eeaprohibitions.rules.md` |
+| Mandatory actions | `.mandatory.md` | `eeamandatory.rules.md` |
+| Style guide | `.style.md` | `python.style.md` |
+| Process | `.process.md` | `pr-review.process.md` |
 
-## Example
+> **Note:** The `.rules.md` extension is kept for backward compatibility with agentget.
 
-```
-rules/
-├── python-style.rules.md
-├── commit-message.rules.md
-└── api-design.rules.md
-```
+## Available Rule Sets
+
+| File | Purpose |
+|------|---------|
+| `eeaprohibitions.rules.md` | Global prohibitions (security, operational safety, code quality) |
+| `eeamandatory.rules.md` | Mandatory end-of-session and verification actions |
 
 ## Usage
 
-Agentget auto-discovers `.rules.md` files from this directory when the repo is
-added as a source.
+Agents load rule files based on context:
+- **OpenCode**: Referenced via `harness/EEA-HARNESS.md` routing rules
+- **Claude Code**: Loaded from symlinked `~/.claude/CLAUDE.md`
+- **Other agents**: Referenced in their respective profiles under `agents/`
+
+Rule files are written in Markdown and should be human-readable as well as agent-actionable.
+
+---
+
+*Last updated: 2026-05-14*

@@ -1,30 +1,36 @@
 # Plugins
 
-This directory is for **plugin directories** used by the [agentget](https://github.com/joeyism/agentget)
-framework.
+This directory contains **tool-specific adapters and manifests** that enable automated installation and discovery of the EEA AI Harness.
 
-## Expected Pattern
+## What Goes Here
 
-```
-plugins/<plugin-name>/
-```
+- Agentget manifests (`agentget.json`)
+- Tool-specific configuration files
+- Install adapters for various agent platforms
 
-Each subdirectory is expanded recursively by agentget. Contents are
-plugin-specific.
+## What Does NOT Go Here
 
-## Example
+- Skills (those are in `skills/`)
+- Agent profiles (those are in `agents/`)
+- Rules (those are in `rules/`)
 
-```
-plugins/
-├── custom-tool/
-│   ├── plugin.yaml
-│   └── src/
-└── report-generator/
-    ├── config.json
-    └── templates/
-```
+## Files
 
-## Usage
+| File | Purpose |
+|------|---------|
+| `agentget.json` | Manifest for agentget installer — defines install paths, symlinks, skills |
 
-Agentget auto-discovers plugin directories from this path when the repo is added
-as a source.
+## Agentget Manifest
+
+The `agentget.json` file defines:
+- Canonical harness file location
+- Installation script
+- Symlink targets for different agents
+- Skills source directory and install paths
+- Supported agent profiles
+
+See [`agentget.json`](agentget.json) for the full manifest.
+
+---
+
+*Last updated: 2026-05-14*
