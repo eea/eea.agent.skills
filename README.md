@@ -267,6 +267,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 - Adding new agent profiles
 - Sync workflow documentation
 
+### Maintaining the Harness
+
+When an agent makes a mistake the harness should have prevented, add a rule instead of rewriting the prompt.
+
+See [`docs/harness-maintenance.md`](docs/harness-maintenance.md) for the full maintenance philosophy and process.
+
 ### Commit Convention
 
 Use [Conventional Commits](https://www.conventionalcommits.org/):

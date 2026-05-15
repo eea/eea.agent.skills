@@ -49,3 +49,4 @@ secrets/
 coverage/
 .nyc_output/
 .cache/
+graphify-out/cache/
