@@ -63,7 +63,7 @@ ea.agent.skills/
 4. **Add `metadata.json`** with skill metadata
 5. **Update `catalog.yaml`** with new skill entry
 6. **Build merged skill**: `./scripts/build.sh {skill-name}`
-7. **Validate**: `./scripts/build.sh --validate`
+7. **Verify**: check that `skills/{skill-name}/SKILL.md` was generated correctly and `git status` shows the expected changes
 8. **Commit**: `skill: add {skill-name}`
 
 ### Updating an Existing Skill
@@ -88,26 +88,21 @@ ea.agent.skills/
 # Build a single skill (merges SKILL.md + EEA-OVERRIDES.md → skills/)
 ./scripts/build.sh docker-expert
 
-# Build all skills
-./scripts/build.sh --all
-
-# Validate catalog and file structure
-./scripts/build.sh --validate
-
-# Show help
-./scripts/build.sh --help
+# Build all skills (run with no arguments)
+./scripts/build.sh
 ```
 
 ---
 
 ## Release Workflow
 
-1. Ensure all skills are built: `./scripts/build.sh --all`
-2. Validate: `./scripts/build.sh --validate`
+> **Note:** GitHub Releases and git tags are **discontinued** as of 2026-05-16. The harness is now distributed directly from source (main branch) via the install script or agentget.
+
+1. Ensure all skills are built: `./scripts/build.sh`
+2. Verify merged output: `git diff --stat skills/`
 3. Update `CHANGELOG.md`
-4. Tag release: `git tag -a v{X.Y.Z} -m "Release v{X.Y.Z}"`
-5. Push tag: `git push origin v{X.Y.Z}`
-6. GitHub Actions will attach built skills to the release
+4. Commit and push to `main`
+5. Users update via `cd ~/.eea/agent-harness && git pull origin main`
 
 ---
 

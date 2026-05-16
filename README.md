@@ -69,22 +69,60 @@ ea.agent.skills/
 ├── AGENTS.md                    # REPO-LOCAL: how to work on THIS repo
 │
 ├── skills/                      # Distributable merged skills (upstream + EEA overrides)
-│   └── docker-expert/
-│       └── SKILL.md
+│   ├── docker-expert/
+│   │   └── SKILL.md             # Merged output (do not edit directly)
+│   ├── composition-patterns/
+│   │   └── SKILL.md
+│   ├── react-best-practices/
+│   │   └── SKILL.md
+│   ├── react-native-skills/
+│   │   └── SKILL.md
+│   ├── react-view-transitions/
+│   │   └── SKILL.md
+│   ├── web-design-guidelines/
+│   │   └── SKILL.md
+│   └── README.md                # Explains auto-generated nature of this directory
 │
 ├── src/skills/                  # Source: upstream + EEA-OVERRIDES.md
 │   ├── docker-expert/
 │   │   ├── SKILL.md             # Upstream base
 │   │   ├── EEA-OVERRIDES.md     # EEA-specific customizations
+│   │   ├── metadata.json        # Skill metadata
 │   │   └── references/          # Deep reference material
-│   └── <future-skills>/
+│   ├── composition-patterns/
+│   │   ├── SKILL.md
+│   │   ├── EEA-OVERRIDES.md
+│   │   ├── metadata.json
+│   │   ├── AGENTS.md            # Compiled guide for this skill
+│   │   └── rules/               # Individual rule files
+│   ├── react-best-practices/
+│   │   ├── SKILL.md
+│   │   ├── EEA-OVERRIDES.md
+│   │   ├── metadata.json
+│   │   ├── AGENTS.md
+│   │   └── rules/               # 70+ individual rule files
+│   ├── react-native-skills/
+│   │   ├── SKILL.md
+│   │   ├── EEA-OVERRIDES.md
+│   │   └── metadata.json
+│   ├── react-view-transitions/
+│   │   ├── SKILL.md
+│   │   ├── EEA-OVERRIDES.md
+│   │   └── metadata.json
+│   ├── web-design-guidelines/
+│   │   ├── SKILL.md
+│   │   ├── EEA-OVERRIDES.md
+│   │   └── metadata.json
+│   └── README.md
 │
 ├── rules/                       # Org-wide prohibitions & mandatory behaviors
+│   ├── README.md                # Explains rule file naming conventions
 │   ├── eeaprohibitions.rules.md # What agents must NEVER do
 │   ├── eeamandatory.rules.md    # What agents MUST do
 │   └── changelog.process.md     # CHANGELOG best practices
 │
 ├── agents/                      # Per-tool agent profiles
+│   ├── README.md
 │   ├── opencode.md              # OpenCode wiring instructions
 │   ├── claudecode.md            # Claude Code wiring instructions
 │   ├── hermes.md                # Hermes Agent wiring instructions
@@ -96,29 +134,39 @@ ea.agent.skills/
 │   ├── design-foundations.md    # Design tokens, color palettes
 │   ├── data-schemas.md          # Common EEA data structures/formats
 │   ├── glossary.md              # EEA acronyms and terminology
-│   └── architecture/            # Architecture decision records (ADRs)
+│   └── architecture/            # Architecture decision records (ADRs) — currently empty template
 │
 ├── instructions/                # Generic org-wide instruction templates
+│   └── README.md
+│
 ├── workflows/                   # Multi-skill orchestration recipes
+│   ├── README.md
+│   └── data-report.md
 │
 ├── plugins/
+│   ├── README.md
 │   └── agentget.json            # Manifest for agentget installer
 │
 ├── scripts/                     # Build + install automation
-│   ├── build.sh                 # Merges SKILL.md + EEA-OVERRIDES.md
+│   ├── build.sh                 # Merges SKILL.md + EEA-OVERRIDES.md → skills/
 │   └── install.sh               # One-shot harness installer
 │
 ├── docs/
 │   ├── BOOTSTRAP.md             # Onboarding guide for EEA developers
-│   ├── opencode-examples/       # opencode.json templates
-│   └── SYNC-STRATEGY.md         # Upstream sync strategy
+│   ├── harness-maintenance.md   # Maintenance philosophy and process
+│   ├── RESTRUCTURE-PLAN.md      # Internal restructure plan (historical)
+│   ├── SYNC-STRATEGY.md         # Upstream sync strategy
+│   └── opencode-examples/       # opencode.json templates
 │
 ├── templates/                   # Templates for project-local .agents/ setup
 │   └── dot-agents/
 │       ├── AGENTS.md            # Project-local instructions template
 │       └── opencode.json        # Project opencode.json template
 │
-└── catalog.yaml                 # Machine-readable skill index
+├── catalog.yaml                 # Machine-readable skill index
+├── CHANGELOG.md                 # Project changelog
+├── CONTRIBUTING.md              # Contribution guidelines
+└── LICENSE                      # MIT License
 ```
 
 ### Key Design Decision: Two-Layer Harness
@@ -185,7 +233,7 @@ cp eea.agent.skills/skills/docker-expert/SKILL.md ~/.config/opencode/skills/dock
 agentget install eea/eea.agent.skills
 ```
 
-> **Note on GitHub Releases:** GitHub Releases distribution is **discontinued** as of 2026-05-16. Skills are now always installed from source via the install script or agentget. Previous releases have been removed. See [CHANGELOG.md](CHANGELOG.md) for details.
+> **Note on GitHub Releases:** GitHub Releases distribution is **discontinued** as of 2026-05-16. Skills are now always installed from source via the install script or agentget. Previous releases and tags have been removed. See [CHANGELOG.md](CHANGELOG.md) for details.
 
 ### Using Skills
 
@@ -241,7 +289,7 @@ Each skill follows a two-file overlay pattern:
 4. **Add `metadata.json`** with skill metadata
 5. **Update `catalog.yaml`** with new skill entry
 6. **Build merged skill**: `./scripts/build.sh {skill-name}`
-7. **Validate**: `./scripts/build.sh --validate`
+7. **Verify**: check that `skills/{skill-name}/SKILL.md` was generated correctly and `git status` shows the expected changes
 8. **Commit**: `skill: add {skill-name}`
 
 ### Updating an Existing Skill
@@ -291,7 +339,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 - Lint `SKILL.md` files for structural conformance
 - Check token count (warn if > 500 lines / 5k tokens)
 - Validate `catalog.yaml` schema
-- Detect upstream sync opportunities
+- Verify `skills/` is up-to-date with `src/skills/`
 
 ### Harness Validation
 
@@ -301,9 +349,11 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 - Scan for accidental secrets
 - Validate agent profiles
 
-### Upstream Sync Check
+### CHANGELOG Check
 
-Runs weekly to detect upstream changes and alerts via GitHub Issues.
+`.github/workflows/check-changelog.yml` runs on pull requests to ensure:
+- Significant changes are documented in `CHANGELOG.md`
+- Entries follow the established format
 
 ---
 
@@ -313,4 +363,4 @@ MIT — See [LICENSE](LICENSE)
 
 ---
 
-*Last updated: 2026-05-16 after harness slimming and rule extraction*
+*Last updated: 2026-05-16 after README review and correction*

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# Build script: merges SKILL.md + EEA-OVERRIDES.md into dist/
+# Build script: merges SKILL.md + EEA-OVERRIDES.md into skills/
 # Usage: ./scripts/build.sh [skill-name]
 # If no skill-name provided, builds all skills
 
