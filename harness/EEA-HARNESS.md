@@ -95,6 +95,7 @@ routing:
     - finish
     - push
     - verify
+    - changelog
 ```
 
 ---
@@ -120,3 +121,32 @@ Reason: {why this matters}
 Locations:
 - Project-local: `docs/decisions/{topic}.md` or `docs/adr/{number}-{topic}.md`
 - Org-wide: `shared/{category}/{topic}.md`
+
+---
+
+## CHANGELOG Best Practice
+
+### Every Major Change Deserves a Log Entry
+
+**Applies to:** All EEA project repositories (not just this harness repo)
+
+**What counts as "major":**
+- New features or capabilities
+- Bug fixes with user-facing impact
+- Breaking changes to APIs, configurations, or behavior
+- Significant refactors that affect architecture
+- New dependencies or removed dependencies
+- Security fixes
+- Changes to build, CI, or deployment processes
+
+**What does NOT need a CHANGELOG entry:**
+- Documentation-only changes (README updates, comments)
+- Formatting, whitespace, or lint fixes with no behavioral change
+- Test-only changes (new tests, test fixes)
+- Minor dependency version bumps with no visible impact
+
+**Format:** This repo uses **date-based versioning** (`YYYY-MM-DD`) rather than semantic versioning. Each entry is a dated section with bullet points under Added/Changed/Fixed/Removed/Documentation headings.
+
+**Why:** CHANGELOGs are the primary source of truth for "what changed and when" for humans. Git history is too noisy; release notes are too sparse. A well-maintained CHANGELOG saves hours of archaeology during incident response, compliance audits, and onboarding.
+
+**Mechanical enforcement:** CI checks on PRs ensure CHANGELOG.md was updated when code files changed. See `.github/workflows/check-changelog.yml`.

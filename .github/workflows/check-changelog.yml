@@ -1,0 +1,62 @@
+name: Check CHANGELOG
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  check-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check CHANGELOG.md updated for code changes
+        run: |
+          echo "Checking if CHANGELOG.md was updated when code files changed..."
+
+          # Get list of changed files in this PR (excluding CHANGELOG.md itself)
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -v 'CHANGELOG.md' || true)
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "Only CHANGELOG.md or no files changed. Skipping check."
+            exit 0
+          fi
+
+          # Check if any non-documentation files changed
+          # Excludes: *.md, *.txt, test files, CI-only changes
+          CODE_CHANGES=$(echo "$CHANGED_FILES" | grep -vE '\.(md|txt|jsonc?)$' | grep -vE '^(\.github/|test/|tests/|__tests__/|spec/|\.planning/)' || true)
+
+          if [ -z "$CODE_CHANGES" ]; then
+            echo "Only documentation/CI/test files changed. Skipping check."
+            echo "Changed files:"
+            echo "$CHANGED_FILES"
+            exit 0
+          fi
+
+          echo "Code changes detected:"
+          echo "$CODE_CHANGES"
+          echo ""
+
+          # Check if CHANGELOG.md was modified
+          if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q 'CHANGELOG.md'; then
+            echo "✅ CHANGELOG.md was updated."
+            exit 0
+          else
+            echo "❌ ERROR: This PR changes code files but does not update CHANGELOG.md"
+            echo ""
+            echo "What changed (code files):"
+            echo "$CODE_CHANGES"
+            echo ""
+            echo "Please add an entry to CHANGELOG.md describing your changes."
+            echo "See CHANGELOG.md for format and examples."
+            echo ""
+            echo "If your changes are truly not user-facing (e.g. internal refactoring"
+            echo "with no visible impact), you can add the label 'skip-changelog'"
+            echo "to bypass this check."
+            exit 1
+          fi

@@ -2,7 +2,44 @@
 
 All notable changes to this repository are documented here.
 
-## [1.2.0] - 2026-04-30
+This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic versioning. Entries are ordered newest-first.
+
+---
+
+## 2026-05-16 — Installer Consolidation
+
+### Changed
+- Consolidate 8 installation methods into 3 canonical methods:
+  - **A. Automated Global Install** — `agentget install` or `curl | bash`
+  - **B. Manual Global Install** — clone + symlink per agent
+  - **C. Project-Embedded** — remote URL, git submodule, or inline `AGENTS.md`
+- Fix 7 mismatches between `plugins/agentget.json` and `scripts/install.sh`:
+  - Add Pi harness symlink (`~/.pi/agent/AGENTS.md`)
+  - Add Gemini harness symlink (`~/.gemini/GEMINI.md`)
+  - Add `~/.agents/skills/` to `install_skills()`
+  - Standardize agent profile name: `claudecode` → `claude`
+  - Add `rules.installPaths` to `agentget.json`
+  - `install_opencode()` now copies canonical template file (was hardcoded JSON)
+  - Make skills/rules installation unconditional (not gated by agent detection)
+- Discontinue GitHub Releases distribution. Skills are now always installed from source via the install script or agentget.
+
+### Documentation
+- Rewrite `docs/BOOTSTRAP.md` with 3-method structure and per-agent wiring
+- Update `README.md` Quick Start and Distribution Options
+- Add cross-reference notes to all `agents/*.md` profiles
+- Add `.planning/codebase/INSTALL-CONFIG-CONCERNS-2026-05.md` detailed analysis
+- Add installer alignment section to `.planning/codebase/CONCERNS.md`
+
+---
+
+## 2026-05-04 — v1.3.0 (Last Semver Release)
+
+### Changed
+- *(Content from original v1.3.0 release notes)*
+
+---
+
+## 2026-04-30 — Restructure for agentget
 
 ### Changed
 - Restructure repository for [agentget](https://github.com/joeyism/agentget) compatibility
@@ -17,7 +54,9 @@ All notable changes to this repository are documented here.
 - Add `docs/RESTRUCTURE-PLAN.md` tracking the restructure
 - Add README files to all new and renamed directories
 
-## [1.1.0] - 2026-04-21
+---
+
+## 2026-04-21 — Commit dist/ directory
 
 ### Changed
 - Commit `dist/` directory to repository for immediate user access
@@ -29,7 +68,9 @@ All notable changes to this repository are documented here.
 - Update `docs/SYNC-STRATEGY.md` with committed `dist/` approach
 - Update `CONTRIBUTING.md` with rebuild-and-commit workflow
 
-## [1.0.0] - 2026-04-21
+---
+
+## 2026-04-21 — Initial Setup
 
 ### Added
 - Initial repository setup with full structure
@@ -42,7 +83,7 @@ All notable changes to this repository are documented here.
 - `README.md` with overview and quick start
 
 ### Documentation
-- EEA-style-guide.md placeholder
-- design-foundations.md placeholder
-- data-schemas.md placeholder
-- data-report.md workflow placeholder
+- `EEA-style-guide.md` placeholder
+- `design-foundations.md` placeholder
+- `data-schemas.md` placeholder
+- `data-report.md` workflow placeholder

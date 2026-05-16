@@ -182,6 +182,26 @@ Alternatives considered:
    - Use a library: rejected because EEA has custom SSO requirements
 ```
 
+## Documentation Protocol
+
+### MAND-09: Update CHANGELOG on Major Code Changes
+
+**Trigger:** The work session includes changes that add, remove, or alter behavior of the project
+
+**Action:**
+1. Before committing, check if `CHANGELOG.md` exists in the project root
+2. If yes, check if your changes qualify as "major" (see criteria in `EEA-HARNESS.md`)
+3. If major: add an entry to `CHANGELOG.md` under the current date
+4. Use format: `YYYY-MM-DD — Brief description`
+5. Categorize under: `Added`, `Changed`, `Fixed`, `Removed`, or `Documentation`
+6. Keep entries concise but specific enough that a future developer can understand the impact
+
+**Why:** CHANGELOGs are the fastest way for humans to understand project evolution. Git history requires archaeology; release notes are often too sparse. A maintained CHANGELOG saves hours during incident response, compliance audits, and onboarding.
+
+**Applies to:** All EEA project repositories. Not optional.
+
+**If no CHANGELOG.md exists:** Propose creating one. Use this repo's `CHANGELOG.md` as a template.
+
 ---
 
-*Last updated: 2026-05-14*
+*Last updated: 2026-05-16*

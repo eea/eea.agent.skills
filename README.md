@@ -184,12 +184,7 @@ cp eea.agent.skills/skills/docker-expert/SKILL.md ~/.config/opencode/skills/dock
 agentget install eea/eea.agent.skills
 ```
 
-**Option 3: Download from release**
-```bash
-curl -L -o eea-skills.zip https://github.com/eea/eea.agent.skills/releases/latest/download/eea-agent-skills.zip
-unzip eea-skills.zip
-cp skills/docker-expert/SKILL.md ~/.claude/skills/docker-expert/SKILL.md
-```
+> **Note on GitHub Releases:** GitHub Releases distribution is **discontinued** as of 2026-05-16. Skills are now always installed from source via the install script or agentget. Previous releases have been removed. See [CHANGELOG.md](CHANGELOG.md) for details.
 
 ### Using Skills
 
