@@ -129,14 +129,7 @@ install_opencode() {
         return
     fi
 
-    cat > "${config_file}" << 'EOF'
-{
-  "instructions": [
-    "https://raw.githubusercontent.com/eea/eea.agent.skills/main/harness/EEA-HARNESS.md"
-  ]
-}
-EOF
-
+    cp "${HARNESS_DIR}/docs/opencode-examples/global-opencode.json" "${config_file}"
     log_success "OpenCode configured at ${config_file}"
 }
 
@@ -184,51 +177,109 @@ install_hermes() {
     log_success "Hermes configured at ${hermes_file}"
 }
 
+# Install for Pi
+install_pi() {
+    log_info "Setting up Pi Agent..."
+
+    local pi_dir="${HOME}/.pi/agent"
+    local pi_file="${pi_dir}/AGENTS.md"
+
+    mkdir -p "${pi_dir}"
+
+    if [ -L "${pi_file}" ] || [ -f "${pi_file}" ]; then
+        if [ "${FORCE}" = true ]; then
+            rm -f "${pi_file}"
+        else
+            log_warn "Pi config already exists at ${pi_file}"
+            return
+        fi
+    fi
+
+    ln -sf "${HARNESS_DIR}/harness/EEA-HARNESS.md" "${pi_file}"
+    log_success "Pi configured at ${pi_file}"
+}
+
+# Install for Gemini
+install_gemini() {
+    log_info "Setting up Gemini..."
+
+    local gemini_dir="${HOME}/.gemini"
+    local gemini_file="${gemini_dir}/GEMINI.md"
+
+    mkdir -p "${gemini_dir}"
+
+    if [ -L "${gemini_file}" ] || [ -f "${gemini_file}" ]; then
+        if [ "${FORCE}" = true ]; then
+            rm -f "${gemini_file}"
+        else
+            log_warn "Gemini config already exists at ${gemini_file}"
+            return
+        fi
+    fi
+
+    ln -sf "${HARNESS_DIR}/harness/EEA-HARNESS.md" "${gemini_file}"
+    log_success "Gemini configured at ${gemini_file}"
+}
+
 # Install skills
 install_skills() {
     log_info "Installing EEA skills..."
 
     local opencode_skills_dir="${HOME}/.config/opencode/skills"
     local claude_skills_dir="${HOME}/.claude/skills"
+    local agents_skills_dir="${HOME}/.agents/skills"
 
     # Install to OpenCode skills directory
-    if [ -d "${opencode_skills_dir}" ] || [ -d "${HOME}/.config/opencode" ]; then
-        mkdir -p "${opencode_skills_dir}"
-        for skill_dir in "${HARNESS_DIR}/skills"/*; do
-            if [ -d "${skill_dir}" ]; then
-                local skill_name="$(basename "${skill_dir}")"
-                local target_dir="${opencode_skills_dir}/${skill_name}"
+    mkdir -p "${opencode_skills_dir}"
+    for skill_dir in "${HARNESS_DIR}/skills"/*; do
+        if [ -d "${skill_dir}" ]; then
+            local skill_name="$(basename "${skill_dir}")"
+            local target_dir="${opencode_skills_dir}/${skill_name}"
 
-                if [ -d "${target_dir}" ] && [ "${FORCE}" != true ]; then
-                    log_warn "Skill ${skill_name} already exists, skipping (use --force to overwrite)"
-                    continue
-                fi
-
-                rm -rf "${target_dir}"
-                cp -r "${skill_dir}" "${target_dir}"
-                log_success "Installed skill: ${skill_name} → ${target_dir}"
+            if [ -d "${target_dir}" ] && [ "${FORCE}" != true ]; then
+                log_warn "Skill ${skill_name} already exists, skipping (use --force to overwrite)"
+                continue
             fi
-        done
-    fi
+
+            rm -rf "${target_dir}"
+            cp -r "${skill_dir}" "${target_dir}"
+            log_success "Installed skill: ${skill_name} → ${target_dir}"
+        fi
+    done
 
     # Install to Claude skills directory
-    if [ -d "${claude_skills_dir}" ] || [ -d "${HOME}/.claude" ]; then
-        mkdir -p "${claude_skills_dir}"
-        for skill_dir in "${HARNESS_DIR}/skills"/*; do
-            if [ -d "${skill_dir}" ]; then
-                local skill_name="$(basename "${skill_dir}")"
-                local target_dir="${claude_skills_dir}/${skill_name}"
+    mkdir -p "${claude_skills_dir}"
+    for skill_dir in "${HARNESS_DIR}/skills"/*; do
+        if [ -d "${skill_dir}" ]; then
+            local skill_name="$(basename "${skill_dir}")"
+            local target_dir="${claude_skills_dir}/${skill_name}"
 
-                if [ -d "${target_dir}" ] && [ "${FORCE}" != true ]; then
-                    continue
-                fi
-
-                rm -rf "${target_dir}"
-                cp -r "${skill_dir}" "${target_dir}"
-                log_success "Installed skill: ${skill_name} → ${target_dir}"
+            if [ -d "${target_dir}" ] && [ "${FORCE}" != true ]; then
+                continue
             fi
-        done
-    fi
+
+            rm -rf "${target_dir}"
+            cp -r "${skill_dir}" "${target_dir}"
+            log_success "Installed skill: ${skill_name} → ${target_dir}"
+        fi
+    done
+
+    # Install to .agents skills directory
+    mkdir -p "${agents_skills_dir}"
+    for skill_dir in "${HARNESS_DIR}/skills"/*; do
+        if [ -d "${skill_dir}" ]; then
+            local skill_name="$(basename "${skill_dir}")"
+            local target_dir="${agents_skills_dir}/${skill_name}"
+
+            if [ -d "${target_dir}" ] && [ "${FORCE}" != true ]; then
+                continue
+            fi
+
+            rm -rf "${target_dir}"
+            cp -r "${skill_dir}" "${target_dir}"
+            log_success "Installed skill: ${skill_name} → ${target_dir}"
+        fi
+    done
 }
 
 # Helper: symlink rules to a target directory
@@ -256,25 +307,10 @@ link_rules_to_dir() {
 install_rules() {
     log_info "Installing EEA rules..."
 
-    # Claude Code
-    if [ -d "${HOME}/.claude" ] || [ -L "${HOME}/.claude/CLAUDE.md" ]; then
-        link_rules_to_dir "${HOME}/.claude/rules"
-    fi
-
-    # OpenCode
-    if [ -d "${HOME}/.config/opencode" ] || command -v opencode &> /dev/null; then
-        link_rules_to_dir "${HOME}/.config/opencode/rules"
-    fi
-
-    # Hermes
-    if [ -d "${HOME}/.hermes" ] || [ -L "${HOME}/.hermes/HERMES.md" ]; then
-        link_rules_to_dir "${HOME}/.hermes/rules"
-    fi
-
-    # Pi
-    if [ -d "${HOME}/.pi/agent" ] || [ -L "${HOME}/.pi/agent/AGENTS.md" ]; then
-        link_rules_to_dir "${HOME}/.pi/agent/rules"
-    fi
+    link_rules_to_dir "${HOME}/.claude/rules"
+    link_rules_to_dir "${HOME}/.config/opencode/rules"
+    link_rules_to_dir "${HOME}/.hermes/rules"
+    link_rules_to_dir "${HOME}/.pi/agent/rules"
 }
 
 # Detect installed agents
@@ -291,6 +327,14 @@ detect_agents() {
 
     if [ -d "${HOME}/.hermes" ] || command -v hermes &> /dev/null; then
         agents+=("hermes")
+    fi
+
+    if [ -d "${HOME}/.pi/agent" ] || command -v pi &> /dev/null; then
+        agents+=("pi")
+    fi
+
+    if [ -d "${HOME}/.gemini" ] || command -v gemini &> /dev/null; then
+        agents+=("gemini")
     fi
 
     echo "${agents[@]}"
@@ -319,10 +363,10 @@ main() {
                 install_hermes
                 ;;
             gemini)
-                log_warn "Gemini requires manual setup. See agents/gemini.md"
+                install_gemini
                 ;;
             pi)
-                log_warn "Pi requires manual setup. See agents/pi.md"
+                install_pi
                 ;;
             *)
                 log_error "Unknown agent: ${SPECIFIC_AGENT}"
@@ -349,6 +393,12 @@ main() {
                         ;;
                     hermes)
                         install_hermes
+                        ;;
+                    pi)
+                        install_pi
+                        ;;
+                    gemini)
+                        install_gemini
                         ;;
                 esac
             done

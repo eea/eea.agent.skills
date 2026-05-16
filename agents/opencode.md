@@ -21,6 +21,9 @@ All three are combined. Local rules override global rules for conflicts.
 
 ## Installation Options
 
+> **See [`docs/BOOTSTRAP.md`](../docs/BOOTSTRAP.md) for the canonical 3-method overview.**
+> The options below map to **Method C (Project-Embedded)** for OpenCode-specific wiring.
+
 ### Option A: Remote URL (Recommended)
 
 Add the EEA harness to your project's `opencode.json`:

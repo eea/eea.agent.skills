@@ -1,5 +1,8 @@
 # Codebase Concerns
 
+> **Meta:** Analysis Date: 2026-05-16 — sections below may supersede older entries.
+> Previous analysis: 2026-05-14.
+
 **Analysis Date:** 2026-05-14
 
 ## Tech Debt
@@ -139,6 +142,36 @@
 - **Files:** `catalog.yaml`
 - **Risk:** Missing required fields or invalid trigger lists could break agent discovery.
 - **Priority:** Low
+
+## Installer & agentget alignment (2026-05-16)
+
+**Context:** The `plugins/agentget.json` manifest declares what `agentget install eea/eea.agent.skills` should produce, but `scripts/install.sh` — the script the manifest points to — behaves differently. This creates a split-brain installation where users get different results depending on whether they use the `agentget` tool or run the script directly.
+
+### Tech Debt
+
+- **Manifest vs. script mismatch:** `agentget.json` and `install.sh` disagree on 7 distinct installation details (symlink targets, skill paths, config content, supported agent names, rules destinations).
+- **Underspecified rules installation:** `agentget.json` declares a `rules` object with `sourceDir` and `pattern` but provides **no target directories**, forcing any `agentget` implementation to guess or hardcode paths.
+- **Hardcoded config instead of template:** `install.sh` generates OpenCode config via inline heredoc rather than copying the template file (`docs/opencode-examples/global-opencode.json`) that `agentget.json` explicitly references.
+- **Agent name mismatch:** The manifest profile is `claudecode`; the install script accepts `claude`. A direct invocation of `install.sh --agent claudecode` fails.
+
+### Risks
+
+- **Incomplete Pi support:** `agentget.json` lists Pi as a supported profile, but neither the manifest nor `install.sh` creates the global harness symlink (`~/.pi/agent/AGENTS.md`). Pi users receive only rules, not the core harness.
+- **Missing skills path:** `agentget.json` declares `~/.agents/skills/` as a skills install path, but `install.sh` never copies skills there. OpenCode docs confirm this is a valid discovery path, so skills may be missing for some users.
+- **Misleading supported agents:** Gemini and Pi are listed in `agentget.json` profiles, but `install.sh` explicitly refuses to set them up, printing a manual-setup warning. The manifest overpromises.
+- **Config drift:** Because `install.sh` hardcodes OpenCode JSON instead of copying the canonical template, future changes to `global-opencode.json` will silently diverge from what the script produces.
+
+### Recommendations
+
+1. **Synchronize `agentget.json` and `install.sh`:** Audit every field in the manifest against the script and ensure they produce identical file system state.
+2. **Add Pi harness symlink:** Both the manifest and the script should create `~/.pi/agent/AGENTS.md` → `harness/EEA-HARNESS.md`, matching the documented manual instructions.
+3. **Add `~/.agents/skills/` to `install.sh`:** The `install_skills` function should copy skills to all three paths declared in `agentget.json`.
+4. **Fix agent name:** Align the profile name in `agentget.json` (`claudecode`) with the `--agent` argument accepted by `install.sh` (`claude`). Prefer `claude` for user-friendliness.
+5. **Use the declared template:** Change `install_opencode` in `install.sh` to `cp` from `docs/opencode-examples/global-opencode.json` instead of generating inline JSON.
+6. **Add `rules.installPaths` to `agentget.json`:** Explicitly list the four rule target directories so the manifest is self-describing.
+7. **Decide on Gemini/Pi automation:** Either implement full setup for Gemini and Pi in `install.sh`, or remove them from `agentget.json` profiles and document them as manual-only.
+
+**Reference:** Full detailed analysis in `.planning/codebase/INSTALL-CONFIG-CONCERNS-2026-05.md`.
 
 ---
 

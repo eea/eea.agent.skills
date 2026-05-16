@@ -22,6 +22,9 @@ Pi recognizes **both** `AGENTS.md` and `CLAUDE.md` filenames.
 
 ## Installation Options
 
+> **See [`docs/BOOTSTRAP.md`](../docs/BOOTSTRAP.md) for the canonical 3-method overview.**
+> The options below map to **Method B (Manual Global Install)** for Pi-specific wiring.
+
 ### Option A: Symlink to Global (Recommended)
 
 ```bash

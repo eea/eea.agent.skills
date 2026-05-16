@@ -11,11 +11,25 @@ The EEA AI Harness provides:
 - **Org-wide rules** — security, compliance, and quality standards
 - **Reusable skills** — expert capabilities for Docker, React, design review, etc.
 - **Mandatory protocols** — required actions at session end
-- **Tool-specific wiring** — setup instructions for OpenCode, Claude Code, Gemini, etc.
+- **Tool-specific wiring** — setup instructions for OpenCode, Claude Code, Gemini, Pi, etc.
 
 ---
 
-## One-Line Install (Recommended)
+## Choose Your Installation Method
+
+There are **three** ways to use the harness. Pick the one that fits your workflow.
+
+| Method | Best For | Internet Required |
+|---|---|---|
+| **A. Automated Global Install** | Most users — one command, all agents | Yes (for clone) |
+| **B. Manual Global Install** | Air-gapped or control-oriented users | Once, for clone |
+| **C. Project-Embedded** | No global setup, harness lives in one project | Per-session (remote URL) |
+
+---
+
+## A. Automated Global Install (Recommended)
+
+### Option A1: agentget
 
 If you have [agentget](https://github.com/joeyism/agentget) installed:
 
@@ -23,15 +37,27 @@ If you have [agentget](https://github.com/joeyism/agentget) installed:
 agentget install eea/eea.agent.skills
 ```
 
-This will:
+### Option A2: curl + bash
+
+If you don't have agentget:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/eea/eea.agent.skills/main/scripts/install.sh | bash
+```
+
+Both options will:
 1. Clone the harness to `~/.eea/agent-harness`
-2. Detect your installed agents (OpenCode, Claude, etc.)
-3. Create appropriate symlinks
-4. Verify the setup
+2. Detect your installed agents (OpenCode, Claude, Hermes, Pi, Gemini)
+3. Create appropriate symlinks and copy skills/rules
+4. Set up global configurations
+
+**To update:** `cd ~/.eea/agent-harness && git pull origin main`
 
 ---
 
-## Manual Install
+## B. Manual Global Install
+
+For users who prefer to see every step, or who work in restricted environments.
 
 ### Step 1: Clone the Harness
 
@@ -41,27 +67,16 @@ mkdir -p ~/.eea
   git clone https://github.com/eea/eea.agent.skills.git ~/.eea/agent-harness
 ```
 
-### Step 2: Wire Your Agent
+### Step 2: Install Per Agent
 
-#### OpenCode (Recommended Method)
+#### OpenCode
 
-Add to your project's `opencode.json`:
-
-```json
-{
-  "instructions": [
-    "https://raw.githubusercontent.com/eea/eea.agent.skills/main/harness/EEA-HARNESS.md"
-  ]
-}
-```
-
-Or add globally:
 ```bash
 mkdir -p ~/.config/opencode
 cp ~/.eea/agent-harness/docs/opencode-examples/global-opencode.json ~/.config/opencode/opencode.json
 ```
 
-See [`agents/opencode.md`](../agents/opencode.md) for full details.
+See [`agents/opencode.md`](../agents/opencode.md) for alternatives (remote URL, submodule, local file).
 
 #### Claude Code
 
@@ -81,10 +96,6 @@ ln -sf ~/.eea/agent-harness/harness/EEA-HARNESS.md ~/.hermes/HERMES.md
 
 See [`agents/hermes.md`](../agents/hermes.md) for full details.
 
-#### Gemini
-
-Gemini requires copying instructions into your IDE or API configuration. See [`agents/gemini.md`](../agents/gemini.md) for options.
-
 #### Pi
 
 ```bash
@@ -96,9 +107,94 @@ Pi loads `AGENTS.md` from `~/.pi/agent/` and walks up from the current directory
 
 See [`agents/pi.md`](../agents/pi.md) for full details.
 
+#### Gemini
+
+```bash
+mkdir -p ~/.gemini
+ln -sf ~/.eea/agent-harness/harness/EEA-HARNESS.md ~/.gemini/GEMINI.md
+```
+
+See [`agents/gemini.md`](../agents/gemini.md) for full details.
+
+### Step 3: Install Skills
+
+```bash
+# Install all skill directories to all agent skill paths
+for dir in ~/.config/opencode/skills ~/.claude/skills ~/.agents/skills; do
+  mkdir -p "$dir"
+  for skill in ~/.eea/agent-harness/skills/*/; do
+    [ -d "$skill" ] && cp -r "$skill" "$dir/"
+  done
+done
+```
+
+### Step 4: Link Rules
+
+```bash
+for dir in ~/.claude/rules ~/.config/opencode/rules ~/.hermes/rules ~/.pi/agent/rules; do
+  mkdir -p "$dir"
+  for rule in ~/.eea/agent-harness/rules/*.rules.md; do
+    ln -sf "$rule" "$dir/$(basename "$rule")"
+  done
+done
+```
+
 ---
 
-## Step 3: Verify Installation
+## C. Project-Embedded (No Global Install)
+
+For projects where you don't want (or can't have) a global harness installation. The harness is referenced only within a single project.
+
+### C1: Remote URL (Zero Install)
+
+Add to your project's `opencode.json`:
+
+```json
+{
+  "instructions": [
+    "https://raw.githubusercontent.com/eea/eea.agent.skills/main/harness/EEA-HARNESS.md"
+  ]
+}
+```
+
+**Pros:** Always up to date, no local storage.
+**Cons:** Requires internet on every session start.
+
+### C2: Git Submodule (Pinned, Reproducible)
+
+```bash
+git submodule add https://github.com/eea/eea.agent.skills.git .harness/eea.agent.skills
+```
+
+Then reference locally in `opencode.json`:
+
+```json
+{
+  "instructions": [
+    "{file:.harness/eea.agent.skills/harness/EEA-HARNESS.md}"
+  ]
+}
+```
+
+**Pros:** Works offline, version-controlled, reproducible.
+**Cons:** Must update submodule to get harness updates.
+
+### C3: Inline Copy (Self-Contained)
+
+Copy the full harness content into your project's `AGENTS.md`:
+
+```bash
+cat ~/.eea/agent-harness/harness/EEA-HARNESS.md >> your-project/AGENTS.md
+```
+
+**Pros:** Zero external dependencies, works with any agent.
+**Cons:** Must manually re-copy to update.
+
+See [`agents/opencode.md`](../agents/opencode.md) for full OpenCode options.
+
+---
+
+## Verify Installation
 
 Start your agent and ask:
 

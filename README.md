@@ -14,11 +14,26 @@ It contains org-wide rules, reusable skills, mandatory protocols, shared knowled
 
 ### For Developers
 
-Add the EEA harness to your project in 30 seconds:
+Add the EEA harness to your project in 30 seconds. Pick **one** of the three methods:
 
-**OpenCode (recommended):**
+**A. Automated Global Install (recommended)** — one command for all your agents:
 ```bash
-# Create opencode.json in your project root
+# With agentget
+agentget install eea/eea.agent.skills
+
+# Or with curl
+curl -fsSL https://raw.githubusercontent.com/eea/eea.agent.skills/main/scripts/install.sh | bash
+```
+
+**B. Manual Global Install** — clone once, symlink per agent:
+```bash
+git clone https://github.com/eea/eea.agent.skills.git ~/.eea/agent-harness
+~/.eea/agent-harness/scripts/install.sh --local
+```
+
+**C. Project-Embedded** — no global setup, reference inside one project:
+```bash
+# OpenCode: remote URL in your project's opencode.json
 cat > opencode.json << 'EOF'
 {
   "instructions": [
@@ -26,20 +41,6 @@ cat > opencode.json << 'EOF'
   ]
 }
 EOF
-```
-
-**Claude Code:**
-```bash
-# One-time setup
-mkdir -p ~/.claude
-ln -sf ~/.eea/agent-harness/harness/EEA-HARNESS.md ~/.claude/CLAUDE.md
-```
-
-**All agents:**
-```bash
-# Or use the install script
-git clone https://github.com/eea/eea.agent.skills.git ~/.eea/agent-harness
-~/.eea/agent-harness/scripts/install.sh
 ```
 
 Full bootstrap guide: [`docs/BOOTSTRAP.md`](docs/BOOTSTRAP.md)
@@ -149,12 +150,11 @@ The canonical org harness ([`harness/EEA-HARNESS.md`](harness/EEA-HARNESS.md)) i
 
 ### Distribution Options
 
-| Method | Best For | Command |
-|--------|----------|---------|
-| **Remote URL** (OpenCode) | Zero-install, always up to date | Add URL to `opencode.json` |
-| **Git clone + symlink** (Claude, Hermes) | Offline use, manual control | `git clone ... && ln -s ...` |
-| **Install script** | Automated setup | `./scripts/install.sh` |
-| **agentget** | Unified installer across tools | `agentget install eea/eea.agent.skills` |
+| Method | Best For | Command | Agents Supported |
+|--------|----------|---------|------------------|
+| **A. Automated Global Install** | Most users — one command, all agents | `agentget install eea/eea.agent.skills` or `curl \| bash` | OpenCode, Claude, Hermes, Pi, Gemini |
+| **B. Manual Global Install** | Air-gapped or control-oriented users | `git clone ... && ./scripts/install.sh --local` | OpenCode, Claude, Hermes, Pi, Gemini |
+| **C. Project-Embedded** | No global setup, harness lives in one project | Remote URL, git submodule, or inline copy in project | Any agent |
 
 ---
 
