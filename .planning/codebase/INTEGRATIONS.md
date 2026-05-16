@@ -1,22 +1,22 @@
 # External Integrations
 
-**Analysis Date:** 2026-05-14
+**Analysis Date:** 2026-05-16
 
 ## APIs & External Services
 
 **GitHub:**
 - **GitHub API** (`api.github.com`) — Used in CI upstream sync check to fetch latest commit SHA from upstream repositories (`.github/workflows/validate-skills.yml:98`)
-- **Raw GitHub Content Delivery** (`raw.githubusercontent.com`) — Used to fetch upstream `SKILL.md` source files during manual sync workflows (`docs/SYNC-STRATEGY.md:108`, `CONTRIBUTING.md:19`)
+- **Raw GitHub Content Delivery** (`raw.githubusercontent.com`) — Used to fetch upstream `SKILL.md` source files during manual sync workflows (`docs/SYNC-STRATEGY.md:108`, `CONTRIBUTING.md:19`) and to serve the harness remotely to agent frameworks (`harness/EEA-HARNESS.md`)
 
 **Agent Platforms (Consumers):**
 - These are the runtimes that load and execute skill content. They are not networked integrations of this repository, but they are the intended consumers:
-  - **OpenCode** — Auto-discovers skills from `~/.config/opencode/skills/`, `~/.claude/skills/`, or project-local `.opencode/skills/`
+  - **OpenCode** — Auto-discovers skills from `~/.config/opencode/skills/`, `~/.claude/skills/`, `~/.agents/skills/`, or project-local `.opencode/skills/`
   - **Claude Code** — Discovers skills from `~/.claude/skills/`
   - **Cursor** — May load skill-like instruction files
   - **GitHub Copilot** — Agent skill support
 
 **Skill Installation Tools:**
-- **agentget** (`joeyism/agentget`) — Optional third-party CLI tool for auto-discovering and installing skills from this repository
+- **agentget** (`joeyism/agentget`) — Optional third-party CLI tool for auto-discovering and installing skills from this repository; consumed via `plugins/agentget.json` manifest
 
 ## Data Storage
 
@@ -33,7 +33,7 @@
 
 **Auth Provider:**
 - None required for repository operation.
-- GitHub Actions uses the implicit `GITHUB_TOKEN` for release creation and artifact upload.
+- GitHub Actions uses the implicit `GITHUB_TOKEN` provided by the GitHub Actions runner for repository checkout and CI operations.
 
 ## Monitoring & Observability
 
@@ -46,19 +46,21 @@
 ## CI/CD & Deployment
 
 **Hosting:**
-- GitHub Releases (`github.com/eea/eea.agent.skills/releases`) — Pre-built merged skills are distributed as `.zip` and `.tar.gz` artifacts
+- GitHub (`github.com/eea/eea.agent.skills`) — Source repository and canonical distribution point
+- **GitHub Releases distribution discontinued** as of 2026-05-16. Skills are now always installed from source via `scripts/install.sh` or agentget. No release artifacts are published.
 
 **CI Pipeline:**
 - **GitHub Actions** (`ubuntu-latest`)
-  - `.github/workflows/validate-skills.yml` — Runs on push/PR; validates skill structure, token counts, catalog schema, and build sync
-  - `.github/workflows/release.yml` — Triggered on `v*` tags; builds merged skills and creates GitHub Release with artifacts
+  - `.github/workflows/validate-skills.yml` — Runs on push/PR; validates skill structure, token counts, catalog schema, build sync, and upstream SHA fetch
+  - `.github/workflows/validate-harness.yml` — Runs on push/PR when harness/rules/agents/skills/catalog change; validates harness file existence, markdown structure, referenced files, agent profiles, catalog YAML validity, and scans for secret patterns
+  - `.github/workflows/check-changelog.yml` — Runs on PR open/synchronize/reopen; enforces that code changes include an updated `CHANGELOG.md`
 
 ## Upstream Sources
 
 This repository forks and extends content from upstream skill libraries. These are content dependencies, not package dependencies:
 
 - **`sickn33/antigravity-awesome-skills`** — Source for `docker-expert` skill
-  - Path: `skills/docker-expert`
+  - Path: `src/skills/docker-expert`
   - Sync method: Manual `curl` fetch of raw `SKILL.md`
 
 - **`vercel-labs/agent-skills`** — Source for frontend/mobile skills
@@ -88,4 +90,4 @@ The Markdown skill files contain extensive references to technologies like Docke
 
 ---
 
-*Integration audit: 2026-05-14*
+*Integration audit: 2026-05-16*

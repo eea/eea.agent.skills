@@ -1,9 +1,6 @@
 # Codebase Concerns
 
-> **Meta:** Analysis Date: 2026-05-16 — sections below may supersede older entries.
-> Previous analysis: 2026-05-14.
-
-**Analysis Date:** 2026-05-14
+**Analysis Date:** 2026-05-16
 
 ## Tech Debt
 
@@ -37,24 +34,38 @@
 
 ### Unimplemented Upstream Sync Logic
 
-- **Issue:** The `upstream-sync` job contains a hard-coded TODO that was never completed.
-- **File:** `.github/workflows/validate-skills.yml` lines 99–100
-- **Impact:** The scheduled upstream sync never actually compares SHAs or opens issues; the job is essentially a no-op.
-- **Fix approach:** Implement SHA comparison against a stored last-known value (e.g., in a repo file or GitHub variable) and auto-create an issue when drift is detected.
+- **Issue:** The `upstream-sync` job contains a hard-coded TODO that was never completed. Additionally, the job has `if: github.event_name == 'schedule'` but the workflow defines no `schedule` trigger, so the job never runs.
+- **File:** `.github/workflows/validate-skills.yml` lines 92–100
+- **Impact:** The scheduled upstream sync never actually compares SHAs or opens issues; the job is a no-op.
+- **Fix approach:** Add a `schedule` trigger to the workflow (e.g., `on: schedule: - cron: '0 0 * * 1'`), implement SHA comparison against a stored last-known value, and auto-create an issue when drift is detected.
 
 ### Referenced npm Commands Without package.json
 
 - **Issue:** `CONTRIBUTING.md` documents `npm run validate` and `npm run check-tokens`, but no `package.json` exists in the repository.
-- **File:** `CONTRIBUTING.md` lines 166–172
+- **File:** `CONTRIBUTING.md` lines 58, 168, 171
 - **Impact:** New contributors following the guide will encounter "command not found" errors.
 - **Fix approach:** Add a `package.json` with the referenced scripts, or replace the npm references with the equivalent shell/CLI commands.
+
+### Broken Reference Link in react-native-skills
+
+- **Symptoms:** A rule contains a placeholder/example URL instead of a real reference.
+- **File:** `src/skills/react-native-skills/AGENTS.md` line 335 in section 2.2 "Hoist callbacks to the root of lists"
+- **Trigger:** N/A (static content error)
+- **Workaround:** Replace `https://example.com` with the correct upstream documentation URL.
+
+### ADR References Missing File
+
+- **Issue:** `docs/adr/2026-05-15-harness-slimming.md` references `harness/REVIEW-1.md` as the external review that triggered the refactoring, but this file does not exist.
+- **File:** `docs/adr/2026-05-15-harness-slimming.md` line 11
+- **Impact:** The rationale for a major architectural decision (slimming the harness from 260 to ~115 lines) cannot be fully verified.
+- **Fix approach:** Either commit `harness/REVIEW-1.md` or inline the key findings from the review into the ADR.
 
 ## Known Bugs
 
 ### Broken Reference Link in react-native-skills
 
 - **Symptoms:** A rule contains a placeholder/example URL instead of a real reference.
-- **File:** `src/skills/react-native-skills/AGENTS.md` in section 2.2 "Hoist callbacks to the root of lists"
+- **File:** `src/skills/react-native-skills/AGENTS.md` line 335 in section 2.2 "Hoist callbacks to the root of lists"
 - **Trigger:** N/A (static content error)
 - **Workaround:** Replace `https://example.com` with the correct upstream documentation URL.
 
@@ -66,6 +77,13 @@
 - **File:** `.github/workflows/validate-skills.yml` line 98
 - **Current mitigation:** Uses unauthenticated `curl` to `api.github.com`.
 - **Recommendations:** If sync frequency increases, add a `GITHUB_TOKEN` secret to avoid rate limiting.
+
+### Secret Scan Has False Positives
+
+- **Risk:** The harness validation workflow scans for secret patterns using a broad regex (`api_key|apikey|password|passwd|secret|token|private_key`) which will match benign occurrences like rule names (`eeaprohibitions.rules.md`) or documentation text (`Never Commit Secrets`).
+- **File:** `.github/workflows/validate-harness.yml` lines 101–110
+- **Current mitigation:** Prints a warning, does not fail the build.
+- **Recommendations:** Tighten the regex or use a dedicated secret-scanning tool (e.g., `trufflehog`, `git-secrets`) for more reliable detection.
 
 ## Performance Bottlenecks
 
@@ -92,9 +110,25 @@
 - **Files:**
   - `shared/design-foundations.md`
   - `shared/data-schemas.md`
-  - `shared/eea-style-guide.md`
+  - `shared/architecture/README.md`
 - **Why fragile:** Skills reference these files in documentation, but they contain no actionable content. Agents may generate code using undefined design tokens or schemas.
 - **Safe modification:** Populate these files before referencing them in skill instructions.
+- **Specific gaps:**
+  - `shared/design-foundations.md` has an explicit TODO list (color palette, typography, spacing, icons, components) with zero items completed.
+  - `shared/data-schemas.md` is a 11-line placeholder with no defined schemas.
+  - `shared/architecture/README.md` provides an ADR template and a "Current Decisions" table with zero entries.
+
+### Installer & agentget Alignment (Mostly Resolved)
+
+- **Context:** The `plugins/agentget.json` manifest and `scripts/install.sh` were previously out of sync. As of 2026-05-16, the core mismatches have been fixed:
+  - `agentget.json` profile name changed from `claudecode` to `claude`
+  - `install.sh` now copies `docs/opencode-examples/global-opencode.json` instead of hardcoding inline JSON
+  - `install.sh` now installs skills to `~/.agents/skills/`
+  - `install.sh` now implements `install_pi()` and `install_gemini()`
+  - `agentget.json` now includes `rules.installPaths`
+- **Files:** `scripts/install.sh`, `plugins/agentget.json`
+- **Residual risk:** The two systems could diverge again. Any future change to `agentget.json` must be mirrored in `install.sh`.
+- **Full historical analysis:** `.planning/codebase/INSTALL-CONFIG-CONCERNS-2026-05.md`
 
 ## Scaling Limits
 
@@ -122,10 +156,17 @@
 
 ### Empty Scaffolding Directories
 
-- **Problem:** `agents/`, `instructions/`, `rules/`, and `plugins/` were added for agentget compatibility but contain no files.
-- **Files:** Directories listed in `CHANGELOG.md` as added in v1.2.0
-- **Risk:** Confuses users and agents looking for agent definitions or rule files.
+- **Problem:** `instructions/` was added for agentget compatibility but contains only a README.
+- **Files:** `instructions/README.md`
+- **Risk:** Confuses users and agents looking for instruction definitions.
 - **Priority:** Low
+
+### Release Workflow Missing
+
+- **Problem:** The restructure plan (`docs/RESTRUCTURE-PLAN.md`) references `.github/workflows/release.yml`, but this file does not exist.
+- **Files:** `docs/RESTRUCTURE-PLAN.md` line 43
+- **Impact:** The release process described in `AGENTS.md` ("GitHub Actions will attach built skills to the release") has no implementation.
+- **Priority:** Medium
 
 ## Test Coverage Gaps
 
@@ -143,36 +184,13 @@
 - **Risk:** Missing required fields or invalid trigger lists could break agent discovery.
 - **Priority:** Low
 
-## Installer & agentget alignment (2026-05-16)
+### Merged Output Size Not Validated in CI
 
-**Context:** The `plugins/agentget.json` manifest declares what `agentget install eea/eea.agent.skills` should produce, but `scripts/install.sh` — the script the manifest points to — behaves differently. This creates a split-brain installation where users get different results depending on whether they use the `agentget` tool or run the script directly.
-
-### Tech Debt
-
-- **Manifest vs. script mismatch:** `agentget.json` and `install.sh` disagree on 7 distinct installation details (symlink targets, skill paths, config content, supported agent names, rules destinations).
-- **Underspecified rules installation:** `agentget.json` declares a `rules` object with `sourceDir` and `pattern` but provides **no target directories**, forcing any `agentget` implementation to guess or hardcode paths.
-- **Hardcoded config instead of template:** `install.sh` generates OpenCode config via inline heredoc rather than copying the template file (`docs/opencode-examples/global-opencode.json`) that `agentget.json` explicitly references.
-- **Agent name mismatch:** The manifest profile is `claudecode`; the install script accepts `claude`. A direct invocation of `install.sh --agent claudecode` fails.
-
-### Risks
-
-- **Incomplete Pi support:** `agentget.json` lists Pi as a supported profile, but neither the manifest nor `install.sh` creates the global harness symlink (`~/.pi/agent/AGENTS.md`). Pi users receive only rules, not the core harness.
-- **Missing skills path:** `agentget.json` declares `~/.agents/skills/` as a skills install path, but `install.sh` never copies skills there. OpenCode docs confirm this is a valid discovery path, so skills may be missing for some users.
-- **Misleading supported agents:** Gemini and Pi are listed in `agentget.json` profiles, but `install.sh` explicitly refuses to set them up, printing a manual-setup warning. The manifest overpromises.
-- **Config drift:** Because `install.sh` hardcodes OpenCode JSON instead of copying the canonical template, future changes to `global-opencode.json` will silently diverge from what the script produces.
-
-### Recommendations
-
-1. **Synchronize `agentget.json` and `install.sh`:** Audit every field in the manifest against the script and ensure they produce identical file system state.
-2. **Add Pi harness symlink:** Both the manifest and the script should create `~/.pi/agent/AGENTS.md` → `harness/EEA-HARNESS.md`, matching the documented manual instructions.
-3. **Add `~/.agents/skills/` to `install.sh`:** The `install_skills` function should copy skills to all three paths declared in `agentget.json`.
-4. **Fix agent name:** Align the profile name in `agentget.json` (`claudecode`) with the `--agent` argument accepted by `install.sh` (`claude`). Prefer `claude` for user-friendliness.
-5. **Use the declared template:** Change `install_opencode` in `install.sh` to `cp` from `docs/opencode-examples/global-opencode.json` instead of generating inline JSON.
-6. **Add `rules.installPaths` to `agentget.json`:** Explicitly list the four rule target directories so the manifest is self-describing.
-7. **Decide on Gemini/Pi automation:** Either implement full setup for Gemini and Pi in `install.sh`, or remove them from `agentget.json` profiles and document them as manual-only.
-
-**Reference:** Full detailed analysis in `.planning/codebase/INSTALL-CONFIG-CONCERNS-2026-05.md`.
+- **What's not tested:** The CI `build-sync` job verifies that `skills/` is up-to-date but does not check whether merged files exceed the documented 5k token limit.
+- **Files:** `.github/workflows/validate-skills.yml` lines 83–88
+- **Risk:** Skills can grow unbounded until they break agent context windows.
+- **Priority:** Medium
 
 ---
 
-*Concerns audit: 2026-05-14*
+*Concerns audit: 2026-05-16*
