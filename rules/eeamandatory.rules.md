@@ -190,7 +190,7 @@ Alternatives considered:
 
 **Action:**
 1. Before committing, check if `CHANGELOG.md` exists in the project root
-2. If yes, check if your changes qualify as "major" (see criteria in `EEA-HARNESS.md`)
+2. If yes, check if your changes qualify as "major" (see criteria in `rules/changelog.process.md`)
 3. If major: add an entry to `CHANGELOG.md` under the current date
 4. Use format: `YYYY-MM-DD — Brief description`
 5. Categorize under: `Added`, `Changed`, `Fixed`, `Removed`, or `Documentation`

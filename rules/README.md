@@ -36,6 +36,7 @@ rules/{domain}.{type}.md
 |------|---------|
 | `eeaprohibitions.rules.md` | Global prohibitions (security, operational safety, code quality) |
 | `eeamandatory.rules.md` | Mandatory end-of-session and verification actions |
+| `changelog.process.md` | CHANGELOG best practices and criteria |
 
 ## Usage
 
