@@ -1,6 +1,6 @@
 # EEA AI Harness
 
-**Version:** 1.0.0
+**Version:** 2026-05-16
 **Source:** https://github.com/eea/eea.agent.skills
 
 ---
