@@ -1,6 +1,6 @@
 # Contributing to EEA Agent Skills
 
-Welcome! This guide explains how to add skills, update existing ones, and maintain the sync with upstream sources.
+Welcome! This guide explains how to contribute skills, rules, agent profiles, documentation, and other parts of the EEA AI Harness.
 
 ## Adding a New Skill
 
@@ -115,24 +115,39 @@ src/skills/<skill-name>/
 
 ---
 
-## Committing Changes
+## Other Contribution Areas
 
-### Always rebuild and commit `skills/`
+Skills are the most common contribution, but the harness has many other parts:
 
-The `skills/` directory contains pre-built merged skills and is **committed to the repository**. This allows users and agentget to install/discover skills directly without running the build script.
+| Area | Path | How to Contribute |
+|---|---|---|
+| **Rules** | `rules/` | Add or edit `.rules.md` files. Follow naming: `rules/{domain}.{type}.md`. See `rules/README.md`. |
+| **Org Harness** | `harness/EEA-HARNESS.md` | Update global routing, prohibitions, or mandatory actions. See `docs/harness-maintenance.md` for the maintenance philosophy. |
+| **Agent Profiles** | `agents/` | Add `{tool}.md` for new tools. Follow format in `agents/README.md`. |
+| **Workflows** | `workflows/` | Add multi-skill recipes. See `workflows/README.md`. |
+| **Shared Knowledge** | `shared/` | Update EEA-wide glossary, style guide, or design foundations when org context changes. |
+| **Templates** | `templates/` | Update project-local setup templates. Keep in sync with `scripts/install.sh`. |
+| **Plugins** | `plugins/` | Update `agentget.json` when new content types or paths change. |
+| **Scripts** | `scripts/` | Test build or install changes locally. Ensure CI passes. |
+| **Documentation** | `docs/` | Update user or maintainer docs. Add ADRs to `docs/adr/` for significant architectural decisions. |
+| **Changelog** | `CHANGELOG.md` | Add entry for any user-facing change. Follow `rules/changelog.process.md`. |
 
-**After modifying any `SKILL.md` or `EEA-OVERRIDES.md`:**
+Open a PR for any of the above. CI validates structure and consistency automatically.
 
-```bash
-# Rebuild all merged skills
-./scripts/build.sh
+---
 
-# Stage both source and built files
-git add src/skills/ skills/
-git commit -m "feat: update docker-expert with EEA proxy configuration"
-```
+## Pull Request Workflow
 
-**CI will fail if `skills/` is out of sync.** The `build-sync` job rebuilds from source and checks that the committed `skills/` matches.
+All changes go through a PR:
+
+1. **Fork or branch** — Create a feature branch from `main`
+2. **Make changes** — Follow the conventions in the relevant section above
+3. **Validate locally** — Run `npm run validate` and `./scripts/build.sh` where applicable
+4. **Open a PR** — Include a clear description and rationale
+5. **CI checks** — GitHub Actions validate structure, build sync, and harness integrity
+6. **Review** — A maintainer reviews and merges
+
+**If you modified `src/skills/*/SKILL.md` or `src/skills/*/EEA-OVERRIDES.md`,** run `./scripts/build.sh` locally so the PR includes updated `skills/` output. CI will fail if `skills/` is out of sync.
 
 ---
 
