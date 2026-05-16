@@ -6,6 +6,27 @@ This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic ve
 
 ---
 
+## 2026-05-16 — Safe Installer: Backup and Merge Existing Configs
+
+### Changed
+- `scripts/install.sh`:
+  - Back up existing agent configs before modifying (`--no-backup` to skip)
+  - Detect and merge into existing `opencode.json` and `opencode.jsonc` instead of overwriting
+  - Use robust Python-based JSONC parser (handles comments and trailing commas without destroying `//` in URLs)
+  - For Claude/Hermes/Pi/Gemini: append EEA harness reference to end of existing file instead of replacing
+  - Detect if symlink already points to EEA harness and skip gracefully
+  - Back up existing skills before `--force` overwrite
+
+### Documentation
+- `docs/BOOTSTRAP.md`: Add "Already Have a Global Config?" section covering backup behavior, restore commands, and why merge vs. overwrite
+- `agents/opencode.md`: Add "Option E: Merge with an Existing Global Config" with before/after JSON examples and restore instructions
+- `agents/claudecode.md`: Add "Option A½: Preserve an Existing CLAUDE.md" with manual steps and restore instructions
+
+### Why
+Prevents accidental loss of personal agent instructions (e.g., graphify config, team rules) when installing the EEA harness.
+
+---
+
 ## 2026-05-16 — Harness Slimming and Rule Extraction
 
 ### Changed

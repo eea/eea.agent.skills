@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # EEA AI Harness Installation Script
-# Usage: ./scripts/install.sh [--global] [--agent <name>]
+# Usage: ./scripts/install.sh [--global] [--agent <name>] [--force] [--no-backup]
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -10,6 +10,7 @@ HARNESS_DIR="${HOME}/.eea/agent-harness"
 FORCE=false
 GLOBAL=false
 LOCAL=false
+NO_BACKUP=false
 SPECIFIC_AGENT=""
 
 # Colors
@@ -29,6 +30,7 @@ usage() {
     echo "  --local         Use current repo instead of cloning from GitHub"
     echo "  --agent <name>  Install only for specific agent (opencode, claude, hermes, gemini, pi)"
     echo "  --force         Overwrite existing installations"
+    echo "  --no-backup     Skip creating backups before modifying existing files"
     echo "  --help          Show this help message"
     echo ""
     echo "Examples:"
@@ -36,6 +38,7 @@ usage() {
     echo "  $0 --local                  # Install from local repo (dev mode)"
     echo "  $0 --agent opencode         # Install only for OpenCode"
     echo "  $0 --force                  # Reinstall everything"
+    echo "  $0 --no-backup              # Skip backups (not recommended)"
 }
 
 log_info() {
@@ -73,6 +76,10 @@ while [[ $# -gt 0 ]]; do
             FORCE=true
             shift
             ;;
+        --no-backup)
+            NO_BACKUP=true
+            shift
+            ;;
         --help)
             usage
             exit 0
@@ -84,6 +91,130 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Backup helper: creates a timestamped copy of any file or directory
+backup_file() {
+    local file="$1"
+    if [ -e "$file" ]; then
+        local backup
+        backup="${file}.backup-$(date +%Y%m%d-%H%M%S)"
+        cp -a "$file" "$backup"
+        log_success "Backed up: ${file} → ${backup}"
+    fi
+}
+
+# Check if a symlink already points to the EEA harness
+is_linked_to_eea() {
+    local file="$1"
+    if [ -L "$file" ]; then
+        local target
+        target=$(readlink "$file")
+        [[ "$target" == *"EEA-HARNESS.md" ]] && return 0
+    fi
+    return 1
+}
+
+# Merge EEA harness URL into an existing opencode.json or opencode.jsonc
+merge_opencode_config() {
+    local config_file="$1"
+    local eea_url="$2"
+
+    if ! command -v python3 &> /dev/null; then
+        log_warn "python3 not found. Cannot auto-merge opencode config."
+        log_info "Please manually add this URL to your instructions array:"
+        echo "  ${eea_url}"
+        return
+    fi
+
+    python3 - "$config_file" "$eea_url" << 'PYEOF'
+import sys, json
+
+config_file = sys.argv[1]
+ea_url = sys.argv[2]
+
+def strip_jsonc_comments(text):
+    result = []
+    in_string = False
+    escape = False
+    i = 0
+    while i < len(text):
+        char = text[i]
+        if escape:
+            result.append(char)
+            escape = False
+            i += 1
+            continue
+        if char == '\\' and in_string:
+            result.append(char)
+            escape = True
+            i += 1
+            continue
+        if char == '"' and not in_string:
+            in_string = True
+            result.append(char)
+            i += 1
+            continue
+        if char == '"' and in_string:
+            in_string = False
+            result.append(char)
+            i += 1
+            continue
+        if not in_string:
+            if char == '/' and i + 1 < len(text) and text[i+1] == '/':
+                while i < len(text) and text[i] != '\n':
+                    i += 1
+                continue
+            if char == '/' and i + 1 < len(text) and text[i+1] == '*':
+                i += 2
+                while i < len(text) - 1 and not (text[i] == '*' and text[i+1] == '/'):
+                    i += 1
+                i += 2
+                continue
+        result.append(char)
+        i += 1
+    return ''.join(result)
+
+def remove_trailing_commas(text):
+    import re
+    return re.sub(r',(\s*[\]\}])', r'\1', text)
+
+with open(config_file, 'r') as f:
+    content = f.read()
+
+try:
+    data = json.loads(content)
+except json.JSONDecodeError:
+    content = strip_jsonc_comments(content)
+    content = remove_trailing_commas(content)
+    data = json.loads(content)
+
+if 'instructions' not in data:
+    data['instructions'] = []
+
+if ea_url not in data['instructions']:
+    data['instructions'].append(ea_url)
+
+with open(config_file, 'w') as f:
+    json.dump(data, f, indent=2)
+    f.write('\n')
+PYEOF
+}
+
+# Append an EEA harness reference section to an existing markdown file
+append_eea_reference_to_markdown() {
+    local md_file="$1"
+
+    cat >> "$md_file" << 'EOF'
+
+---
+
+## EEA Global Harness
+
+This session is also governed by the EEA AI Harness for org-wide rules, skills, and mandatory actions.
+
+**Harness file:** ~/.eea/agent-harness/harness/EEA-HARNESS.md
+EOF
+}
 
 # Clone or update harness repo
 install_harness_repo() {
@@ -118,19 +249,42 @@ install_opencode() {
     log_info "Setting up OpenCode..."
 
     local config_dir="${HOME}/.config/opencode"
-    local config_file="${config_dir}/opencode.json"
+    local config_json="${config_dir}/opencode.json"
+    local config_jsonc="${config_dir}/opencode.jsonc"
+    local eea_url="https://raw.githubusercontent.com/eea/eea.agent.skills/main/harness/EEA-HARNESS.md"
 
     mkdir -p "${config_dir}"
 
-    if [ -f "${config_file}" ] && [ "${FORCE}" != true ]; then
-        log_warn "OpenCode config already exists at ${config_file}"
-        log_info "Add this to your opencode.json instructions:"
-        echo '  "https://raw.githubusercontent.com/eea/eea.agent.skills/main/harness/EEA-HARNESS.md"'
+    # Determine which config file to target
+    local target_config=""
+    if [ -f "${config_jsonc}" ] && [ -f "${config_json}" ]; then
+        log_warn "Both opencode.json and opencode.jsonc exist. Merging into opencode.jsonc (remove one to avoid confusion)"
+        target_config="${config_jsonc}"
+    elif [ -f "${config_jsonc}" ]; then
+        target_config="${config_jsonc}"
+    elif [ -f "${config_json}" ]; then
+        target_config="${config_json}"
+    fi
+
+    if [ -n "${target_config}" ]; then
+        if [ "${NO_BACKUP}" != true ]; then
+            backup_file "${target_config}"
+        fi
+
+        merge_opencode_config "${target_config}" "${eea_url}"
+        log_success "Merged EEA harness into ${target_config}"
+
+        if [[ "${target_config}" == *.jsonc ]]; then
+            log_warn "Comments in .jsonc were stripped during merge. Original preserved in backup."
+        fi
+
+        log_info "Your original config is backed up (see above)"
         return
     fi
 
-    cp "${HARNESS_DIR}/docs/opencode-examples/global-opencode.json" "${config_file}"
-    log_success "OpenCode configured at ${config_file}"
+    # No existing config: copy template
+    cp "${HARNESS_DIR}/docs/opencode-examples/global-opencode.json" "${config_json}"
+    log_success "OpenCode configured at ${config_json}"
 }
 
 # Install for Claude Code
@@ -143,12 +297,28 @@ install_claude() {
     mkdir -p "${claude_dir}"
 
     if [ -L "${claude_file}" ] || [ -f "${claude_file}" ]; then
-        if [ "${FORCE}" = true ]; then
-            rm -f "${claude_file}"
-        else
-            log_warn "Claude config already exists at ${claude_file}"
+        # Already linked to EEA harness? Skip.
+        if is_linked_to_eea "${claude_file}"; then
+            log_info "Claude Code already linked to EEA harness"
             return
         fi
+
+        if [ "${NO_BACKUP}" != true ]; then
+            backup_file "${claude_file}"
+        fi
+
+        # If it's a symlink to something else, convert to a real file
+        if [ -L "${claude_file}" ]; then
+            local real_file
+            real_file=$(readlink -f "${claude_file}")
+            rm -f "${claude_file}"
+            cp "${real_file}" "${claude_file}"
+        fi
+
+        append_eea_reference_to_markdown "${claude_file}"
+        log_success "Appended EEA harness reference to ${claude_file}"
+        log_info "Your original config is backed up (see above)"
+        return
     fi
 
     ln -sf "${HARNESS_DIR}/harness/EEA-HARNESS.md" "${claude_file}"
@@ -165,12 +335,26 @@ install_hermes() {
     mkdir -p "${hermes_dir}"
 
     if [ -L "${hermes_file}" ] || [ -f "${hermes_file}" ]; then
-        if [ "${FORCE}" = true ]; then
-            rm -f "${hermes_file}"
-        else
-            log_warn "Hermes config already exists at ${hermes_file}"
+        if is_linked_to_eea "${hermes_file}"; then
+            log_info "Hermes already linked to EEA harness"
             return
         fi
+
+        if [ "${NO_BACKUP}" != true ]; then
+            backup_file "${hermes_file}"
+        fi
+
+        if [ -L "${hermes_file}" ]; then
+            local real_file
+            real_file=$(readlink -f "${hermes_file}")
+            rm -f "${hermes_file}"
+            cp "${real_file}" "${hermes_file}"
+        fi
+
+        append_eea_reference_to_markdown "${hermes_file}"
+        log_success "Appended EEA harness reference to ${hermes_file}"
+        log_info "Your original config is backed up (see above)"
+        return
     fi
 
     ln -sf "${HARNESS_DIR}/harness/EEA-HARNESS.md" "${hermes_file}"
@@ -187,12 +371,26 @@ install_pi() {
     mkdir -p "${pi_dir}"
 
     if [ -L "${pi_file}" ] || [ -f "${pi_file}" ]; then
-        if [ "${FORCE}" = true ]; then
-            rm -f "${pi_file}"
-        else
-            log_warn "Pi config already exists at ${pi_file}"
+        if is_linked_to_eea "${pi_file}"; then
+            log_info "Pi already linked to EEA harness"
             return
         fi
+
+        if [ "${NO_BACKUP}" != true ]; then
+            backup_file "${pi_file}"
+        fi
+
+        if [ -L "${pi_file}" ]; then
+            local real_file
+            real_file=$(readlink -f "${pi_file}")
+            rm -f "${pi_file}"
+            cp "${real_file}" "${pi_file}"
+        fi
+
+        append_eea_reference_to_markdown "${pi_file}"
+        log_success "Appended EEA harness reference to ${pi_file}"
+        log_info "Your original config is backed up (see above)"
+        return
     fi
 
     ln -sf "${HARNESS_DIR}/harness/EEA-HARNESS.md" "${pi_file}"
@@ -209,12 +407,26 @@ install_gemini() {
     mkdir -p "${gemini_dir}"
 
     if [ -L "${gemini_file}" ] || [ -f "${gemini_file}" ]; then
-        if [ "${FORCE}" = true ]; then
-            rm -f "${gemini_file}"
-        else
-            log_warn "Gemini config already exists at ${gemini_file}"
+        if is_linked_to_eea "${gemini_file}"; then
+            log_info "Gemini already linked to EEA harness"
             return
         fi
+
+        if [ "${NO_BACKUP}" != true ]; then
+            backup_file "${gemini_file}"
+        fi
+
+        if [ -L "${gemini_file}" ]; then
+            local real_file
+            real_file=$(readlink -f "${gemini_file}")
+            rm -f "${gemini_file}"
+            cp "${real_file}" "${gemini_file}"
+        fi
+
+        append_eea_reference_to_markdown "${gemini_file}"
+        log_success "Appended EEA harness reference to ${gemini_file}"
+        log_info "Your original config is backed up (see above)"
+        return
     fi
 
     ln -sf "${HARNESS_DIR}/harness/EEA-HARNESS.md" "${gemini_file}"
@@ -233,15 +445,21 @@ install_skills() {
     mkdir -p "${opencode_skills_dir}"
     for skill_dir in "${HARNESS_DIR}/skills"/*; do
         if [ -d "${skill_dir}" ]; then
-            local skill_name="$(basename "${skill_dir}")"
+            local skill_name
+            skill_name="$(basename "${skill_dir}")"
             local target_dir="${opencode_skills_dir}/${skill_name}"
 
-            if [ -d "${target_dir}" ] && [ "${FORCE}" != true ]; then
-                log_warn "Skill ${skill_name} already exists, skipping (use --force to overwrite)"
-                continue
+            if [ -d "${target_dir}" ]; then
+                if [ "${FORCE}" != true ]; then
+                    log_warn "Skill ${skill_name} already exists, skipping (use --force to overwrite)"
+                    continue
+                fi
+                if [ "${NO_BACKUP}" != true ]; then
+                    backup_file "${target_dir}"
+                fi
+                rm -rf "${target_dir}"
             fi
 
-            rm -rf "${target_dir}"
             cp -r "${skill_dir}" "${target_dir}"
             log_success "Installed skill: ${skill_name} → ${target_dir}"
         fi
@@ -251,14 +469,20 @@ install_skills() {
     mkdir -p "${claude_skills_dir}"
     for skill_dir in "${HARNESS_DIR}/skills"/*; do
         if [ -d "${skill_dir}" ]; then
-            local skill_name="$(basename "${skill_dir}")"
+            local skill_name
+            skill_name="$(basename "${skill_dir}")"
             local target_dir="${claude_skills_dir}/${skill_name}"
 
-            if [ -d "${target_dir}" ] && [ "${FORCE}" != true ]; then
-                continue
+            if [ -d "${target_dir}" ]; then
+                if [ "${FORCE}" != true ]; then
+                    continue
+                fi
+                if [ "${NO_BACKUP}" != true ]; then
+                    backup_file "${target_dir}"
+                fi
+                rm -rf "${target_dir}"
             fi
 
-            rm -rf "${target_dir}"
             cp -r "${skill_dir}" "${target_dir}"
             log_success "Installed skill: ${skill_name} → ${target_dir}"
         fi
@@ -268,14 +492,20 @@ install_skills() {
     mkdir -p "${agents_skills_dir}"
     for skill_dir in "${HARNESS_DIR}/skills"/*; do
         if [ -d "${skill_dir}" ]; then
-            local skill_name="$(basename "${skill_dir}")"
+            local skill_name
+            skill_name="$(basename "${skill_dir}")"
             local target_dir="${agents_skills_dir}/${skill_name}"
 
-            if [ -d "${target_dir}" ] && [ "${FORCE}" != true ]; then
-                continue
+            if [ -d "${target_dir}" ]; then
+                if [ "${FORCE}" != true ]; then
+                    continue
+                fi
+                if [ "${NO_BACKUP}" != true ]; then
+                    backup_file "${target_dir}"
+                fi
+                rm -rf "${target_dir}"
             fi
 
-            rm -rf "${target_dir}"
             cp -r "${skill_dir}" "${target_dir}"
             log_success "Installed skill: ${skill_name} → ${target_dir}"
         fi

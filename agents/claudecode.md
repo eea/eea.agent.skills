@@ -55,6 +55,42 @@ ls -la ~/.claude/CLAUDE.md
 
 ---
 
+### Option A½: Preserve an Existing CLAUDE.md
+
+If you already have a personal `~/.claude/CLAUDE.md`, the installer (or the steps below) will **back it up** and **append an EEA harness reference** instead of replacing it.
+
+**Manual steps (what the installer does automatically):**
+
+```bash
+# 1. Back up your existing file
+cp ~/.claude/CLAUDE.md ~/.claude/CLAUDE.md.backup-$(date +%Y%m%d-%H%M%S)
+
+# 2. Append the EEA harness reference
+cat >> ~/.claude/CLAUDE.md << 'EOF'
+
+---
+
+## EEA Global Harness
+
+This session is also governed by the EEA AI Harness for org-wide rules, skills, and mandatory actions.
+
+**Harness file:** ~/.eea/agent-harness/harness/EEA-HARNESS.md
+EOF
+```
+
+**What the appended section looks like:**
+
+Your existing `CLAUDE.md` stays completely intact. The installer simply adds a short reference section at the end so Claude knows to also follow the EEA org-wide rules.
+
+**Restore if needed:**
+
+```bash
+ls ~/.claude/CLAUDE.md.backup-*
+cp ~/.claude/CLAUDE.md.backup-20260516-143052 ~/.claude/CLAUDE.md
+```
+
+---
+
 ### Option B: Per-Project Setup
 
 For project-specific harness with org-wide fallback:

@@ -206,6 +206,59 @@ The agent should reference rules from `EEA-HARNESS.md` (e.g., never commit secre
 
 ---
 
+## Already Have a Global Config?
+
+If you already have a personal `CLAUDE.md`, `opencode.json`, or other agent config, the installer **backs up your existing file and merges in the EEA harness** instead of overwriting it.
+
+### What the Installer Does
+
+| If this exists... | The installer will... |
+|---|---|
+| `~/.config/opencode/opencode.json` or `.jsonc` | **Back it up**, then merge the EEA harness URL into your existing `instructions` array |
+| `~/.claude/CLAUDE.md` | **Back it up** as `CLAUDE.md.backup-<timestamp>`, then append an EEA reference section to the end of your existing file |
+| `~/.hermes/HERMES.md` | Same backup + append pattern |
+| `~/.pi/agent/AGENTS.md` | Same backup + append pattern |
+| `~/.gemini/GEMINI.md` | Same backup + append pattern |
+| Existing skills | Back up the old skill directory before overwriting (with `--force`) |
+
+### Backup Naming
+
+Backups are timestamped so they accumulate:
+
+```
+~/.claude/CLAUDE.md.backup-20260516-143052
+~/.config/opencode/opencode.json.backup-20260516-143052
+```
+
+### Restoring from Backup
+
+If something goes wrong, restore your original file:
+
+```bash
+# Find your backup
+ls -la ~/.claude/CLAUDE.md.backup-*
+
+# Restore it
+cp ~/.claude/CLAUDE.md.backup-20260516-143052 ~/.claude/CLAUDE.md
+```
+
+### Skip Backups (Not Recommended)
+
+If you are sure you don't need backups:
+
+```bash
+./scripts/install.sh --no-backup
+```
+
+### Why Merge Instead of Overwrite?
+
+Different agents handle multiple instruction sources differently:
+
+- **OpenCode** natively supports multiple instruction sources (global + local + URLs), so we can safely append the EEA URL to your existing `instructions` array.
+- **Claude Code** loads a single global `CLAUDE.md`, so we preserve your existing content and append a reference to the EEA harness at the end.
+
+---
+
 ## Adding Project-Local Rules
 
 Every EEA project should have local instructions that add to (not replace) the org harness.

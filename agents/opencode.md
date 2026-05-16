@@ -123,6 +123,45 @@ EOF
 
 ---
 
+### Option E: Merge with an Existing Global Config
+
+If you already have a global `opencode.json` or `opencode.jsonc`, the installer will **back it up and merge** the EEA harness URL into your existing `instructions` array instead of replacing the file.
+
+**What happens:**
+
+```bash
+# Before (your existing opencode.json)
+{
+  "instructions": [
+    "{file:~/.my-personal-rules.md}",
+    "https://example.com/my-team-rules.md"
+  ]
+}
+
+# After (installer merged EEA harness)
+{
+  "instructions": [
+    "{file:~/.my-personal-rules.md}",
+    "https://example.com/my-team-rules.md",
+    "https://raw.githubusercontent.com/eea/eea.agent.skills/main/harness/EEA-HARNESS.md"
+  ]
+}
+```
+
+**Notes:**
+- The installer detects both `opencode.json` and `opencode.jsonc`.
+- For `.jsonc`, comments are stripped during the merge (your original is preserved in the backup).
+- If `python3` is not available, the installer prints the URL and asks you to add it manually.
+
+**Restore if needed:**
+
+```bash
+ls ~/.config/opencode/opencode.json.backup-*
+cp ~/.config/opencode/opencode.json.backup-20260516-143052 ~/.config/opencode/opencode.json
+```
+
+---
+
 ## Project-Local Instructions
 
 For project-specific rules that add to (not replace) the org harness:
