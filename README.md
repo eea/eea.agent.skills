@@ -81,7 +81,8 @@ ea.agent.skills/
 │
 ├── rules/                       # Org-wide prohibitions & mandatory behaviors
 │   ├── eeaprohibitions.rules.md # What agents must NEVER do
-│   └── eeamandatory.rules.md    # What agents MUST do
+│   ├── eeamandatory.rules.md    # What agents MUST do
+│   └── changelog.process.md     # CHANGELOG best practices
 │
 ├── agents/                      # Per-tool agent profiles
 │   ├── opencode.md              # OpenCode wiring instructions
@@ -312,4 +313,4 @@ MIT — See [LICENSE](LICENSE)
 
 ---
 
-*Last updated: 2026-05-14 after harness v1.0 initialization*
+*Last updated: 2026-05-16 after harness slimming and rule extraction*

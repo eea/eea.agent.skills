@@ -204,4 +204,25 @@ Alternatives considered:
 
 ---
 
+### MAND-10: Review Documentation Before Commit
+
+**Trigger:** User indicates work completion ("done", "wrap up", "commit", "finish", "push")
+
+**Action:**
+1. Before committing, review the project's main `README.md`
+2. Check if other key documentation files exist and need updates:
+   - `CONTRIBUTING.md`
+   - `ARCHITECTURE.md`
+   - `AGENTS.md`
+   - `docs/` (if present)
+3. Determine if the code changes introduced require documentation updates
+4. If updates are needed:
+   - Propose the specific changes to the user
+   - Wait for explicit approval
+   - Update the documentation before committing
+
+**Why:** Documentation must stay in sync with code. Outdated docs confuse developers and users, and waste time during onboarding and incident response.
+
+---
+
 *Last updated: 2026-05-16*

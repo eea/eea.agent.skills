@@ -6,6 +6,25 @@ This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic ve
 
 ---
 
+## 2026-05-16 — Harness Slimming and Rule Extraction
+
+### Changed
+- Slim down `harness/EEA-HARNESS.md`:
+  - Use explicit file paths for rule references (`rules/eeaprohibitions.rules.md`, `rules/eeamandatory.rules.md`)
+  - Remove verbose CHANGELOG Best Practice section from harness (keep it slim)
+- Extract detailed CHANGELOG guidance into standalone `rules/changelog.process.md`
+  - Remove repo-specific CI enforcement reference (not org-wide applicable)
+  - Remove CalVer format mandate — agents must follow each project's existing convention
+- Update `rules/eeamandatory.rules.md`:
+  - MAND-09 cross-reference now points to `rules/changelog.process.md`
+  - Add MAND-10: review `README.md` and other key docs before committing
+
+### Documentation
+- Update `README.md` repo structure diagram to include `changelog.process.md`
+- Update `rules/README.md` to list `changelog.process.md` in Available Rule Sets
+
+---
+
 ## 2026-05-16 — Installer Consolidation
 
 ### Changed
