@@ -109,7 +109,7 @@ Prevents accidental loss of personal agent instructions (e.g., graphify config, 
 
 ### Documentation
 - Update `README.md`, `CONTRIBUTING.md`, and `docs/SYNC-STRATEGY.md` with new paths
-- Add `docs/RESTRUCTURE-PLAN.md` tracking the restructure
+- ~~Add `docs/RESTRUCTURE-PLAN.md` tracking the restructure~~ (removed 2026-05-17)
 - Add README files to all new and renamed directories
 
 ---
