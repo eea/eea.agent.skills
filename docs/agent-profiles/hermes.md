@@ -19,7 +19,7 @@ Hermes loads these files at session initialization and uses them as system conte
 
 ## Installation
 
-> **See [`docs/BOOTSTRAP.md`](../docs/BOOTSTRAP.md) for the canonical 3-method overview.**
+> **See [`docs/BOOTSTRAP.md`](../BOOTSTRAP.md) for the canonical 3-method overview.**
 > The options below map to **Method B (Manual Global Install)** for Hermes-specific wiring.
 
 ### Option A: Symlink to Global (Recommended)

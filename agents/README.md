@@ -1,48 +1,44 @@
 # Agents
 
-This directory contains **per-tool agent profiles** that explain how to wire the EEA AI Harness into specific agentic coding tools.
+This directory is reserved for **agentget-compatible sub-agent prompts** (`*.agent.md`).
+
+## Purpose
+
+In the [agentget](https://github.com/joeyism/agentget) framework, the `agents/` directory contains **sub-agent system prompts** — specialized agent definitions that can be dispatched by a main agent for specific tasks (e.g., code review, planning, exploration).
+
+These are distinct from **per-tool installation profiles** (OpenCode, Claude Code, etc.), which live in [`docs/agent-profiles/`](../docs/agent-profiles/).
 
 ## What Goes Here
 
-- Tool-specific setup instructions (OpenCode, Claude Code, Hermes, Gemini, Pi)
-- Path conventions for each tool
-- Known limitations or special behaviors
-- Troubleshooting for common issues
+- Sub-agent prompt files following the `*.agent.md` naming convention
+- Specialized agent definitions for multi-agent orchestration
+- Prompts designed to be loaded by agentget or compatible installers
 
 ## What Does NOT Go Here
 
-- Org-wide rules (those are in `rules/`)
-- Reusable skills (those are in `skills/`)
-- Generic instructions (those are in `instructions/`)
+- Tool-specific wiring instructions → [`docs/agent-profiles/`](../docs/agent-profiles/)
+- Org-wide rules → `rules/`
+- Reusable skills → `skills/`
+- Generic instructions → `instructions/`
 
-## Available Profiles
+## File Naming Convention
 
-| File | Tool | Status |
-|------|------|--------|
-| `opencode.md` | OpenCode | Ready |
-| `claudecode.md` | Claude Code | Ready |
-| `hermes.md` | Hermes Agent | Ready |
-| `gemini.md` | Gemini (Google) | Ready |
-| `pi.md` | Pi (Earendil Works) | Ready |
+```
+agents/{name}.agent.md
+```
 
-## Profile Format
+Example:
+```
+agents/code-reviewer.agent.md
+agents/planner.agent.md
+```
 
-Each profile should include:
+## Current Status
 
-1. **Tool overview** — what the tool is and how it loads instructions
-2. **Installation** — how to install the EEA harness for this tool
-3. **Path conventions** — where the tool looks for files
-4. **Verification** — how to confirm the harness is loaded
-5. **Troubleshooting** — common issues and fixes
-6. **Limitations** — known constraints
-
-## Adding a New Agent Profile
-
-1. Create `{tool-name}.md` in this directory
-2. Follow the format above
-3. Update the table in this README
-4. Update `harness/EEA-HARNESS.md` Tool-Specific Wiring section
+*(No sub-agent prompts yet — add as needed for multi-agent workflows.)*
 
 ---
 
-*Last updated: 2026-05-14*
+*See [`docs/agent-profiles/`](../docs/agent-profiles/) for OpenCode, Claude Code, Hermes, Gemini, and Pi setup instructions.*
+
+*Last updated: 2026-05-17*

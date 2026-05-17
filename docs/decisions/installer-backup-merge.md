@@ -48,4 +48,4 @@ OpenCode configs may be `.jsonc` (JSON with comments). The merge logic uses a ro
 
 - `scripts/install.sh` — implementation
 - `docs/BOOTSTRAP.md` — user-facing documentation
-- `agents/opencode.md` and `agents/claudecode.md` — per-agent merge details
+- `docs/agent-profiles/opencode.md` and `docs/agent-profiles/claudecode.md` — per-agent merge details

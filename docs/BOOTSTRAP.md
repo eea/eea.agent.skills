@@ -76,7 +76,7 @@ mkdir -p ~/.config/opencode
 cp ~/.eea/agent-harness/docs/opencode-examples/global-opencode.json ~/.config/opencode/opencode.json
 ```
 
-See [`agents/opencode.md`](../agents/opencode.md) for alternatives (remote URL, submodule, local file).
+See [`agent-profiles/opencode.md`](agent-profiles/opencode.md) for alternatives (remote URL, submodule, local file).
 
 #### Claude Code
 
@@ -85,7 +85,7 @@ mkdir -p ~/.claude
 ln -sf ~/.eea/agent-harness/harness/EEA-HARNESS.md ~/.claude/CLAUDE.md
 ```
 
-See [`agents/claudecode.md`](../agents/claudecode.md) for full details.
+See [`agent-profiles/claudecode.md`](agent-profiles/claudecode.md) for full details.
 
 #### Hermes Agent
 
@@ -94,7 +94,7 @@ mkdir -p ~/.hermes
 ln -sf ~/.eea/agent-harness/harness/EEA-HARNESS.md ~/.hermes/HERMES.md
 ```
 
-See [`agents/hermes.md`](../agents/hermes.md) for full details.
+See [`agent-profiles/hermes.md`](agent-profiles/hermes.md) for full details.
 
 #### Pi
 
@@ -105,7 +105,7 @@ ln -sf ~/.eea/agent-harness/harness/EEA-HARNESS.md ~/.pi/agent/AGENTS.md
 
 Pi loads `AGENTS.md` from `~/.pi/agent/` and walks up from the current directory. We recommend standardizing on `AGENTS.md` for cross-agent compatibility.
 
-See [`agents/pi.md`](../agents/pi.md) for full details.
+See [`agent-profiles/pi.md`](agent-profiles/pi.md) for full details.
 
 #### Gemini
 
@@ -114,7 +114,7 @@ mkdir -p ~/.gemini
 ln -sf ~/.eea/agent-harness/harness/EEA-HARNESS.md ~/.gemini/GEMINI.md
 ```
 
-See [`agents/gemini.md`](../agents/gemini.md) for full details.
+See [`agent-profiles/gemini.md`](agent-profiles/gemini.md) for full details.
 
 ### Step 3: Install Skills
 
@@ -190,7 +190,7 @@ cat ~/.eea/agent-harness/harness/EEA-HARNESS.md >> your-project/AGENTS.md
 **Pros:** Zero external dependencies, works with any agent.
 **Cons:** Must manually re-copy to update.
 
-See [`agents/opencode.md`](../agents/opencode.md) for full OpenCode options.
+See [`agent-profiles/opencode.md`](agent-profiles/opencode.md) for full OpenCode options.
 
 ---
 

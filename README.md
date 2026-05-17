@@ -121,14 +121,6 @@ ea.agent.skills/
 │   ├── eeamandatory.rules.md    # What agents MUST do
 │   └── changelog.process.md     # CHANGELOG best practices
 │
-├── agents/                      # Per-tool agent profiles
-│   ├── README.md
-│   ├── opencode.md              # OpenCode wiring instructions
-│   ├── claudecode.md            # Claude Code wiring instructions
-│   ├── hermes.md                # Hermes Agent wiring instructions
-│   ├── gemini.md                # Gemini wiring instructions
-│   └── pi.md                    # Pi wiring instructions
-│
 ├── shared/                      # Cross-project knowledge base
 │   ├── eea-style-guide.md       # EEA brand/tone guidance for LLM outputs
 │   ├── design-foundations.md    # Design tokens, color palettes
@@ -151,8 +143,15 @@ ea.agent.skills/
 │   ├── build.sh                 # Merges SKILL.md + EEA-OVERRIDES.md → skills/
 │   └── install.sh               # One-shot harness installer
 │
-├── docs/
+├── docs/                        # Documentation and examples
 │   ├── BOOTSTRAP.md             # Onboarding guide for EEA developers
+│   ├── agent-profiles/          # Per-tool agent wiring docs
+│   │   ├── README.md
+│   │   ├── opencode.md          # OpenCode wiring instructions
+│   │   ├── claudecode.md        # Claude Code wiring instructions
+│   │   ├── hermes.md            # Hermes Agent wiring instructions
+│   │   ├── gemini.md            # Gemini wiring instructions
+│   │   └── pi.md                # Pi wiring instructions
 │   ├── harness-maintenance.md   # Maintenance philosophy and process
 │   ├── RESTRUCTURE-PLAN.md      # Internal restructure plan (historical)
 │   ├── SYNC-STRATEGY.md         # Upstream sync strategy

@@ -20,7 +20,7 @@ Claude Code loads these files at session start and uses them as system context.
 
 ## Installation
 
-> **See [`docs/BOOTSTRAP.md`](../docs/BOOTSTRAP.md) for the canonical 3-method overview.**
+> **See [`docs/BOOTSTRAP.md`](../BOOTSTRAP.md) for the canonical 3-method overview.**
 > The options below map to **Method B (Manual Global Install)** for Claude Code-specific wiring.
 
 ### Option A: Symlink to Global (Recommended)

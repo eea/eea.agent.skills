@@ -123,7 +123,7 @@ Skills are the most common contribution, but the harness has many other parts:
 |---|---|---|
 | **Rules** | `rules/` | Add or edit `.rules.md` files. Follow naming: `rules/{domain}.{type}.md`. See `rules/README.md`. |
 | **Org Harness** | `harness/EEA-HARNESS.md` | Update global routing, prohibitions, or mandatory actions. See `docs/harness-maintenance.md` for the maintenance philosophy. |
-| **Agent Profiles** | `agents/` | Add `{tool}.md` for new tools. Follow format in `agents/README.md`. |
+| **Agent Profiles** | `docs/agent-profiles/` | Add `{tool}.md` for new tools. Follow format in `docs/agent-profiles/README.md`. |
 | **Workflows** | `workflows/` | Add multi-skill recipes. See `workflows/README.md`. |
 | **Shared Knowledge** | `shared/` | Update EEA-wide glossary, style guide, or design foundations when org context changes. |
 | **Templates** | `templates/` | Update project-local setup templates. Keep in sync with `scripts/install.sh`. |

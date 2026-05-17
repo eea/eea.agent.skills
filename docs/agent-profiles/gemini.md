@@ -18,7 +18,7 @@ Gemini does not have a standard global instructions file like OpenCode or Claude
 
 ## Installation Options
 
-> **See [`docs/BOOTSTRAP.md`](../docs/BOOTSTRAP.md) for the canonical 3-method overview.**
+> **See [`docs/BOOTSTRAP.md`](../BOOTSTRAP.md) for the canonical 3-method overview.**
 > The options below map to **Method B (Manual Global Install)** for Gemini-specific wiring.
 
 ### Option A: IDE Workspace Settings

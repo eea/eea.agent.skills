@@ -6,6 +6,24 @@ This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic ve
 
 ---
 
+## 2026-05-17 — Move Agent Profiles to docs/agent-profiles/
+
+### Changed
+- Move per-tool agent wiring docs from `agents/` to `docs/agent-profiles/`:
+  - `agents/opencode.md` → `docs/agent-profiles/opencode.md`
+  - `agents/claudecode.md` → `docs/agent-profiles/claudecode.md`
+  - `agents/hermes.md` → `docs/agent-profiles/hermes.md`
+  - `agents/gemini.md` → `docs/agent-profiles/gemini.md`
+  - `agents/pi.md` → `docs/agent-profiles/pi.md`
+  - `agents/README.md` → `docs/agent-profiles/README.md`
+- Create new `agents/README.md` explaining the directory is reserved for agentget-compatible sub-agent prompts (`*.agent.md`)
+- Update all cross-references in `README.md`, `AGENTS.md`, `docs/BOOTSTRAP.md`, `CONTRIBUTING.md`, `scripts/install.sh`, and `docs/decisions/installer-backup-merge.md`
+
+### Why
+The `agents/` directory name is semantically reserved in the [agentget](https://github.com/joeyism/agentget) framework for sub-agent system prompts (`*.agent.md`), not for tool wiring instructions. This change keeps the repository aligned with agentget conventions while preserving all documentation.
+
+---
+
 ## 2026-05-16 — Safe Installer: Backup and Merge Existing Configs
 
 ### Changed

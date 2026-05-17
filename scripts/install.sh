@@ -652,7 +652,7 @@ main() {
     echo ""
     echo "Documentation:"
     echo "  - Bootstrap guide: ${HARNESS_DIR}/docs/BOOTSTRAP.md"
-    echo "  - Agent profiles: ${HARNESS_DIR}/agents/"
+    echo "  - Agent profiles: ${HARNESS_DIR}/docs/agent-profiles/"
     echo "========================================"
 }
 

@@ -28,7 +28,7 @@ ea.agent.skills/
 ├── skills/                      # Distributable merged skills
 ├── src/skills/                  # Source: upstream + EEA-OVERRIDES.md
 ├── rules/                       # Org-wide prohibitions & mandatory behaviors
-├── agents/                      # Per-tool agent profiles (OpenCode, Claude, etc.)
+├── docs/agent-profiles/         # Per-tool agent wiring docs (OpenCode, Claude, etc.)
 ├── shared/                      # Cross-project knowledge base
 ├── instructions/                # Generic org-wide instruction templates
 ├── workflows/                   # Multi-skill orchestration recipes
