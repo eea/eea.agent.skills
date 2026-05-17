@@ -64,108 +64,23 @@ cp ~/.eea/agent-harness/templates/dot-agents/opencode.json opencode.json
 ea.agent.skills/
 ├── harness/
 │   └── EEA-HARNESS.md           # ORG-WIDE: canonical harness for all EEA projects
-│                                  # Loaded by all agents via URL or symlink
-│
 ├── AGENTS.md                    # REPO-LOCAL: how to work on THIS repo
-│
-├── skills/                      # Distributable merged skills (upstream + EEA overrides)
-│   ├── docker-expert/
-│   │   └── SKILL.md             # Merged output (do not edit directly)
-│   ├── composition-patterns/
-│   │   └── SKILL.md
-│   ├── react-best-practices/
-│   │   └── SKILL.md
-│   ├── react-native-skills/
-│   │   └── SKILL.md
-│   ├── react-view-transitions/
-│   │   └── SKILL.md
-│   ├── web-design-guidelines/
-│   │   └── SKILL.md
-│   └── README.md                # Explains auto-generated nature of this directory
-│
-├── src/skills/                  # Source: upstream + EEA-OVERRIDES.md
-│   ├── docker-expert/
-│   │   ├── SKILL.md             # Upstream base
-│   │   ├── EEA-OVERRIDES.md     # EEA-specific customizations
-│   │   ├── metadata.json        # Skill metadata
-│   │   └── references/          # Deep reference material
-│   ├── composition-patterns/
-│   │   ├── SKILL.md
-│   │   ├── EEA-OVERRIDES.md
-│   │   ├── metadata.json
-│   │   ├── AGENTS.md            # Compiled guide for this skill
-│   │   └── rules/               # Individual rule files
-│   ├── react-best-practices/
-│   │   ├── SKILL.md
-│   │   ├── EEA-OVERRIDES.md
-│   │   ├── metadata.json
-│   │   ├── AGENTS.md
-│   │   └── rules/               # 70+ individual rule files
-│   ├── react-native-skills/
-│   │   ├── SKILL.md
-│   │   ├── EEA-OVERRIDES.md
-│   │   └── metadata.json
-│   ├── react-view-transitions/
-│   │   ├── SKILL.md
-│   │   ├── EEA-OVERRIDES.md
-│   │   └── metadata.json
-│   ├── web-design-guidelines/
-│   │   ├── SKILL.md
-│   │   ├── EEA-OVERRIDES.md
-│   │   └── metadata.json
-│   └── README.md
-│
+├── skills/                      # Distributable merged skills (do not edit directly)
+├── src/skills/                  # Source: upstream SKILL.md + EEA-OVERRIDES.md
 ├── rules/                       # Org-wide prohibitions & mandatory behaviors
-│   ├── README.md                # Explains rule file naming conventions
-│   ├── eeaprohibitions.rules.md # What agents must NEVER do
-│   ├── eeamandatory.rules.md    # What agents MUST do
-│   └── changelog.process.md     # CHANGELOG best practices
-│
 ├── shared/                      # Cross-project knowledge base
-│   ├── eea-style-guide.md       # EEA brand/tone guidance for LLM outputs
-│   ├── design-foundations.md    # Design tokens, color palettes
-│   ├── data-schemas.md          # Common EEA data structures/formats
-│   ├── glossary.md              # EEA acronyms and terminology
-│   └── architecture/            # Architecture decision records (ADRs) — currently empty template
-│
 ├── instructions/                # Generic org-wide instruction templates
-│   └── README.md
-│
 ├── workflows/                   # Multi-skill orchestration recipes
-│   ├── README.md
-│   └── data-report.md
-│
-├── plugins/
-│   ├── README.md
-│   └── agentget.json            # Manifest for agentget installer
-│
+├── plugins/                     # Tool-specific adapters (agentget manifest)
 ├── scripts/                     # Build + install automation
-│   ├── build.sh                 # Merges SKILL.md + EEA-OVERRIDES.md → skills/
-│   └── install.sh               # One-shot harness installer
-│
-├── docs/                        # Documentation and examples
-│   ├── BOOTSTRAP.md             # Onboarding guide for EEA developers
-│   ├── agent-profiles/          # Per-tool agent wiring docs
-│   │   ├── README.md
-│   │   ├── opencode.md          # OpenCode wiring instructions
-│   │   ├── claudecode.md        # Claude Code wiring instructions
-│   │   ├── hermes.md            # Hermes Agent wiring instructions
-│   │   ├── gemini.md            # Gemini wiring instructions
-│   │   └── pi.md                # Pi wiring instructions
-│   ├── harness-maintenance.md   # Maintenance philosophy and process
-│   ├── RESTRUCTURE-PLAN.md      # Internal restructure plan (historical)
-│   ├── SYNC-STRATEGY.md         # Upstream sync strategy
-│   └── opencode-examples/       # opencode.json templates
-│
+│   ├── build.sh
+│   └── install.sh
+├── docs/                        # Documentation and per-tool agent profiles
 ├── templates/                   # Templates for project-local .agents/ setup
-│   └── dot-agents/
-│       ├── AGENTS.md            # Project-local instructions template
-│       └── opencode.json        # Project opencode.json template
-│
 ├── catalog.yaml                 # Machine-readable skill index
-├── CHANGELOG.md                 # Project changelog
-├── CONTRIBUTING.md              # Contribution guidelines
-└── LICENSE                      # MIT License
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+└── LICENSE
 ```
 
 ### Key Design Decision: Two-Layer Harness
