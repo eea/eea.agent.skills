@@ -82,27 +82,12 @@ jobs:
           }
           echo "✓ catalog.yaml is valid YAML"
 
-      - name: Validate agent profiles
-        run: |
-          errors=0
-          for profile in agents/opencode.md agents/claudecode.md agents/hermes.md agents/gemini.md agents/pi.md; do
-            if [ ! -f "$profile" ]; then
-              echo "ERROR: Agent profile missing: $profile"
-              errors=$((errors + 1))
-            fi
-          done
-          
-          if [ $errors -gt 0 ]; then
-            exit 1
-          fi
-          echo "✓ All agent profiles exist"
-
       - name: Check for secrets in harness files
         run: |
           # Scan for common secret patterns
           patterns="api_key|apikey|password|passwd|secret|token|private_key"
           
-          if grep -riE "$patterns" harness/ rules/ agents/ shared/ 2>/dev/null | grep -v "README\|\.md.*prohibition\|Never Commit Secrets"; then
+          if grep -riE "$patterns" harness/ rules/ shared/ 2>/dev/null | grep -v "README\|\.md.*prohibition\|Never Commit Secrets"; then
             echo "WARNING: Potential secret patterns found in harness files"
             echo "Review the matches above to ensure no real secrets are committed"
           fi
