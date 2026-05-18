@@ -1,6 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/opencode-ai/opencode/main/packages/core/src/config/schema.json",
   "instructions": [
-    "https://raw.githubusercontent.com/eea/eea.agent.skills/main/harness/EEA-HARNESS.md"
+    "https://raw.githubusercontent.com/eea/eea.agent.skills/main/harness/EEA-HARNESS.md",
+    "https://raw.githubusercontent.com/eea/eea.agent.skills/main/rules/eeaprohibitions.rules.md",
+    "https://raw.githubusercontent.com/eea/eea.agent.skills/main/rules/eeamandatory.rules.md"
   ]
 }

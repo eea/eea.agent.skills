@@ -28,75 +28,18 @@ Load specialized skills and rules on trigger match. Follow the safety kernel wit
 - Never modify production without explicit signal.
 
 For full rules, load on trigger match. Skipping is prohibited:
-- `rules/eeaprohibitions.rules.md` — security, compliance, secrets
-- `rules/eeamandatory.rules.md` — done, wrap up, commit, finish, push
+- `../rules/eeaprohibitions.rules.md` — security, compliance, secrets
+- `../rules/eeamandatory.rules.md` — done, wrap up, commit, finish, push
 
----
+**How to load rules:**
+When trigger keywords match, use your Read tool to load the full rule file immediately.
 
-## Skill & Rule Routing
+- For security, compliance, or secrets triggers: read `../rules/eeaprohibitions.rules.md`
+- For done, wrap up, commit, finish, or push triggers: read `../rules/eeamandatory.rules.md`
 
-Load on trigger match. Ask user if unclear.
-
-```yaml
-routing:
-  # Skills
-  docker-expert:
-    - docker
-    - container
-    - containerize
-    - dockerfile
-    - docker-compose
-    - multi-stage
-    - buildkit
-  react-best-practices:
-    - react
-    - nextjs
-    - performance
-    - rendering
-    - re-render
-    - optimization
-    - bundle size
-  composition-patterns:
-    - composition
-    - compound components
-    - component architecture
-    - state lifting
-  web-design-guidelines:
-    - design review
-    - accessibility
-    - UX
-    - UI review
-    - web design
-  react-native-skills:
-    - react native
-    - expo
-    - mobile
-    - ios
-    - android
-  react-view-transitions:
-    - view transitions
-    - animation
-    - page transitions
-    - shared element
-  eea-style-guide:
-    - EEA conventions
-    - style guide
-
-  # Rules
-  eeaprohibitions:
-    - security
-    - compliance
-    - secrets
-    - never
-  eeamandatory:
-    - done
-    - wrap up
-    - commit
-    - finish
-    - push
-    - verify
-    - changelog
-```
+If relative path resolution fails (e.g., this harness was loaded as plain text without a file location), fetch from:
+- `https://raw.githubusercontent.com/eea/eea.agent.skills/main/rules/eeaprohibitions.rules.md`
+- `https://raw.githubusercontent.com/eea/eea.agent.skills/main/rules/eeamandatory.rules.md`
 
 ---
 

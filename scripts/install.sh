@@ -117,20 +117,23 @@ is_linked_to_eea() {
 # Merge EEA harness URL into an existing opencode.json or opencode.jsonc
 merge_opencode_config() {
     local config_file="$1"
-    local eea_url="$2"
+    shift
+    local urls=("$@")
 
     if ! command -v python3 &> /dev/null; then
         log_warn "python3 not found. Cannot auto-merge opencode config."
-        log_info "Please manually add this URL to your instructions array:"
-        echo "  ${eea_url}"
+        log_info "Please manually add these URLs to your instructions array:"
+        for url in "${urls[@]}"; do
+            echo "  ${url}"
+        done
         return
     fi
 
-    python3 - "$config_file" "$eea_url" << 'PYEOF'
+    python3 - "$config_file" "${urls[@]}" << 'PYEOF'
 import sys, json
 
 config_file = sys.argv[1]
-ea_url = sys.argv[2]
+urls = sys.argv[2:]
 
 def strip_jsonc_comments(text):
     result = []
@@ -191,8 +194,9 @@ except json.JSONDecodeError:
 if 'instructions' not in data:
     data['instructions'] = []
 
-if ea_url not in data['instructions']:
-    data['instructions'].append(ea_url)
+for url in urls:
+    if url not in data['instructions']:
+        data['instructions'].append(url)
 
 with open(config_file, 'w') as f:
     json.dump(data, f, indent=2)
@@ -252,6 +256,8 @@ install_opencode() {
     local config_json="${config_dir}/opencode.json"
     local config_jsonc="${config_dir}/opencode.jsonc"
     local eea_url="https://raw.githubusercontent.com/eea/eea.agent.skills/main/harness/EEA-HARNESS.md"
+    local prohibitions_url="https://raw.githubusercontent.com/eea/eea.agent.skills/main/rules/eeaprohibitions.rules.md"
+    local mandatory_url="https://raw.githubusercontent.com/eea/eea.agent.skills/main/rules/eeamandatory.rules.md"
 
     mkdir -p "${config_dir}"
 
@@ -295,8 +301,13 @@ install_opencode() {
             backup_file "${target_config}"
         fi
 
-        merge_opencode_config "${target_config}" "${eea_url}"
-        log_success "Merged EEA harness into ${target_config}"
+        if [ "$harness_via_claude" = true ] && [ -z "${OPENCODE_DISABLE_CLAUDE_CODE_PROMPT:-}" ]; then
+            merge_opencode_config "${target_config}" "${prohibitions_url}" "${mandatory_url}"
+            log_success "Merged EEA rules into ${target_config} (harness inherited from Claude Code compatibility)"
+        else
+            merge_opencode_config "${target_config}" "${eea_url}" "${prohibitions_url}" "${mandatory_url}"
+            log_success "Merged EEA harness and rules into ${target_config}"
+        fi
 
         if [[ "${target_config}" == *.jsonc ]]; then
             log_warn "Comments in .jsonc were stripped during merge. Original preserved in backup."
@@ -306,8 +317,20 @@ install_opencode() {
         return
     fi
 
-    # No existing config: copy template
-    cp "${HARNESS_DIR}/docs/opencode-examples/global-opencode.json" "${config_json}"
+    # No existing config: create appropriate config
+    if [ "$harness_via_claude" = true ] && [ -z "${OPENCODE_DISABLE_CLAUDE_CODE_PROMPT:-}" ]; then
+        cat > "${config_json}" << EOF
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "${prohibitions_url}",
+    "${mandatory_url}"
+  ]
+}
+EOF
+    else
+        cp "${HARNESS_DIR}/docs/opencode-examples/global-opencode.json" "${config_json}"
+    fi
     log_success "OpenCode configured at ${config_json}"
 }
 
