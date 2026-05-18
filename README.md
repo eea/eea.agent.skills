@@ -45,6 +45,12 @@ EOF
 
 Full bootstrap guide: [`docs/BOOTSTRAP.md`](docs/BOOTSTRAP.md)
 
+After installing, run the health check to verify everything is wired correctly:
+
+```bash
+./scripts/verify.sh
+```
+
 ### For Project Maintainers
 
 Create project-local instructions that add to the org harness:
@@ -74,7 +80,8 @@ ea.agent.skills/
 ├── plugins/                     # Tool-specific adapters (agentget manifest)
 ├── scripts/                     # Build + install automation
 │   ├── build.sh
-│   └── install.sh
+│   ├── install.sh
+│   └── verify.sh
 ├── docs/                        # Documentation and per-tool agent profiles
 ├── templates/                   # Templates for project-local .agents/ setup
 ├── catalog.yaml                 # Machine-readable skill index

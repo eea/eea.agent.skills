@@ -92,6 +92,38 @@ ea.agent.skills/
 ./scripts/build.sh
 ```
 
+## Verification
+
+After running `./scripts/install.sh` (or after any manual changes), verify the installation state:
+
+```bash
+# Run the health-check script
+./scripts/verify.sh
+
+# Use a specific harness source (e.g. when testing from a local repo)
+./scripts/verify.sh --harness-dir /path/to/eea.agent.skills
+```
+
+The script checks:
+- Harness repo health and freshness
+- Remote version comparison (against GitHub `main`; skips gracefully if offline)
+- Per-agent configuration (OpenCode, Claude, Hermes, Pi, Gemini)
+- OpenCode duplication awareness (warns if the harness is wired via multiple instruction sources)
+- OpenCode `AGENTS.md` content check (warns if the full EEA harness is copied into a personal `AGENTS.md`)
+- Skills consistency across agent directories
+- Rules integrity (missing, broken, or non-symlinked)
+- Repository consistency (when run from the repo itself)
+
+> **Note on `AGENTS.md` vs `opencode.json`:**
+> `~/.config/opencode/AGENTS.md` is for **personal** global instructions (individual preferences).
+> `~/.config/opencode/opencode.json` (`instructions` array) is for **org-wide** rules like the EEA harness.
+> Never copy the full EEA harness into `AGENTS.md` — it will go stale. Always reference the remote URL in `opencode.json`.
+
+Exit codes:
+- `0` — all checks passed
+- `1` — failures detected
+- `2` — warnings only (no failures)
+
 ---
 
 ## Release Workflow

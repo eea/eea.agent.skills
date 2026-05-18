@@ -162,6 +162,63 @@ cp ~/.config/opencode/opencode.json.backup-20260516-143052 ~/.config/opencode/op
 
 ---
 
+### OpenCode + Claude Code: Avoiding Duplication
+
+If you use **both** OpenCode and Claude Code, OpenCode will automatically read `~/.claude/CLAUDE.md` via its Claude Code compatibility mode. This means:
+
+- **If `~/.claude/CLAUDE.md` is symlinked to `EEA-HARNESS.md`**, OpenCode already receives the harness without any `opencode.json` changes.
+- **If you also add the EEA URL to `opencode.json`**, the harness will appear **twice** in OpenCode's LLM context.
+
+**What the installer does:**
+- Detects if `~/.claude/CLAUDE.md` is linked to the EEA harness.
+- If yes, it **skips** adding the URL to `opencode.json` and logs an informational message.
+
+**If you want to force `opencode.json`-only loading** (and ignore `~/.claude/CLAUDE.md`):
+
+```bash
+export OPENCODE_DISABLE_CLAUDE_CODE_PROMPT=1
+```
+
+Then re-run the installer. This disables Claude Code compatibility for prompts while still allowing `.claude/skills/` discovery.
+
+---
+
+### `AGENTS.md` vs `opencode.json`: Personal vs Org-Wide
+
+OpenCode loads instructions from **two** global sources:
+
+| Source | Purpose | Best For |
+|---|---|---|
+| `~/.config/opencode/AGENTS.md` | Personal global instructions | Your own preferences, shortcuts, habits |
+| `~/.config/opencode/opencode.json` (`instructions` array) | Org-wide / team-shared rules | EEA harness, company standards, project URLs |
+
+**Do not copy the full EEA harness into `AGENTS.md`.**
+
+- `AGENTS.md` is for **personal** rules that follow you across projects.
+- `opencode.json` is for **organizational** references that should stay current.
+- Copied harness content in `AGENTS.md` will **go stale** (the file is static; it doesn't auto-update when the harness changes on GitHub).
+
+**Correct setup:**
+
+```json
+// ~/.config/opencode/opencode.json
+{
+  "instructions": [
+    "https://raw.githubusercontent.com/eea/eea.agent.skills/main/harness/EEA-HARNESS.md"
+  ]
+}
+```
+
+```markdown
+<!-- ~/.config/opencode/AGENTS.md — personal stuff only -->
+# My Personal Rules
+
+- Always use `pnpm` instead of `npm`
+- Prefer `async/await` over raw Promises
+```
+
+---
+
 ## Project-Local Instructions
 
 For project-specific rules that add to (not replace) the org harness:

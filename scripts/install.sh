@@ -255,6 +255,30 @@ install_opencode() {
 
     mkdir -p "${config_dir}"
 
+    # Detect if OpenCode already receives the harness via Claude Code compatibility
+    local claude_file="${HOME}/.claude/CLAUDE.md"
+    local harness_via_claude=false
+    if [ -L "${claude_file}" ]; then
+        local target
+        target=$(readlink "${claude_file}")
+        if [[ "$target" == *"EEA-HARNESS.md" ]]; then
+            harness_via_claude=true
+        fi
+    fi
+
+    if [ "$harness_via_claude" = true ] && [ -z "${OPENCODE_DISABLE_CLAUDE_CODE_PROMPT:-}" ]; then
+        log_info "OpenCode will inherit the EEA harness via ~/.claude/CLAUDE.md (Claude Code compatibility)"
+        log_info "Skipping duplicate instructions in opencode.json to avoid LLM context duplication"
+        log_info "To disable this behavior, set OPENCODE_DISABLE_CLAUDE_CODE_PROMPT=1 and re-run"
+
+        # Still create a basic config if none exists, but without the EEA URL
+        if [ ! -f "${config_json}" ] && [ ! -f "${config_jsonc}" ]; then
+            echo '{ "$schema": "https://opencode.ai/config.json" }' > "${config_json}"
+            log_success "Created minimal OpenCode config at ${config_json}"
+        fi
+        return
+    fi
+
     # Determine which config file to target
     local target_config=""
     if [ -f "${config_jsonc}" ] && [ -f "${config_json}" ]; then

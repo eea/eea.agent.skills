@@ -196,6 +196,29 @@ See [`agent-profiles/opencode.md`](agent-profiles/opencode.md) for full OpenCode
 
 ## Verify Installation
 
+### Quick Health Check
+
+Run the built-in verification script to see if everything is wired correctly:
+
+```bash
+# From the harness repo
+./scripts/verify.sh
+
+# Or from any clone
+~/.eea/agent-harness/scripts/verify.sh
+```
+
+This checks harness health, agent configs, skills, and rules — and suggests fixes if anything is off.
+
+> **Note for OpenCode + Claude Code users:** OpenCode reads `~/.claude/CLAUDE.md` via Claude Code compatibility mode. The installer and verification script detect this and avoid duplicating the harness in OpenCode's context.
+
+> **Note on `AGENTS.md` vs `opencode.json`:**
+> `~/.config/opencode/AGENTS.md` is for **personal** global instructions (individual preferences).
+> `~/.config/opencode/opencode.json` (`instructions` array) is for **org-wide** rules like the EEA harness.
+> Never copy the full EEA harness into `AGENTS.md` — it will go stale. Always reference the remote URL in `opencode.json`.
+
+### Manual Verification
+
 Start your agent and ask:
 
 ```
