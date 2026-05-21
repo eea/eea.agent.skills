@@ -6,43 +6,6 @@ This file governs how AI agents work when editing the `eea.agent.skills` reposit
 
 ---
 
-## Your Role
-
-You are maintaining the **EEA AI Harness** — the central repository for organization-wide agent rules, reusable skills, shared knowledge, and cross-project workflows.
-
-When working in this repo, your job is to:
-- Add and maintain reusable skills
-- Keep EEA-specific overrides up to date
-- Ensure the harness is well-documented and easy to consume
-- Follow the two-file overlay pattern for upstream skills
-
----
-
-## Repository Structure
-
-```
-ea.agent.skills/
-├── harness/
-│   └── EEA-HARNESS.md           # ORG-WIDE harness (loaded by all EEA projects)
-├── AGENTS.md                    # This file — repo-local instructions
-├── skills/                      # Distributable merged skills
-├── src/skills/                  # Source: upstream + EEA-OVERRIDES.md
-├── rules/                       # Org-wide prohibitions & mandatory behaviors
-├── docs/agent-profiles/         # Per-tool agent wiring docs (OpenCode, Claude, etc.)
-├── shared/                      # Cross-project knowledge base
-├── instructions/                # Generic org-wide instruction templates
-├── workflows/                   # Multi-skill orchestration recipes
-├── plugins/                     # Tool-specific adapters (agentget manifest)
-├── scripts/                     # Build + install automation
-├── docs/                        # Documentation and examples
-│   ├── BOOTSTRAP.md             # Onboarding guide for EEA developers
-│   └── opencode-examples/       # opencode.json templates for EEA projects
-├── templates/                   # Templates for project-local .agents/ setup
-└── catalog.yaml                 # Machine-readable skill index
-```
-
----
-
 ## Prohibited Actions
 
 - **Do not edit `harness/EEA-HARNESS.md` without explicit user request** — that's org-wide policy; changes affect every EEA project
@@ -53,36 +16,9 @@ ea.agent.skills/
 
 ---
 
-## Skill Development Workflow
-
-### Adding a New Skill
-
-1. **Create skill directory** under `src/skills/{skill-name}/`
-2. **Add upstream `SKILL.md`** (if based on upstream source)
-3. **Create `EEA-OVERRIDES.md`** with EEA-specific customizations
-4. **Add `metadata.json`** with skill metadata
-5. **Update `catalog.yaml`** with new skill entry
-6. **Build merged skill**: `./scripts/build.sh {skill-name}`
-7. **Verify**: check that `skills/{skill-name}/SKILL.md` was generated correctly and `git status` shows the expected changes
-8. **Commit**: `skill: add {skill-name}`
-
-### Updating an Existing Skill
-
-1. **Sync upstream** changes to `src/skills/{name}/SKILL.md`
-2. **Update `EEA-OVERRIDES.md`** if upstream changes affect EEA customizations
-3. **Rebuild**: `./scripts/build.sh {name}`
-4. **Update `catalog.yaml`** version if applicable
-5. **Commit**: `skill: update {name} to v{X.Y.Z}`
-
-### Updating EEA Overrides Only
-
-1. **Edit** `src/skills/{name}/EEA-OVERRIDES.md`
-2. **Rebuild**: `./scripts/build.sh {name}`
-3. **Commit**: `harness: update EEA overrides for {name}`
-
----
-
 ## Build System
+
+`skills/` is auto-generated. Never edit it directly.
 
 ```bash
 # Build a single skill (merges SKILL.md + EEA-OVERRIDES.md → skills/)
@@ -92,49 +28,54 @@ ea.agent.skills/
 ./scripts/build.sh
 ```
 
-## Verification
+**After any change to `src/skills/*/SKILL.md` or `EEA-OVERRIDES.md`, run `./scripts/build.sh` and commit the `skills/` changes.**
+CI fails if `skills/` is out of sync (`git status --porcelain skills/` must be clean).
 
-After running `./scripts/install.sh` (or after any manual changes), verify the installation state:
-
-```bash
-# Run the health-check script
-./scripts/verify.sh
-
-# Use a specific harness source (e.g. when testing from a local repo)
-./scripts/verify.sh --harness-dir /path/to/eea.agent.skills
-```
-
-The script checks:
-- Harness repo health and freshness
-- Remote version comparison (against GitHub `main`; skips gracefully if offline)
-- Per-agent configuration (OpenCode, Claude, Hermes, Pi, Gemini)
-- OpenCode duplication awareness (warns if the harness is wired via multiple instruction sources)
-- OpenCode `AGENTS.md` content check (warns if the full EEA harness is copied into a personal `AGENTS.md`)
-- Skills consistency across agent directories
-- Rules integrity (missing, broken, or non-symlinked)
-- Repository consistency (when run from the repo itself)
-
-> **Note on `AGENTS.md` vs `opencode.json`:**
-> `~/.config/opencode/AGENTS.md` is for **personal** global instructions (individual preferences).
-> `~/.config/opencode/opencode.json` (`instructions` array) is for **org-wide** rules like the EEA harness.
-> Never copy the full EEA harness into `AGENTS.md` — it will go stale. Always reference the remote URL in `opencode.json`.
-
-Exit codes:
-- `0` — all checks passed
-- `1` — failures detected
-- `2` — warnings only (no failures)
+The build script also copies `references/`, `DESIGN.md`, and `assets/` if present.
 
 ---
 
-## Release Workflow
+## Validation
 
-> **Note:** GitHub Releases and git tags are **discontinued** as of 2026-05-16. The harness is now distributed directly from source (main branch) via the install script or agentget.
+```bash
+# Full health check: repo consistency, catalog sync, agentskills spec compliance
+./scripts/verify.sh
 
-1. Ensure all skills are built: `./scripts/build.sh`
-2. Verify merged output: `git diff --stat skills/`
-3. Update `CHANGELOG.md`
-4. Commit and push to `main`
-5. Users update via `cd ~/.eea/agent-harness && git pull origin main`
+# Validate all source and merged skills against the Agent Skills specification
+./scripts/validate-skills.sh
+```
+
+- `validate-skills.sh` auto-installs `skills-ref` (PyPI) into a temp venv if `agentskills` is missing.
+- CI runs both on every PR.
+
+---
+
+## Skill Development Workflow
+
+### Adding a New Skill
+
+1. Create skill directory under `src/skills/{skill-name}/`
+2. Add upstream `SKILL.md` (if based on upstream source)
+3. Create `EEA-OVERRIDES.md` with EEA-specific customizations
+4. Add `metadata.json` with skill metadata
+5. Update `catalog.yaml` with new skill entry
+6. **Build merged skill**: `./scripts/build.sh {skill-name}`
+7. **Verify**: check that `skills/{skill-name}/SKILL.md` was generated correctly and `git status` shows the expected changes
+8. **Commit**: `skill: add {skill-name}`
+
+### Updating an Existing Skill
+
+1. Sync upstream changes to `src/skills/{name}/SKILL.md`
+2. Update `EEA-OVERRIDES.md` if upstream changes affect EEA customizations
+3. Rebuild: `./scripts/build.sh {name}`
+4. Update `catalog.yaml` version if applicable
+5. Commit: `skill: update {name} to v{X.Y.Z}`
+
+### Updating EEA Overrides Only
+
+1. Edit `src/skills/{name}/EEA-OVERRIDES.md`
+2. Rebuild: `./scripts/build.sh {name}`
+3. Commit: `harness: update EEA overrides for {name}`
 
 ---
 
@@ -152,15 +93,47 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 
 ---
 
-## Testing Skills
+## CI Enforcement
 
-Before merging a skill change:
-
-1. Build the skill and verify the merged output
-2. Check that `catalog.yaml` is valid YAML
-3. Ensure no secrets or internal URLs leaked into merged output
-4. Verify skill loads correctly in OpenCode: `Use {skill-name} to ...`
+| Workflow | Trigger | What it checks |
+|----------|---------|--------------|
+| `validate-skills.yml` | Push/PR touching skills | `skills/` up-to-date, `catalog.yaml` valid YAML, `agentskills validate` on all skills, token count warnings |
+| `validate-harness.yml` | Push/PR touching harness | `harness/EEA-HARNESS.md` exists, referenced files exist, secret scan |
+| `check-changelog.yml` | All PRs | Code changes must update `CHANGELOG.md` (bypass with `skip-changelog` label) |
 
 ---
 
-*Last updated: 2026-05-14 after harness initialization*
+## Repo-Specific Conventions
+
+- **Two-file overlay**: every forked skill keeps upstream in `SKILL.md` and EEA deltas in `EEA-OVERRIDES.md`. EEA-specific values must never leak into upstream base skills.
+- **`agents/` is reserved** for agentget-compatible sub-agent prompts (`*.agent.md`), not for tool wiring instructions. Agent profiles live in `docs/agent-profiles/`.
+- **Date-based versioning** in `CHANGELOG.md` (YYYY-MM-DD), not SemVer.
+- **`graphify-out/`** exists locally; only `graphify-out/cache/` is gitignored. Do not commit cache artifacts.
+
+---
+
+## Verification
+
+After running `./scripts/install.sh` (or after any manual changes), verify the installation state:
+
+```bash
+# Run the health-check script
+./scripts/verify.sh
+
+# Use a specific harness source (e.g. when testing from a local repo)
+./scripts/verify.sh --harness-dir /path/to/eea.agent.skills
+```
+
+Exit codes:
+- `0` — all checks passed
+- `1` — failures detected
+- `2` — warnings only (no failures)
+
+> **Note on `AGENTS.md` vs `opencode.json`:**
+> `~/.config/opencode/AGENTS.md` is for **personal** global instructions (individual preferences).
+> `~/.config/opencode/opencode.json` (`instructions` array) is for **org-wide** rules like the EEA harness.
+> Never copy the full EEA harness into `AGENTS.md` — it will go stale. Always reference the remote URL in `opencode.json`.
+
+---
+
+*Last updated: 2026-05-21*
