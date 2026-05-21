@@ -6,6 +6,28 @@ This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic ve
 
 ---
 
+## 2026-05-21 — Add EEA Design System Skill
+
+### Added
+- New `eea-design-system` skill (`src/skills/eea-design-system/`):
+  - `SKILL.md` with agentskills.io-compliant YAML frontmatter
+  - `references/DESIGN.md` — canonical design tokens (colors, typography, spacing, components)
+  - `EEA-OVERRIDES.md` — EEA logo legal rules, WIPO restrictions, corporate identity manual links
+  - `metadata.json` with skill index data
+  - `assets/` — 12 official logos (EEA + BISE, FISE, WISE Freshwater, WISE Marine, color + white variants)
+
+### Changed
+- `scripts/build.sh`: copy `DESIGN.md` and `assets/` to `skills/` output during build
+- Normalize YAML frontmatter across all 7 skills:
+  - `name` now matches directory name (fixed 4 skills with `vercel-` prefix)
+  - Moved non-spec top-level keys (`category`, `risk`, `upstream`, etc.) into `metadata` block
+- Updated 4 existing skills to remove "(future)" label from `eea-design-system` handoff references
+
+### Why
+Makes the EEA Design System discoverable and loadable as a reusable agent skill. Keeps DESIGN.md as a peer reference document per agentskills.io spec, rather than inlining tokens into SKILL.md.
+
+---
+
 ## 2026-05-17 — Move Agent Profiles to docs/agent-profiles/
 
 ### Changed
