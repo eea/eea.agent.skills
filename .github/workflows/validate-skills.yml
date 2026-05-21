@@ -53,20 +53,20 @@ jobs:
           chmod +x scripts/build.sh
           ./scripts/build.sh
 
-      - name: Verify merged output
+      - name: Verify merged output exists for all source skills
         run: |
-          if [ ! -f "skills/docker-expert/SKILL.md" ]; then
-            echo "ERROR: Merged SKILL.md not found for docker-expert"
+          errors=0
+          for skill_dir in src/skills/*/; do
+            name=$(basename "$skill_dir")
+            if [ ! -f "skills/${name}/SKILL.md" ]; then
+              echo "ERROR: Merged SKILL.md not found for ${name}"
+              errors=$((errors + 1))
+            fi
+          done
+          if [ $errors -gt 0 ]; then
             exit 1
           fi
-
-          # Check that merged file contains upstream + overrides markers
-          if ! grep -q "BEGIN EEA-OVERRIDES" "skills/docker-expert/SKILL.md"; then
-            echo "ERROR: Merged file missing EEA-OVERRIDES section"
-            exit 1
-          fi
-
-          echo "✓ Build validation passed"
+          echo "✓ All merged skills present"
 
       - name: Check skills/ is up-to-date
         run: |
@@ -79,6 +79,35 @@ jobs:
             exit 1
           fi
           echo "✓ skills/ is up-to-date"
+
+      - name: Install skills-ref validator
+        run: pip install skills-ref
+
+      - name: Validate all skills (agentskills)
+        run: |
+          exit_code=0
+          echo "Source skills:"
+          for skill in src/skills/*/; do
+            name=$(basename "$skill")
+            if agentskills validate "$skill"; then
+              echo "  ✓ $name"
+            else
+              echo "  ✗ $name"
+              exit_code=1
+            fi
+          done
+          echo ""
+          echo "Built skills:"
+          for skill in skills/*/; do
+            name=$(basename "$skill")
+            if agentskills validate "$skill"; then
+              echo "  ✓ $name"
+            else
+              echo "  ✗ $name"
+              exit_code=1
+            fi
+          done
+          exit $exit_code
 
       - name: Check merged token count
         run: |

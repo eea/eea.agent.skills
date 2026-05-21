@@ -208,7 +208,17 @@ Run the built-in verification script to see if everything is wired correctly:
 ~/.eea/agent-harness/scripts/verify.sh
 ```
 
-This checks harness health, agent configs, skills, and rules — and suggests fixes if anything is off.
+This checks harness health, agent configs, skills, rules, and Agent Skills spec compliance — and suggests fixes if anything is off.
+
+### Validate Skills
+
+To validate all skills against the official Agent Skills specification:
+
+```bash
+./scripts/validate-skills.sh
+```
+
+This runs `agentskills validate` (via `skills-ref`) on every skill in `src/skills/` and `skills/` to ensure frontmatter, naming conventions, and required fields are correct.
 
 > **Note for OpenCode + Claude Code users:** OpenCode reads `~/.claude/CLAUDE.md` via Claude Code compatibility mode. The installer and verification script detect this and avoid duplicating the harness in OpenCode's context.
 
@@ -362,4 +372,4 @@ Project-specific rules can add exceptions, but org-wide prohibitions cannot be o
 
 ---
 
-*Last updated: 2026-05-14*
+*Last updated: 2026-05-21 after skills-ref validation integration*

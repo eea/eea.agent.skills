@@ -81,7 +81,8 @@ ea.agent.skills/
 ├── scripts/                     # Build + install automation
 │   ├── build.sh
 │   ├── install.sh
-│   └── verify.sh
+│   ├── verify.sh
+│   └── validate-skills.sh
 ├── docs/                        # Documentation and per-tool agent profiles
 ├── templates/                   # Templates for project-local .agents/ setup
 ├── catalog.yaml                 # Machine-readable skill index
@@ -140,6 +141,7 @@ The canonical org harness ([`harness/EEA-HARNESS.md`](harness/EEA-HARNESS.md)) i
 | `web-design-guidelines` | UI review, accessibility, UX audit | design | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) |
 | `react-native-skills` | React Native/Expo best practices | mobile | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) |
 | `react-view-transitions` | View transitions, animations, shared elements | frontend | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) |
+| `eea-design-system` | EEA design system for Volto-based web applications | design | Self-contained (EEA-specific) |
 
 ### Installing Skills
 
@@ -261,6 +263,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 - Check token count (warn if > 500 lines / 5k tokens)
 - Validate `catalog.yaml` schema
 - Verify `skills/` is up-to-date with `src/skills/`
+- Run `agentskills validate` (via `skills-ref`) against all source and merged skills for Agent Skills spec compliance
 
 ### Harness Validation
 
@@ -284,4 +287,4 @@ MIT — See [LICENSE](LICENSE)
 
 ---
 
-*Last updated: 2026-05-16 after README review and correction*
+*Last updated: 2026-05-21 after skills-ref validation integration and eea-design-system skill addition*

@@ -6,6 +6,24 @@ This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic ve
 
 ---
 
+## 2026-05-21 — Integrate skills-ref Validation
+
+### Added
+- `scripts/validate-skills.sh` — validates all `src/skills/*` and `skills/*` against the official Agent Skills specification using `agentskills` (from `skills-ref` PyPI package)
+- CI workflow step: `pip install skills-ref` + `agentskills validate` for every source and merged skill
+- `verify.sh` integration: new `check_skills_agentskills()` reports per-skill spec compliance
+
+### Changed
+- `scripts/build.sh`: moved auto-generated HTML comments (`<!-- Merged Build ... -->`) to **after** the YAML frontmatter block so merged `skills/*/SKILL.md` files start with `---` and pass spec validation
+- Rebuilt all 7 skills with corrected comment ordering
+- `README.md`: added `eea-design-system` to skills table, documented `validate-skills.sh`, updated CI description
+- `docs/BOOTSTRAP.md`: added `agentskills validate` / `skills-ref` validation section
+
+### Why
+The Agent Skills specification requires `---` as the first line of `SKILL.md`. Our merged output previously failed `agentskills validate` due to comment lines preceding frontmatter. This ensures all distributed skills are spec-compliant.
+
+---
+
 ## 2026-05-21 — Add EEA Design System Skill
 
 ### Added

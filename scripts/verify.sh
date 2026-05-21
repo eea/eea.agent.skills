@@ -534,6 +534,73 @@ check_rules() {
 }
 
 # ---------------------------------------------------------------------------
+# Skills — agentskills validation (spec compliance)
+# ---------------------------------------------------------------------------
+check_skills_agentskills() {
+    log_section "Skills Specification Compliance (agentskills)"
+
+    local agentskills_cmd=""
+    if command -v agentskills &>/dev/null; then
+        agentskills_cmd="agentskills"
+    elif [ -n "${REPO_ROOT}" ] && [ -f "${REPO_ROOT}/scripts/validate-skills.sh" ]; then
+        # The validate script can auto-install into a temp venv
+        agentskills_cmd="${REPO_ROOT}/scripts/validate-skills.sh"
+    fi
+
+    if [ -z "$agentskills_cmd" ]; then
+        log_info "agentskills not available — skipping spec validation"
+        log_info "Install: pip install skills-ref"
+        return
+    fi
+
+    local skill_dirs=()
+    if [ -n "${REPO_ROOT}" ]; then
+        # Running from repo — validate both src/ and built skills/
+        for d in "${REPO_ROOT}"/src/skills/*/; do
+            [ -d "$d" ] && skill_dirs+=("$d")
+        done
+        for d in "${REPO_ROOT}"/skills/*/; do
+            [ -d "$d" ] && skill_dirs+=("$d")
+        done
+    elif [ -d "${HARNESS_DIR}/skills" ]; then
+        # Running from installed harness
+        for d in "${HARNESS_DIR}"/skills/*/; do
+            [ -d "$d" ] && skill_dirs+=("$d")
+        done
+    fi
+
+    if [ ${#skill_dirs[@]} -eq 0 ]; then
+        log_info "No skill directories found to validate"
+        return
+    fi
+
+    local errors=0
+    local passed=0
+
+    for skill_dir in "${skill_dirs[@]}"; do
+        local name
+        name=$(basename "$skill_dir")
+        if [ ! -f "$skill_dir/SKILL.md" ]; then
+            log_fail "Skill '$name' missing SKILL.md"
+            errors=$((errors + 1))
+            continue
+        fi
+
+        if $agentskills_cmd validate "$skill_dir" >/dev/null 2>&1; then
+            log_pass "Skill '$name' passes agentskills validation"
+            passed=$((passed + 1))
+        else
+            log_fail "Skill '$name' failed agentskills validation"
+            errors=$((errors + 1))
+        fi
+    done
+
+    if [ $errors -gt 0 ]; then
+        log_info "Fix: Run ./scripts/validate-skills.sh for detailed error output"
+    fi
+}
+
+# ---------------------------------------------------------------------------
 # Repo Consistency (only when running from the repo)
 # ---------------------------------------------------------------------------
 check_repo_consistency() {
@@ -809,6 +876,7 @@ main() {
 
     check_skills
     check_rules
+    check_skills_agentskills
     check_repo_consistency
     check_remote_version
     print_summary
