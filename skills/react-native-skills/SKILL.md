@@ -3,8 +3,8 @@
 <!-- Source: https://github.com/eea/eea.agent.skills -->
 
 ---
-name: vercel-react-native-skills
-description:
+name: react-native-skills
+description: >
   React Native and Expo best practices for building performant mobile apps. Use
   when building React Native components, optimizing list performance,
   implementing animations, or working with native modules. Triggers on tasks
@@ -12,7 +12,9 @@ description:
 license: MIT
 metadata:
   author: vercel
-  version: '1.0.0'
+  version: "1.0.0"
+  upstream_source: vercel-labs/agent-skills
+  upstream_url: https://github.com/vercel-labs/agent-skills
 ---
 
 # React Native Skills

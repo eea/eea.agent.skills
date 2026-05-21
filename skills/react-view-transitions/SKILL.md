@@ -3,12 +3,19 @@
 <!-- Source: https://github.com/eea/eea.agent.skills -->
 
 ---
-name: vercel-react-view-transitions
-description: Guide for implementing smooth, native-feeling animations using React's View Transition API (`<ViewTransition>` component, `addTransitionType`, and CSS view transition pseudo-elements). Use this skill whenever the user wants to add page transitions, animate route changes, create shared element animations, animate enter/exit of components, animate list reorder, implement directional (forward/back) navigation animations, or integrate view transitions in Next.js. Also use when the user mentions view transitions, `startViewTransition`, `ViewTransition`, transition types, or asks about animating between UI states in React without third-party animation libraries.
+name: react-view-transitions
+description: >
+  Guide for implementing smooth, native-feeling animations using React's View
+  Transition API. Use when adding page transitions, shared element animations,
+  directional navigation animations, or integrating view transitions in Next.js.
+  Triggers on tasks involving ViewTransition, startViewTransition, or animating
+  between UI states without third-party animation libraries.
 license: MIT
 metadata:
   author: vercel
   version: "1.0.0"
+  upstream_source: vercel-labs/agent-skills
+  upstream_url: https://github.com/vercel-labs/agent-skills
 ---
 
 # React View Transitions
@@ -342,7 +349,7 @@ guidelines are broadly applicable.
 
 When view transition tasks are complete, consider these EEA skills:
 
-- **`eea-design-system`** (future): EEA-specific animation and transition patterns
+- **`eea-design-system`**: EEA-specific animation and transition patterns
 
 ## Notes
 

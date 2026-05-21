@@ -88,7 +88,7 @@ EEA follows WCAG 2.1 Level AA as the minimum accessibility standard:
 When web design tasks are complete, consider these EEA skills:
 
 - **`eea-volto`** (future): EEA's Volto/Plone 6 frontend development
-- **`eea-design-system`** (future): EEA-specific component library
+- **`eea-design-system`**: EEA-specific component library
 - **`eea-accessibility`** (future): Detailed EEA accessibility compliance
 
 ## Notes

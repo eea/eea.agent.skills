@@ -122,6 +122,24 @@ skills:
     added_date: "2026-05-04"
     notes: Upstream copy with EEA-OVERRIDES.md referencing EEA Design System and WCAG 2.1 AA accessibility standards
 
+  - id: eea-design-system
+    name: EEA Design System
+    description: European Environment Agency design system for Volto-based web applications. Covers colors, typography, spacing, components, and branding assets.
+    category: design
+    upstream: null
+    triggers:
+      - design system
+      - eea
+      - volto
+      - component library
+      - eea design
+      - eea branding
+      - eea logo
+    version: "1.0.0"
+    eeaspecific: true
+    added_date: "2026-05-21"
+    notes: Self-contained EEA skill with DESIGN.md reference doc and assets/ for official logos
+
 # Future skills placeholder
 # - chart: Data visualization and chart generation
 # - doc: Technical documentation generation

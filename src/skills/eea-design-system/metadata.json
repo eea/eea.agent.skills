@@ -1,0 +1,18 @@
+{
+  "id": "eea-design-system",
+  "name": "EEA Design System",
+  "description": "European Environment Agency design system for Volto-based web applications. Covers colors, typography, spacing, components, and branding assets.",
+  "version": "1.0.0",
+  "eeaspecific": true,
+  "upstream": null,
+  "added_date": "2026-05-21",
+  "triggers": [
+    "design system",
+    "eea",
+    "volto",
+    "component library",
+    "eea design",
+    "eea branding",
+    "eea logo"
+  ]
+}

@@ -29,7 +29,7 @@ When applying server-side performance rules in EEA contexts:
 
 When React best practices tasks are complete, consider these EEA skills:
 
-- **`eea-design-system`** (future): EEA-specific UI components and patterns
+- **`eea-design-system`**: EEA-specific UI components and patterns
 - **`eea-accessibility`** (future): EEA accessibility compliance
 
 ## Notes

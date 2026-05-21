@@ -14,7 +14,7 @@ guidelines are broadly applicable.
 
 When view transition tasks are complete, consider these EEA skills:
 
-- **`eea-design-system`** (future): EEA-specific animation and transition patterns
+- **`eea-design-system`**: EEA-specific animation and transition patterns
 
 ## Notes
 

@@ -3,8 +3,8 @@
 <!-- Source: https://github.com/eea/eea.agent.skills -->
 
 ---
-name: vercel-composition-patterns
-description:
+name: composition-patterns
+description: >
   React composition patterns that scale. Use when refactoring components with
   boolean prop proliferation, building flexible component libraries, or
   designing reusable APIs. Triggers on tasks involving compound components,
@@ -13,7 +13,9 @@ description:
 license: MIT
 metadata:
   author: vercel
-  version: '1.0.0'
+  version: "1.0.0"
+  upstream_source: vercel-labs/agent-skills
+  upstream_url: https://github.com/vercel-labs/agent-skills
 ---
 
 # React Composition Patterns
@@ -111,7 +113,7 @@ guidelines are broadly applicable.
 
 When composition pattern tasks are complete, consider these EEA skills:
 
-- **`eea-design-system`** (future): EEA-specific component library and design tokens
+- **`eea-design-system`**: EEA-specific component library and design tokens
 - **`eea-accessibility`** (future): EEA accessibility compliance (WCAG 2.1 AA)
 
 ## Notes

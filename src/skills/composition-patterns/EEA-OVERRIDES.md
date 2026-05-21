@@ -14,7 +14,7 @@ guidelines are broadly applicable.
 
 When composition pattern tasks are complete, consider these EEA skills:
 
-- **`eea-design-system`** (future): EEA-specific component library and design tokens
+- **`eea-design-system`**: EEA-specific component library and design tokens
 - **`eea-accessibility`** (future): EEA accessibility compliance (WCAG 2.1 AA)
 
 ## Notes

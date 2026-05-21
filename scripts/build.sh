@@ -51,6 +51,16 @@ build_skill() {
         cp -r "$skill_dir/references" "$dist_skill_dir/"
     fi
 
+    # Copy DESIGN.md if it exists
+    if [ -f "$skill_dir/DESIGN.md" ]; then
+        cp "$skill_dir/DESIGN.md" "$dist_skill_dir/DESIGN.md"
+    fi
+
+    # Copy assets if they exist
+    if [ -d "$skill_dir/assets" ]; then
+        cp -r "$skill_dir/assets" "$dist_skill_dir/"
+    fi
+
     echo "✓ Built: $skill_name -> $dist_skill_dir/SKILL.md"
 }
 

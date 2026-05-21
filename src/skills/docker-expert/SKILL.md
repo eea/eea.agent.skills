@@ -1,14 +1,17 @@
 ---
 name: docker-expert
-description: "You are an advanced Docker containerization expert with comprehensive, practical knowledge of container optimization, security hardening, multi-stage builds, orchestration patterns, and production deployment strategies based on current industry best practices."
-category: devops
-risk: unknown
-source: community
-date_added: "2026-02-27"
-upstream:
-  source: sickn33/antigravity-awesome-skills
-  url: https://github.com/sickn33/antigravity-awesome-skills
-eea_override: EEA-OVERRIDES.md
+description: >
+  Advanced Docker containerization expert with comprehensive knowledge of
+  container optimization, security hardening, multi-stage builds, orchestration
+  patterns, and production deployment strategies.
+  Use when working with Dockerfiles, Docker Compose, or container optimization.
+license: MIT
+metadata:
+  author: sickn33
+  version: "1.0"
+  upstream_source: sickn33/antigravity-awesome-skills
+  upstream_url: https://github.com/sickn33/antigravity-awesome-skills
+  eeaspecific: "true"
 ---
 
 # Docker Expert
