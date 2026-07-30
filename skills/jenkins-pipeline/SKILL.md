@@ -255,6 +255,54 @@ immediately with `invalid option type "ansiColor"`. `ansiColor` is not in
 covered by core Jenkins or that reference file, leave it out and ask the user
 to confirm the plugin is installed before using it, rather than guessing.
 
+## EEA Docker-outside-of-Docker constraint
+
+EEA `docker-host` Jenkins agents run Docker-outside-of-Docker: the agent only
+has `/var/run/docker.sock` forwarded to the real dockerd, not the
+filesystem. Any `sh` step in the generated Jenkinsfile that calls `docker`
+is really talking to a daemon on a different filesystem than `$WORKSPACE`.
+
+Concretely:
+- `docker build .` and `docker cp <container>:<path> <host-path>` work,
+  because the build context is streamed and `docker cp` operates through
+  the Docker API against the container's own filesystem — neither depends
+  on the *daemon* being able to see a path on the *agent's* disk.
+- `docker run -v "$WORKSPACE:/somewhere"` (or any bind mount of a path under
+  `$WORKSPACE`) does not work. `$WORKSPACE` is a path inside the Jenkins
+  agent, not a real path on the host the dockerd lives on. Docker's fallback
+  for a bind-mount source that doesn't exist on that host is to silently
+  create an empty directory and mount that — so every step inside the
+  spawned container that looks for a file under the mount sees an empty
+  directory, not an error about the mount itself. This is exactly what
+  produced `ruff check ... -> E902 No such file or directory (os error 2)`
+  for every path argument in an early generated pipeline: `-v
+  "$WORKSPACE:/workspace"` mounted nothing, so ruff found nothing.
+
+Rules for anything this skill generates:
+- Never bind-mount `$WORKSPACE` (or any subpath of it) into a spawned
+  container with `-v`. This applies to lint, unit test, and integration
+  test stages alike, whether the mount is meant to feed source in or pull
+  reports/fixtures out.
+- To run checks against repository source inside a container, rely on the
+  copy `Dockerfile.test` already baked into the image via `COPY . .`
+  (`WORKDIR /app` in the EEA `Dockerfile.test` contract) — do not try to
+  re-supply source via a mount.
+- To pull JUnit/coverage/report files out of a container, run it with a
+  deterministic `--name` (no `--rm`), then `docker cp
+  <container-name>:<path-in-image> <path-in-workspace>` after the run, then
+  clean up with `docker rm -v <container-name>` in a `finally`/`post` block
+  — the same pattern the Sonarqube/versioning stages already use
+  successfully.
+- To feed a small input file into a container that needs it (e.g. a test
+  fixture), use `docker create --name <x> <image>`, then `docker cp
+  <fixture> <x>:<path-that-already-exists-in-the-image>` (e.g. `/tmp/...`,
+  not a path that requires creating a new directory first), then `docker
+  start <x>`. Do not rely on a bind mount for this either.
+- Capture exit codes with `sh(returnStatus: true, ...)` rather than letting
+  a failing `docker run` throw immediately — otherwise the `docker cp`
+  calls that pull out JUnit/coverage results never run when tests fail, and
+  Jenkins silently reports zero test results instead of the real failures.
+
 ## EEA Jenkinsfile shape
 
 For EEA projects, generated Jenkinsfiles should preserve this outer structure exactly unless the repository owner explicitly asks otherwise:

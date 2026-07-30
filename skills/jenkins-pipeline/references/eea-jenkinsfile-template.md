@@ -40,10 +40,22 @@ pipeline {
 
     stage('Auto-fix code style') {
       steps {
-        sh '''docker run --rm -v "$WORKSPACE:/workspace" -w /workspace --name="${IMAGE_NAME}-autofix" $TEST_IMAGE bash -lc '
-          ruff check analysis api pre_analysis exporters scripts adaptation_stories tests main.py env_settings.py --fix --select I && \
-          black analysis api pre_analysis exporters scripts adaptation_stories tests main.py env_settings.py
-        ' '''
+        // Do not bind-mount $WORKSPACE here: EEA docker-host agents run
+        // Docker-outside-of-Docker, so $WORKSPACE is not a real path on the
+        // dockerd host and the mount would silently resolve to an empty
+        // directory. Run against the source already copied into the image
+        // by Dockerfile.test, then copy fixes back out with `docker cp`.
+        sh '''
+          set +e
+          docker run --name="${IMAGE_NAME}-autofix" $TEST_IMAGE bash -lc '
+            ruff check analysis api pre_analysis exporters scripts adaptation_stories tests main.py env_settings.py --fix --select I && \
+            black analysis api pre_analysis exporters scripts adaptation_stories tests main.py env_settings.py
+          '
+          status=$?
+          docker cp "${IMAGE_NAME}-autofix":/app/. .
+          docker rm -v "${IMAGE_NAME}-autofix"
+          exit $status
+        '''
       }
     }
 
