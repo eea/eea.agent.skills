@@ -1,6 +1,22 @@
 # EEA-Specific Overrides
-<!-- EEA-Overrides-Version: 1.0 -->
-<!-- Last-Sync: 2026-07-29 -->
+<!-- EEA-Overrides-Version: 1.1 -->
+<!-- Last-Sync: 2026-07-30 -->
+
+## EEA plugin/step constraint
+
+Declarative pipeline validates `options {}` entries and plugin-provided steps
+against whatever is actually installed on the target Jenkins controller — an
+invalid one fails at parse time, before any stage runs. Do not add any
+`options {}` entry, wrapper step, or symbol unless it is a Jenkins pipeline
+core step or it appears in `references/eea-available-plugins.md`.
+
+This is a real, previously-hit failure: an earlier draft of this skill added
+`options { ansiColor('xterm') }` to color console output, and the target
+controller has no AnsiColor plugin installed, so the pipeline failed
+immediately with `invalid option type "ansiColor"`. `ansiColor` is not in
+`references/eea-available-plugins.md` — never add it. If a capability isn't
+covered by core Jenkins or that reference file, leave it out and ask the user
+to confirm the plugin is installed before using it, rather than guessing.
 
 ## EEA Jenkinsfile shape
 
@@ -133,6 +149,8 @@ withSonarQubeEnv('Sonarqube') {
 ## EEA reference implementation
 
 When choosing patterns for test container lifecycle, result publishing, or SonarQube wiring, align with the Jenkinsfile used by `eea/volto-addon-template`.
+
+Before finalizing a Jenkinsfile, cross-check every non-core step and `options {}` entry against `references/eea-available-plugins.md` (see "EEA plugin/step constraint" above).
 
 ## EEA cross-skill routing
 
