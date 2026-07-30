@@ -1,148 +1,206 @@
-skills:
-  - id: docker-expert
-    name: Docker Expert
-    description: Advanced Docker containerization expert for multi-stage builds, security hardening, and production deployment patterns
-    category: devops
-    upstream:
-      source: sickn33/antigravity-awesome-skills
-      path: skills/docker-expert
-      url: https://github.com/sickn33/antigravity-awesome-skills
-    triggers:
-      - docker
-      - container
-      - containerize
-      - dockerfile
-      - docker-compose
-      - multi-stage
-      - buildkit
-    version: "1.0"
-    eeaspecific: true
-    added_date: "2026-04-21"
-    notes: Two-file overlay pattern with EEA-OVERRIDES.md for EEA-specific patterns
-
-  - id: composition-patterns
-    name: React Composition Patterns
-    description: React composition patterns that scale. Helps avoid boolean prop proliferation through compound components, state lifting, and internal composition.
-    category: frontend
-    upstream:
-      source: vercel-labs/agent-skills
-      path: skills/composition-patterns
-      url: https://github.com/vercel-labs/agent-skills
-    triggers:
-      - composition
-      - compound components
-      - react patterns
-      - component architecture
-      - state lifting
-    version: "1.0.0"
-    eeaspecific: false
-    added_date: "2026-05-04"
-    notes: Upstream copy with placeholder EEA-OVERRIDES.md
-
-  - id: react-best-practices
-    name: React Best Practices
-    description: React and Next.js performance optimization guidelines from Vercel Engineering. Contains 70+ rules across 8 categories, prioritized by impact.
-    category: frontend
-    upstream:
-      source: vercel-labs/agent-skills
-      path: skills/react-best-practices
-      url: https://github.com/vercel-labs/agent-skills
-    triggers:
-      - react
-      - nextjs
-      - performance
-      - optimization
-      - bundle size
-      - data fetching
-      - rendering
-      - re-render
-    version: "1.0.0"
-    eeaspecific: false
-    added_date: "2026-05-04"
-    notes: Upstream copy with placeholder EEA-OVERRIDES.md. Full compiled guide in AGENTS.md.
-
-  - id: react-native-skills
-    name: React Native Best Practices
-    description: React Native and Expo best practices for building performant mobile apps. Contains rules covering performance, animations, UI patterns, and platform-specific optimizations.
-    category: mobile
-    upstream:
-      source: vercel-labs/agent-skills
-      path: skills/react-native-skills
-      url: https://github.com/vercel-labs/agent-skills
-    triggers:
-      - react native
-      - expo
-      - mobile
-      - ios
-      - android
-      - animation
-      - list performance
-    version: "1.0.0"
-    eeaspecific: false
-    added_date: "2026-05-04"
-    notes: Upstream copy with placeholder EEA-OVERRIDES.md
-
-  - id: react-view-transitions
-    name: React View Transitions
-    description: Guide for implementing smooth, native-feeling animations using React's View Transition API. Covers ViewTransition component, addTransitionType, CSS pseudo-elements, shared element transitions, and Next.js integration.
-    category: frontend
-    upstream:
-      source: vercel-labs/agent-skills
-      path: skills/react-view-transitions
-      url: https://github.com/vercel-labs/agent-skills
-    triggers:
-      - view transitions
-      - animation
-      - page transitions
-      - shared element
-      - react transitions
-      - startViewTransition
-    version: "1.0.0"
-    eeaspecific: false
-    added_date: "2026-05-04"
-    notes: Upstream copy with placeholder EEA-OVERRIDES.md
-
-  - id: web-design-guidelines
-    name: Web Design Guidelines
-    description: Review UI code for compliance with web interface best practices. Audits code for 100+ rules covering accessibility, performance, and UX.
-    category: design
-    upstream:
-      source: vercel-labs/agent-skills
-      path: skills/web-design-guidelines
-      url: https://github.com/vercel-labs/agent-skills
-    triggers:
-      - design review
-      - accessibility
-      - UX
-      - UI review
-      - web design
-      - best practices
-    version: "1.0.0"
-    eeaspecific: false
-    added_date: "2026-05-04"
-    notes: Upstream copy with EEA-OVERRIDES.md referencing EEA Design System and WCAG 2.1 AA accessibility standards
-
-  - id: eea-design-system
-    name: EEA Design System
-    description: European Environment Agency design system for Volto-based web applications. Covers colors, typography, spacing, components, and branding assets.
-    category: design
-    upstream: null
-    triggers:
-      - design system
-      - eea
-      - volto
-      - component library
-      - eea design
-      - eea branding
-      - eea logo
-    version: "1.0.0"
-    eeaspecific: true
-    added_date: "2026-05-21"
-    notes: Self-contained EEA skill with DESIGN.md reference doc and assets/ for official logos
-
-# Future skills placeholder
-# - chart: Data visualization and chart generation
-# - doc: Technical documentation generation
-# - xlsx: Excel spreadsheet operations
-# - slides: Presentation generation
-# - website-building: Static site and web app creation
+     1|skills:
+     2|  - id: docker-expert
+     3|    name: Docker Expert
+     4|    description: Advanced Docker containerization expert for multi-stage builds, security hardening, and production deployment patterns
+     5|    category: devops
+     6|    upstream:
+     7|      source: sickn33/antigravity-awesome-skills
+     8|      path: skills/docker-expert
+     9|      url: https://github.com/sickn33/antigravity-awesome-skills
+    10|    triggers:
+    11|      - docker
+    12|      - container
+    13|      - containerize
+    14|      - dockerfile
+    15|      - docker-compose
+    16|      - multi-stage
+    17|      - buildkit
+    18|    version: "1.0"
+    19|    eeaspecific: true
+    20|    added_date: "2026-04-21"
+    21|    notes: Two-file overlay pattern with EEA-OVERRIDES.md for EEA-specific patterns
+    22|
+    23|  - id: composition-patterns
+    24|    name: React Composition Patterns
+    25|    description: React composition patterns that scale. Helps avoid boolean prop proliferation through compound components, state lifting, and internal composition.
+    26|    category: frontend
+    27|    upstream:
+    28|      source: vercel-labs/agent-skills
+    29|      path: skills/composition-patterns
+    30|      url: https://github.com/vercel-labs/agent-skills
+    31|    triggers:
+    32|      - composition
+    33|      - compound components
+    34|      - react patterns
+    35|      - component architecture
+    36|      - state lifting
+    37|    version: "1.0.0"
+    38|    eeaspecific: false
+    39|    added_date: "2026-05-04"
+    40|    notes: Upstream copy with placeholder EEA-OVERRIDES.md
+    41|
+    42|  - id: react-best-practices
+    43|    name: React Best Practices
+    44|    description: React and Next.js performance optimization guidelines from Vercel Engineering. Contains 70+ rules across 8 categories, prioritized by impact.
+    45|    category: frontend
+    46|    upstream:
+    47|      source: vercel-labs/agent-skills
+    48|      path: skills/react-best-practices
+    49|      url: https://github.com/vercel-labs/agent-skills
+    50|    triggers:
+    51|      - react
+    52|      - nextjs
+    53|      - performance
+    54|      - optimization
+    55|      - bundle size
+    56|      - data fetching
+    57|      - rendering
+    58|      - re-render
+    59|    version: "1.0.0"
+    60|    eeaspecific: false
+    61|    added_date: "2026-05-04"
+    62|    notes: Upstream copy with placeholder EEA-OVERRIDES.md. Full compiled guide in AGENTS.md.
+    63|
+    64|  - id: react-native-skills
+    65|    name: React Native Best Practices
+    66|    description: React Native and Expo best practices for building performant mobile apps. Contains rules covering performance, animations, UI patterns, and platform-specific optimizations.
+    67|    category: mobile
+    68|    upstream:
+    69|      source: vercel-labs/agent-skills
+    70|      path: skills/react-native-skills
+    71|      url: https://github.com/vercel-labs/agent-skills
+    72|    triggers:
+    73|      - react native
+    74|      - expo
+    75|      - mobile
+    76|      - ios
+    77|      - android
+    78|      - animation
+    79|      - list performance
+    80|    version: "1.0.0"
+    81|    eeaspecific: false
+    82|    added_date: "2026-05-04"
+    83|    notes: Upstream copy with placeholder EEA-OVERRIDES.md
+    84|
+    85|  - id: react-view-transitions
+    86|    name: React View Transitions
+    87|    description: Guide for implementing smooth, native-feeling animations using React's View Transition API. Covers ViewTransition component, addTransitionType, CSS pseudo-elements, shared element transitions, and Next.js integration.
+    88|    category: frontend
+    89|    upstream:
+    90|      source: vercel-labs/agent-skills
+    91|      path: skills/react-view-transitions
+    92|      url: https://github.com/vercel-labs/agent-skills
+    93|    triggers:
+    94|      - view transitions
+    95|      - animation
+    96|      - page transitions
+    97|      - shared element
+    98|      - react transitions
+    99|      - startViewTransition
+   100|    version: "1.0.0"
+   101|    eeaspecific: false
+   102|    added_date: "2026-05-04"
+   103|    notes: Upstream copy with placeholder EEA-OVERRIDES.md
+   104|
+   105|  - id: web-design-guidelines
+   106|    name: Web Design Guidelines
+   107|    description: Review UI code for compliance with web interface best practices. Audits code for 100+ rules covering accessibility, performance, and UX.
+   108|    category: design
+   109|    upstream:
+   110|      source: vercel-labs/agent-skills
+   111|      path: skills/web-design-guidelines
+   112|      url: https://github.com/vercel-labs/agent-skills
+   113|    triggers:
+   114|      - design review
+   115|      - accessibility
+   116|      - UX
+   117|      - UI review
+   118|      - web design
+   119|      - best practices
+   120|    version: "1.0.0"
+   121|    eeaspecific: false
+   122|    added_date: "2026-05-04"
+   123|    notes: Upstream copy with EEA-OVERRIDES.md referencing EEA Design System and WCAG 2.1 AA accessibility standards
+   124|
+   125|  - id: eea-design-system
+   126|    name: EEA Design System
+   127|    description: European Environment Agency design system for Volto-based web applications. Covers colors, typography, spacing, components, and branding assets.
+   128|    category: design
+   129|    upstream: null
+   130|    triggers:
+   131|      - design system
+   132|      - eea
+   133|      - volto
+   134|      - component library
+   135|      - eea design
+   136|      - eea branding
+   137|      - eea logo
+   138|    version: "1.0.0"
+   139|    eeaspecific: true
+   140|    added_date: "2026-05-21"
+   141|    notes: Self-contained EEA skill with DESIGN.md reference doc and assets/ for official logos
+   142|
+   143|  - id: jenkins-pipeline
+   144|    name: Jenkins Pipeline
+   145|    description: Build Jenkins declarative pipelines for EEA projects with Docker-based testing, SonarQube, Trivy, versioning, and Docker Hub release automation.
+   146|    category: devops
+   147|    upstream:
+   148|      source: aj-geddes/useful-ai-prompts
+   149|      path: skills/jenkins-pipeline
+   150|      url: https://github.com/aj-geddes/useful-ai-prompts
+   151|    triggers:
+   152|      - jenkins
+   153|      - jenkinsfile
+   154|      - pipeline
+   155|      - sonarqube
+   156|      - trivy
+   157|      - docker hub
+   158|      - ci/cd
+   159|    version: "1.0.0"
+   160|    eeaspecific: true
+   161|    added_date: "2026-07-29"
+   162|    notes: Upstream-inspired Jenkins skill extended with EEA Jenkinsfile format, Dockerfile.test contract, SonarQube, Trivy, versioning, and Docker Hub release guidance.
+   163|
+   164|  - id: code-quality
+   165|    name: Code Quality
+   166|    description: Produce and repair code so it passes repository linting, typing, tests, Docker checks, and Jenkins quality gates with minimal manual intervention.
+   167|    category: software-development
+   168|    upstream: null
+   169|    triggers:
+   170|      - code quality
+   171|      - lint
+   172|      - ruff
+   173|      - mypy
+   174|      - tests
+   175|      - jenkins
+   176|      - ai generated code
+   177|    version: "1.0.0"
+   178|    eeaspecific: true
+   179|    added_date: "2026-07-29"
+   180|    notes: Self-contained EEA skill for creating and repairing code so it passes real repository and Jenkins quality gates without relying on repeated manual fixer runs.
+   181|
+   182|  - id: quality-fixes
+   183|    name: Quality Fixes
+   184|    description: Diagnose and repair failing lint, typing, test, Docker, and Jenkins quality gates until the real blocking commands pass.
+   185|    category: software-development
+   186|    upstream: null
+   187|    triggers:
+   188|      - fix lint
+   189|      - fix tests
+   190|      - fix jenkins
+   191|      - quality failures
+   192|      - ruff failures
+   193|      - mypy failures
+   194|      - ci failures
+   195|    version: "1.0.0"
+   196|    eeaspecific: true
+   197|    added_date: "2026-07-29"
+   198|    notes: Self-contained EEA skill for repairing repositories that already fail code-quality or Jenkins verification before delivery.
+   199|
+   200|# Future skills placeholder
+   201|# - chart: Data visualization and chart generation
+   202|# - doc: Technical documentation generation
+   203|# - xlsx: Excel spreadsheet operations
+   204|# - slides: Presentation generation
+   205|# - website-building: Static site and web app creation
+   206|

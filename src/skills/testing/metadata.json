@@ -1,0 +1,17 @@
+{
+  "id": "testing",
+  "name": "Testing",
+  "description": "Define and run developer-reproducible test commands that match Jenkins exactly, with Docker as the canonical execution environment.",
+  "version": "1.0.0",
+  "eeaspecific": true,
+  "upstream": null,
+  "added_date": "2026-07-29",
+  "triggers": [
+    "testing",
+    "docker tests",
+    "unit tests",
+    "integration tests",
+    "jenkins parity",
+    "developer reproducibility"
+  ]
+}

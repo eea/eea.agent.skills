@@ -528,6 +528,33 @@ When the Docker task is complete, consider these EEA skills:
 - All containers must comply with EEA security policy SC-01
 - Proxy exceptions required for external dependencies
 - Contact: EEA Platform Team for registry access issues
+
+### Dockerfile.test for Jenkins Pipelines
+
+When an EEA project needs Jenkins-based linting, unit tests, and integration tests in Docker:
+
+```dockerfile
+FROM node:20-bookworm
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
+COPY . .
+ENV CI=true
+CMD ["npm", "run", "test:ci"]
+```
+
+Required contract for `Dockerfile.test`:
+- The full repository source is copied into the image.
+- Development and test dependencies are installed, not just production dependencies.
+- The image can run linting, unit tests, and integration helpers.
+- Unit test results can be copied out as `junit.xml`.
+- Coverage can be copied out as `coverage/lcov.info` and `coverage/lcov-report/index.html`.
+- The image should be suitable for `docker run --name <container> ...` so Jenkins can use `docker cp` and then `docker rm -v`.
+- For mixed Python + Node repositories, prefer starting from a Node base image and installing Python tooling into it rather than copying `node` / `npm` binaries across images.
+- If `requirements.txt`, `pyproject.toml`, and lockfiles disagree, inspect which dependency source is actually buildable before freezing the Dockerfile around the wrong install path.
+- If `npm ci` fails because of peer dependency resolution in an existing project, use `--legacy-peer-deps` only as an explicit repository-specific decision, not as a universal default.
+
+
 <!-- END EEA-OVERRIDES -->
 
 <!-- Merged Build: upstream SKILL.md + EEA-OVERRIDES.md -->

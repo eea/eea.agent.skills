@@ -6,6 +6,97 @@ This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic ve
 
 ---
 
+## 2026-07-29 — Add Testing Skill
+
+### Added
+- New `testing` skill (`src/skills/testing/`):
+  - `SKILL.md` with Docker-based parity guidance between developer test commands and Jenkins stages
+  - `EEA-OVERRIDES.md` with EEA policy for developer-reproducible local testing
+  - `references/docker-test-parity.md` describing the Docker parity model
+  - `metadata.json` with skill index data
+- `catalog.yaml` entry for `testing`
+
+### Why
+Provides a reusable EEA skill for ensuring that the tests Jenkins runs are the same ones developers can run locally with Docker, without relying on Make-only workflows or Jenkins log spelunking.
+
+---
+
+## 2026-07-29 — Add Quality Fixes Skill
+
+### Added
+- New `quality-fixes` skill (`src/skills/quality-fixes/`):
+  - `SKILL.md` with diagnose → fix → rerun guidance for failing lint, typing, tests, Docker, and Jenkins gates
+  - `EEA-OVERRIDES.md` with EEA routing from Jenkins/code-quality preflight failures
+  - `references/fix-loop.md` describing the verification-preserving repair loop
+  - `metadata.json` with skill index data
+- `catalog.yaml` entry for `quality-fixes`
+
+### Why
+Provides a dedicated skill for repairing repositories that already fail their real quality checks before a Jenkinsfile is finalized or before delivery is considered complete.
+
+---
+
+## 2026-07-29 — Update Jenkins Pipeline Skill for Code Quality Integration
+
+### Changed
+- `src/skills/jenkins-pipeline/SKILL.md`:
+  - requires using the `code-quality` skill mindset when designing pipeline quality stages
+  - adds guidance for a dedicated `Auto-fix code style` stage
+  - expands stage blueprint to separate auto-fix from strict linting
+  - documents workspace propagation for container-based auto-fix steps
+  - requires a preflight run of the repository's current quality/test commands before finalizing a Jenkinsfile
+  - instructs the agent to surface expected failures and ask whether to repair them first using `quality-fixes`
+- `src/skills/jenkins-pipeline/EEA-OVERRIDES.md`:
+  - recommends an `Auto-fix code style` stage in EEA Jenkins pipelines
+  - adds cross-skill routing to `code-quality` and `quality-fixes`
+- `src/skills/jenkins-pipeline/references/eea-jenkinsfile-template.md`:
+  - includes an `Auto-fix code style` stage ahead of strict linting
+  - includes branch-build auto-commit/push behavior for safe deterministic rewrites
+- `src/skills/docker-expert/EEA-OVERRIDES.md`:
+  - documents practical `Dockerfile.test` guidance for mixed Python + Node repositories
+  - warns against copying `node` / `npm` binaries across images
+  - warns to verify the real dependency source when requirements and lockfiles disagree
+  - documents `--legacy-peer-deps` as a repository-specific fallback, not a universal default
+
+### Why
+Makes future Jenkinsfiles better aligned with the new `code-quality` skill, adds a dedicated repair workflow, and captures the Dockerfile.test findings discovered while validating a real mixed-stack repository.
+
+---
+
+## 2026-07-29 — Add Code Quality Skill
+
+### Added
+- New `code-quality` skill (`src/skills/code-quality/`):
+  - `SKILL.md` with repository-first code quality guidance for AI-generated and legacy code
+  - `EEA-OVERRIDES.md` with EEA policy for Jenkins-aligned auto-fix and strict verification
+  - `references/jenkins-quality-gates.md` describing the recommended split between auto-fix, lint, typing, and tests
+  - `metadata.json` with skill index data
+- `catalog.yaml` entry for `code-quality`
+
+### Why
+Provides a reusable skill for generating code correctly up front, repairing existing code when needed, and aligning repository quality work with the real Jenkins checks instead of relying on repeated manual formatter or `--fix` runs.
+
+---
+
+## 2026-07-29 — Add Jenkins Pipeline Skill
+
+### Added
+- New `jenkins-pipeline` skill (`src/skills/jenkins-pipeline/`):
+  - `SKILL.md` with Jenkins declarative pipeline guidance for EEA projects
+  - `EEA-OVERRIDES.md` with the required EEA Jenkinsfile outer structure and stage contract
+  - `references/eea-jenkinsfile-template.md` with a full stage-by-stage Jenkinsfile example
+  - `references/dockerfile-test-template.md` with the expected `Dockerfile.test` artifact contract
+  - `metadata.json` with skill index data
+- `catalog.yaml` entry for `jenkins-pipeline`
+
+### Changed
+- `src/skills/docker-expert/EEA-OVERRIDES.md`: added `Dockerfile.test` guidance for Jenkins-driven linting, unit tests, coverage export, and integration helpers
+
+### Why
+Provides a reusable EEA skill for generating Jenkinsfiles that follow the existing EEA structure, run tests inside Docker, publish JUnit and LCOV artifacts, scan with SonarQube and Trivy, and release images to Docker Hub.
+
+---
+
 ## 2026-05-21 — Integrate skills-ref Validation
 
 ### Added
