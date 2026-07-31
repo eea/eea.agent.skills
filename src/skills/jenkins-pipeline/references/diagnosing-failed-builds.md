@@ -72,7 +72,64 @@ first.
 
 Some failures need the full Jenkins console log to diagnose — a
 Docker-outside-of-Docker path issue, a SonarQube sensor warning, anything
-not captured in the check's `output` fields. In that case ask the user to
-paste the relevant section from the Jenkins UI
+not captured in the check's `output` fields. If the developer has set up a
+Jenkins API token (section 6), fetch the log directly. Otherwise, ask the
+user to paste the relevant section from the Jenkins UI
 (`https://ci.eionet.europa.eu/...`, from the check's `details_url`) rather
 than guessing at the cause from the pass/fail status alone.
+
+## 6. Reading the full Jenkins console log directly (optional — needs a personal API token)
+
+GitHub Checks (sections 1–5) cover most cases without any extra setup. If
+a developer wants the agent to read the actual Jenkins console log
+directly instead of pasting excerpts, that needs a personal Jenkins API
+token — `ci.eionet.europa.eu` isn't otherwise reachable with the agent's
+GitHub credentials; the GitHub-OAuth login on the Jenkins side is a human
+browser login flow, not something an API caller can reuse.
+
+### Generating the token (one-time, per developer)
+
+1. Go to `https://ci.eionet.europa.eu/user/<github-username>/security/`
+   (`<github-username>` is the same username used to log into Jenkins via
+   GitHub OAuth).
+2. Under "API Token", add a new token, name it something identifiable
+   (e.g. `claude-code`), and copy it immediately — Jenkins only shows the
+   value once.
+3. Give it to the agent as environment variables for the session (e.g.
+   `JENKINS_USER=<github-username>`, `JENKINS_API_TOKEN=<token>`) — never
+   write it into a file in the repository, a Jenkinsfile, or commit it
+   anywhere. It's a personal credential, scoped to that one Jenkins user
+   account's permissions — not a service account to share across a team.
+
+### Fetching a build's console log
+
+```bash
+curl -s -u "$JENKINS_USER:$JENKINS_API_TOKEN" \
+  "https://ci.eionet.europa.eu/job/EEA-AI/job/<repo>/job/<branch>/lastBuild/consoleText"
+```
+
+Nested-folder jobs need `/job/<segment>` repeated for every path segment
+(`EEA-AI/job/<repo>/job/<branch>`) — the same job-path shape already used
+for the Jenkins README badge URL. Useful build selectors in place of a
+specific number:
+- `lastBuild` — most recent build regardless of outcome
+- `lastFailedBuild` — most recent failing build (the common case here)
+- `lastSuccessfulBuild` — for comparing against a known-good run
+- a specific number (e.g. `42`), once known from a check's `details_url`
+
+### Fetching build metadata/status as JSON
+
+```bash
+curl -s -u "$JENKINS_USER:$JENKINS_API_TOKEN" \
+  "https://ci.eionet.europa.eu/job/EEA-AI/job/<repo>/job/<branch>/lastBuild/api/json"
+```
+
+### Notes
+
+- These are read-only `GET` requests; Jenkins doesn't require a CSRF crumb
+  for reads, only for state-changing calls (triggering builds, etc.) —
+  don't reach for crumb handling, and don't use a token to trigger or
+  modify builds without the developer explicitly asking for that.
+- Prefer the GitHub Checks route (sections 1–5) first — it needs no token
+  setup and covers most cases. Reach for the direct Jenkins log only when
+  the check summary genuinely isn't enough to diagnose the failure.
