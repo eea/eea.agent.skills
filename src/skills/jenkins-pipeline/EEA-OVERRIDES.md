@@ -262,6 +262,64 @@ withSonarQubeEnv('Sonarqube') {
 }
 ```
 
+## EEA README badges (opt-in, ask first)
+
+Never add CI/quality badges to a README on your own initiative — this is
+only ever done at the developer's request, and even then it's a
+conversation, not a template to apply blindly. When a developer asks for
+badges (or asks something like "can we add build/coverage badges"), ask:
+
+1. Do they want badges in the README at all, and for which branch(es)?
+   Default to just the repository's default branch unless they say
+   otherwise — see why below.
+2. Do they want a Jenkins pipeline badge? If yes, use this confirmed
+   pattern (image URL uses `%2F`-joined path segments; the link target uses
+   literal `/job/<segment>/job/<segment>/...` path segments — these are two
+   different URL shapes for the same job):
+
+   ```markdown
+   [![Pipeline](https://ci.eionet.europa.eu/buildStatus/icon?job=<org-folder>%2F<repo>%2F<branch>&subject=<branch>)](https://ci.eionet.europa.eu/view/Github/job/<org-folder>/job/<repo>/job/<branch>/display/redirect)
+   ```
+
+   `<org-folder>` is the Jenkins/GitHub-org folder the job lives under
+   (`EEA-AI` for AI applications; other project families use other org
+   folders) — confirm it from an existing working job URL for that
+   repository rather than guessing. `<repo>` is the GitHub repo name and
+   `<branch>` is the branch this specific job runs.
+
+3. If they want SonarQube badges, ask **which** of the following 6 they
+   want — do not add all 6 by default, and do not silently pick a subset:
+
+   | Badge | `metric` value |
+   |---|---|
+   | Coverage | `coverage` |
+   | Duplications | `duplicated_lines_density` |
+   | Security Hotspots Reviewed | `security_hotspots_reviewed` |
+   | Maintainability | `sqale_rating` |
+   | Reliability | `reliability_rating` |
+   | Security | `security_rating` |
+
+   Badge/link pattern for each chosen metric:
+
+   ```markdown
+   [![<Label>](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=<repo>&metric=<metric>)](https://sonarqube.eea.europa.eu/dashboard?id=<repo>)
+   ```
+
+   `<repo>` here is `sonar.projectKey` from the Jenkinsfile's `sonar-scanner`
+   invocation — often the same as the GitHub repo name, but read it from the
+   actual Jenkinsfile rather than assuming.
+
+### Only ever point badges at the default branch
+
+A README's badges get merged into whatever branch is default. A badge
+pinned to a feature branch (`&branch=some-feature`, or a Jenkins job path
+for that branch) would keep showing that branch's frozen state forever once
+merged — even after the branch is deleted — because the README itself
+doesn't get re-templated per branch. If a developer wants a badge for a
+specific non-default branch anyway (e.g. documenting a `develop` line
+alongside `main` in the same README), that's their call to make explicitly —
+just don't default to it or suggest it unprompted.
+
 ## EEA reference implementation
 
 When choosing patterns for test container lifecycle, result publishing, or SonarQube wiring, align with the Jenkinsfile used by `eea/volto-addon-template`.

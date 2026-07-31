@@ -26,6 +26,7 @@ Use this skill when you need to create or update:
 - Docker Hub release automation
 - reusable CI layouts for JavaScript, Python, or mixed application repositories
 - developer-reproducible Docker test flows that match Jenkins exactly
+- README CI/quality badges (Jenkins pipeline, SonarQube) — but only when the developer asks, and as a conversation about which badges and branch, not a template to apply blindly; see the EEA-specific override for the exact questions to ask and URL conventions
 
 ## Required workflow
 
