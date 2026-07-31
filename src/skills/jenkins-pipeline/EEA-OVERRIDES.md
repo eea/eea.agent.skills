@@ -262,6 +262,68 @@ withSonarQubeEnv('Sonarqube') {
 }
 ```
 
+## EEA SonarQube PR decoration (GitHub DevOps Platform Integration)
+
+`sonar.pullrequest.base`/`.branch`/`.key` (already in the pattern above)
+only tell the *scanner* it's analyzing a PR — they do not make SonarQube
+post anything back to GitHub. For the Quality Gate result to show up as a
+GitHub check/status on the PR, the SonarQube *project* needs to be bound to
+a GitHub DevOps Platform Integration. At EEA this integration is already
+configured instance-wide under the name **`GitHubEEA`** — a project just
+needs to be bound to it, once, via the `alm_settings/set_github_binding`
+Web API endpoint (confirmed against SonarQube's own Java WS client source,
+not guessed):
+
+```groovy
+sh '''
+  curl -s -XPOST -u "${SONAR_AUTH_TOKEN}:" "${SONAR_HOST_URL}api/alm_settings/set_github_binding" \
+    -d "almSetting=GitHubEEA" \
+    -d "project=$GIT_NAME" \
+    -d "repository=eea/$GIT_NAME" \
+    -d "summaryCommentEnabled=true"
+'''
+```
+
+- Required params: `almSetting` (the integration name, `GitHubEEA`),
+  `project` (`sonar.projectKey`), `repository` (the GitHub repo). Optional:
+  `summaryCommentEnabled`, `monorepo`.
+- `repository` is expected as `owner/repo` (e.g. `eea/eea-ai-mission-aipossible`)
+  by analogy with every other EEA integration that addresses a GitHub repo
+  this way (Jenkins job paths, GitHub API itself) — SonarQube's own docs
+  don't spell out the exact string format, so verify once against a real
+  PR (does the check actually appear?) rather than trusting this blindly.
+- Call it from inside `withSonarQubeEnv` (needs `$SONAR_AUTH_TOKEN` /
+  `$SONAR_HOST_URL`), right alongside the `sonar-scanner` invocation. It's
+  idempotent — safe to call on every build, the same way the existing
+  `api/project_tags/set` calls already are in these pipelines — not a
+  one-time manual step you have to remember to run separately.
+- The CI token needs "Administer" permission on the SonarQube project for
+  this call to succeed; if it 403s, either grant that permission to the
+  token or do the binding once manually instead (Project Settings → General
+  Settings → Pull Request Decoration in the SonarQube UI) — that always
+  works regardless of the API detail above.
+- This binding is separate from, and doesn't replace, the
+  `sonar.pullrequest.*` scanner parameters — both are required together.
+
+## EEA Quality Gate badge and recommendation
+
+The Quality Gate pass/fail badge is a **separate endpoint** from the 6
+measure badges above — it does not take a `metric=` parameter:
+
+```markdown
+[![Quality Gate](https://sonarqube.eea.europa.eu/api/project_badges/quality_gate?project=<repo>)](https://sonarqube.eea.europa.eu/dashboard?id=<repo>)
+```
+
+Recommendation on Quality Gates generally: gate on **New Code** conditions
+(0 new bugs, 0 new vulnerabilities, new-code coverage above a threshold,
+low new-code duplication) rather than absolute/overall-code thresholds.
+This is SonarQube's own "Clean as You Code" default and it's the right fit
+for any EEA repo with real legacy history — it stops new debt from being
+added without demanding a retroactive cleanup of everything that came
+before. Once PR decoration (above) is working, make the GitHub check a
+required status check in the repo's branch protection rules — a Quality
+Gate that's visible but not required doesn't actually block anything.
+
 ## EEA real-world pipeline examples
 
 `references/examples/` holds full, real Jenkinsfiles from EEA repositories,
@@ -328,8 +390,11 @@ they say yes, ask:
    repository rather than guessing. `<repo>` is the GitHub repo name and
    `<branch>` is the branch this specific job runs.
 
-3. If they want SonarQube badges, ask **which** of the following 6 they
-   want — do not add all 6 by default, and do not silently pick a subset:
+3. If they want SonarQube badges, ask **which** they want — do not add all
+   of them by default, and do not silently pick a subset. Seven are
+   available: 6 measure badges plus the Quality Gate badge (see "EEA
+   Quality Gate badge and recommendation" above for that one — it's a
+   different endpoint shape, no `metric=` param).
 
    | Badge | `metric` value |
    |---|---|
@@ -340,7 +405,7 @@ they say yes, ask:
    | Reliability | `reliability_rating` |
    | Security | `security_rating` |
 
-   Badge/link pattern for each chosen metric:
+   Badge/link pattern for each chosen measure metric:
 
    ```markdown
    [![<Label>](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=<repo>&metric=<metric>)](https://sonarqube.eea.europa.eu/dashboard?id=<repo>)
