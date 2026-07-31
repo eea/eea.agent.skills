@@ -27,6 +27,7 @@ Use this skill when you need to create or update:
 - reusable CI layouts for JavaScript, Python, or mixed application repositories
 - developer-reproducible Docker test flows that match Jenkins exactly
 - README CI/quality badges (Jenkins pipeline, SonarQube) — raised proactively once the Jenkinsfile is finalized (see the EEA-specific override for when and why), as a conversation about which badges and branch rather than a template to apply blindly
+- diagnosing and fixing a failed Jenkins build — see `references/diagnosing-failed-builds.md`
 
 ## Required workflow
 
@@ -810,6 +811,12 @@ at all, but the badges genuinely can't be filled in with a working URL
 until the pipeline exists (the Jenkins job path and Sonar project key they
 need come directly from the Jenkinsfile you just wrote). See "EEA README
 badges" above for the questions to ask once they say yes.
+
+If a Jenkins build fails after the pipeline is already in place — not
+during initial setup — see `references/diagnosing-failed-builds.md`: check
+GitHub Check status via `gh` before asking the user to paste a console
+log, then reproduce the failing stage's exact command locally rather than
+guessing at a fix and waiting for the next CI run to confirm it.
 
 <!-- END EEA-OVERRIDES -->
 

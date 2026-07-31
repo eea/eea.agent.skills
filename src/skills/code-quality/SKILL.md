@@ -155,6 +155,27 @@ After that initial validation, for ongoing day-to-day auto-fixing:
    worth doing every time, even though the auto-fix commands themselves
    usually run natively afterward.
 
+## Nothing known-broken gets committed
+
+Running checks and auto-fixing is not optional, and neither is fixing what
+auto-fix can't reach:
+
+- Before every commit, run the format/lint auto-fixers and the strict
+  checks. This is fast (seconds, natively) — there's no excuse to skip it.
+- Whatever auto-fix cannot resolve — real bugs, type errors, non-mechanical
+  lint findings, failing tests — the agent or developer must fix directly,
+  by hand, before committing. "Auto-fix didn't catch it" is not a reason to
+  commit it anyway; it means the remaining work is manual, not that the
+  remaining work is optional.
+- Tests take longer than a lint/format pass, but that's a reason to budget
+  time for them, not a reason to skip them. Run the tests relevant to what
+  changed before every commit at minimum, and the full suite before
+  pushing or opening/updating a PR — Jenkins should confirm what was
+  already verified locally, not be the first place a real failure surfaces.
+- Never commit with a check known to be red and a plan to "fix it in CI"
+  — Jenkins cannot commit a fix back (see "EEA auto-fix policy" below), so
+  there is no CI-side safety net for a check that was never actually fixed.
+
 ## Recommended quality-stage model
 
 `Auto-fix code style` (safe rewrites only — import sorting, formatting) is

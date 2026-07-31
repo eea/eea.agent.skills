@@ -27,6 +27,7 @@ Use this skill when you need to create or update:
 - reusable CI layouts for JavaScript, Python, or mixed application repositories
 - developer-reproducible Docker test flows that match Jenkins exactly
 - README CI/quality badges (Jenkins pipeline, SonarQube) — raised proactively once the Jenkinsfile is finalized (see the EEA-specific override for when and why), as a conversation about which badges and branch rather than a template to apply blindly
+- diagnosing and fixing a failed Jenkins build — see `references/diagnosing-failed-builds.md`
 
 ## Required workflow
 
