@@ -204,6 +204,29 @@ See `references/dockerfile-test-template.md` for the expected layout.
 - Compute branch vs PR parameters from Jenkins env vars.
 - Pass both unit and integration coverage paths when both exist.
 - Normalize LCOV paths when the test container writes repository-prefixed absolute paths.
+- Match the coverage property to the language, not just the report format:
+  - JavaScript/TypeScript coverage (LCOV, e.g. from Jest/Vitest/Istanbul) goes
+    to `sonar.javascript.lcov.reportPaths`.
+  - Python coverage goes to `sonar.python.coverage.reportPaths`, and it
+    expects **Cobertura XML**, not LCOV — generate it with `pytest-cov`'s
+    `--cov-report=xml:<path>` (alongside `lcov`/`html` if those are used for
+    other artifacts), never point `sonar.javascript.lcov.reportPaths` at a
+    Python-generated LCOV file. Feeding Python coverage into the JS property
+    is a real failure mode that silently produces 0% coverage in Sonar even
+    though tests pass and coverage was actually measured.
+  - Never invoke `pytest --cov=<dir1> --cov=<dir2> --cov=<dir3> ...` with
+    several unrelated top-level directories when the Cobertura (`xml`)
+    report is going to Sonar. `coverage.py`'s Cobertura writer groups files
+    by package *relative to each `--cov` root*, so multiple disjoint roots
+    collide into ambiguous bare filenames (e.g. two different files both
+    reported as `filename="analyzer.py"` with no directory) that Sonar can't
+    reliably map back to source files — even though the equivalent LCOV
+    report for the same run stays correctly qualified
+    (`SF:analysis/analyzer.py`). Use a single `--cov=.` together with a
+    `[tool.coverage.run]` `source`/`omit` config (in `pyproject.toml` or
+    `.coveragerc`) to keep the same measured scope while producing
+    fully-qualified relative paths (`analysis/analyzer.py`,
+    `pre_analysis/analyzer.py`) in every report format.
 
 ## Trivy guidance
 
