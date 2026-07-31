@@ -30,25 +30,86 @@ Use this skill when you need to create or update:
 
 ## Required workflow
 
+This is a strict order, not a menu — do not generate the Jenkinsfile before
+completing every earlier phase, and do not skip the preflight because the
+repository "looks fine." The whole point of the preflight is that a
+Jenkinsfile written before it is a guess about what will pass in CI; a
+Jenkinsfile written after it is a fact.
+
+### Phase 1 — Discover
+
 1. Inspect the repository and identify:
    - package manager / build tool
-   - lint commands
+   - lint / type-check commands
    - unit test commands
    - integration / e2e test commands
    - coverage output capabilities
    - Docker build context and release image details
-2. If `Dockerfile.test` does not exist, use `docker-expert` to create it before writing the pipeline.
-3. Load and apply the `code-quality` skill mindset when deciding which checks belong in auto-fix, strict lint, typing, unit-test, and integration-test stages.
-4. Load and apply the `testing` skill mindset so Jenkins uses the same Docker-based test commands that developers can run locally.
-5. Before authoring the Jenkinsfile, run the repository's current quality and test commands through the same dependency path you plan to use for CI.
-6. If those checks already fail, report exactly which commands and files will fail in Jenkins.
-7. Ask the user whether they want those failures repaired before the Jenkinsfile is generated. If yes, switch into the `quality-fixes` workflow and repair the repository first.
-8. Only after the preflight state is understood should you generate a declarative `Jenkinsfile` using the EEA pipeline shell from `references/eea-jenkinsfile-template.md`. If the repository doesn't fit that template's Docker-based JS/Python assumption (e.g. it's Java/Maven, a Python egg/Plone add-on, or a Dockerfile-only release repo with nothing to test), check `references/examples/` for a closer-matching real EEA pipeline first.
-9. Keep one concern per stage. Prefer more small stages instead of one large stage.
-10. Run all code-quality and test commands inside Docker containers created from `Dockerfile.test`.
-11. Add an `Auto-fix code style` stage before strict linting when the repository benefits from safe mechanical rewrites.
-12. Ensure every non-`--rm` test container is explicitly removed with `docker rm -v` in `finally` / `post` cleanup logic.
-13. Keep Docker images available after the job finishes; do not add `docker rmi` unless the repository explicitly requires it.
+
+### Phase 2 — Build the exact environment CI will run in
+
+2. If `Dockerfile.test` does not exist, use `docker-expert` to create it
+   now. Do not move on to testing without it — every command in Phase 3
+   must run inside this image, not on the host, because that's what the
+   Jenkinsfile will do too. A check that only ever ran on the host has not
+   actually been validated against what Jenkins will execute.
+3. Build it: `docker build -f Dockerfile.test -t <repo>-test:preflight .`.
+   If this fails, fix the Dockerfile.test itself before doing anything
+   else — nothing downstream can be trusted until the image builds.
+
+### Phase 3 — Preflight with the exact commands the Jenkinsfile will use
+
+4. Decide the exact lint, type-check, and unit-test command strings the
+   Jenkinsfile's stages will run. Load the `code-quality` skill mindset to
+   decide what belongs in auto-fix vs. a strict hard gate, and the
+   `testing` skill mindset so these are the same Docker-based commands a
+   developer can run locally. These commands are decided **once**, here —
+   do not write an approximate or simplified version now and a "real"
+   version later when authoring the Jenkinsfile. The exact string you run
+   in this phase is the exact string that goes into the Jenkinsfile's
+   `sh` step in Phase 4. If they ever diverge, the preflight validated
+   nothing.
+5. Run each command inside the image built in Phase 2 (`docker run --rm
+   <repo>-test:preflight <command>`), exactly as it will run in its
+   corresponding Jenkinsfile stage (lint, type-check, unit tests,
+   integration tests if feasible locally).
+6. If a command fails on something mechanical (formatting, import order,
+   safe auto-fixable lint rules), apply the repository's auto-fixers
+   inside the image, copy the changes back to the workspace, and rerun the
+   command. Repeat until it's clean or the remaining failures require
+   judgment (real bugs, type errors, failing tests, non-mechanical lint
+   findings) — those aren't auto-fixable and shouldn't be force-fixed.
+7. If failures remain after auto-fixing, stop and report exactly which
+   commands and files fail, then ask the user whether to repair them now
+   (route into `quality-fixes`) before generating the Jenkinsfile, or
+   proceed knowing Jenkins will report the same failures on its first run.
+
+### Phase 4 — Generate the Jenkinsfile
+
+8. Only now generate a declarative `Jenkinsfile`, using the EEA pipeline
+   shell from `references/eea-jenkinsfile-template.md`. If the repository
+   doesn't fit that template's Docker-based JS/Python assumption (e.g.
+   it's Java/Maven, a Python egg/Plone add-on, or a Dockerfile-only
+   release repo with nothing to test), check `references/examples/` for a
+   closer-matching real EEA pipeline first.
+9. Embed the **exact** commands verified in Phase 3 into the matching
+   stages (`Auto-fix code style`, `Code linting`, `Unit test`, `Integration
+   test`) — do not restate, simplify, or "clean up" them when writing the
+   Jenkinsfile. If a command needs to change, go back to Phase 3, rerun it
+   there, confirm it still passes, and only then carry the new string
+   into the Jenkinsfile.
+10. Keep one concern per stage. Prefer more small stages instead of one
+    large stage.
+11. Run all code-quality and test commands inside Docker containers
+    created from `Dockerfile.test` — never on the host, matching what
+    Phase 3 already validated.
+12. Add an `Auto-fix code style` stage before strict linting when the
+    repository benefits from safe mechanical rewrites (Phase 3, step 6,
+    will already have told you whether it does).
+13. Ensure every non-`--rm` test container is explicitly removed with
+    `docker rm -v` in `finally` / `post` cleanup logic.
+14. Keep Docker images available after the job finishes; do not add
+    `docker rmi` unless the repository explicitly requires it.
 
 ## Mandatory pipeline contract
 
