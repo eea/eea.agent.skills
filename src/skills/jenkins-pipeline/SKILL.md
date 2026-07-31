@@ -43,7 +43,7 @@ Use this skill when you need to create or update:
 5. Before authoring the Jenkinsfile, run the repository's current quality and test commands through the same dependency path you plan to use for CI.
 6. If those checks already fail, report exactly which commands and files will fail in Jenkins.
 7. Ask the user whether they want those failures repaired before the Jenkinsfile is generated. If yes, switch into the `quality-fixes` workflow and repair the repository first.
-8. Only after the preflight state is understood should you generate a declarative `Jenkinsfile` using the EEA pipeline shell from `references/eea-jenkinsfile-template.md`.
+8. Only after the preflight state is understood should you generate a declarative `Jenkinsfile` using the EEA pipeline shell from `references/eea-jenkinsfile-template.md`. If the repository doesn't fit that template's Docker-based JS/Python assumption (e.g. it's Java/Maven, a Python egg/Plone add-on, or a Dockerfile-only release repo with nothing to test), check `references/examples/` for a closer-matching real EEA pipeline first.
 9. Keep one concern per stage. Prefer more small stages instead of one large stage.
 10. Run all code-quality and test commands inside Docker containers created from `Dockerfile.test`.
 11. Add an `Auto-fix code style` stage before strict linting when the repository benefits from safe mechanical rewrites.

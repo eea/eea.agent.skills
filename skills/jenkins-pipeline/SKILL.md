@@ -43,7 +43,7 @@ Use this skill when you need to create or update:
 5. Before authoring the Jenkinsfile, run the repository's current quality and test commands through the same dependency path you plan to use for CI.
 6. If those checks already fail, report exactly which commands and files will fail in Jenkins.
 7. Ask the user whether they want those failures repaired before the Jenkinsfile is generated. If yes, switch into the `quality-fixes` workflow and repair the repository first.
-8. Only after the preflight state is understood should you generate a declarative `Jenkinsfile` using the EEA pipeline shell from `references/eea-jenkinsfile-template.md`.
+8. Only after the preflight state is understood should you generate a declarative `Jenkinsfile` using the EEA pipeline shell from `references/eea-jenkinsfile-template.md`. If the repository doesn't fit that template's Docker-based JS/Python assumption (e.g. it's Java/Maven, a Python egg/Plone add-on, or a Dockerfile-only release repo with nothing to test), check `references/examples/` for a closer-matching real EEA pipeline first.
 9. Keep one concern per stage. Prefer more small stages instead of one large stage.
 10. Run all code-quality and test commands inside Docker containers created from `Dockerfile.test`.
 11. Add an `Auto-fix code style` stage before strict linting when the repository benefits from safe mechanical rewrites.
@@ -547,6 +547,43 @@ withSonarQubeEnv('Sonarqube') {
   sh "export PATH=${scannerHome}/bin:${nodeJS}/bin:$PATH; sonar-scanner -Dsonar.javascript.lcov.reportPaths=./xunit-reports-current/coverage/lcov.info,./integration-reports-current/coverage/lcov.info -Dsonar.sources=./src -Dsonar.projectKey=$GIT_NAME -Dsonar.projectName=$GIT_NAME -Dsonar.projectVersion=\$(jq -r '.version' package.json) ${env.sonarParams}"
 }
 ```
+
+## EEA real-world pipeline examples
+
+`references/examples/` holds full, real Jenkinsfiles from EEA repositories,
+each covering a project shape this skill's default Docker-based template
+doesn't fit well. EEA archives repositories rather than deleting them, so
+these stay fetchable even for old/inactive projects — but re-fetch the
+source URL in each file before trusting details as current practice, since
+the source repo may have evolved since these were captured.
+
+Consult the closest-matching one when the repository being worked on isn't
+a straightforward Docker-based JS/Python app with its own `Dockerfile.test`
+(this skill's default assumption) — read the example's "When to reach for
+this one" section first to confirm it actually fits before borrowing from
+it:
+
+- `references/examples/python-egg-plone-jenkinsfile.md` — a Python package
+  released as a PyPI/internal egg (Plone add-on style), tested via
+  standalone per-tool `eeacms/<tool>` images instead of a project-owned
+  test image.
+- `references/examples/java-maven-jenkinsfile.md` — a Java/Maven WAR
+  application, using Jenkins `tools { maven; jdk }` instead of a
+  Dockerfile.test, JaCoCo coverage, and `mvn sonar:sonar`.
+- `references/examples/nodejs-volto-jenkinsfile.md` — a Volto (React/Plone
+  frontend) add-on that must test against multiple core-framework versions
+  in parallel and run a full Cypress integration suite against a real
+  backend.
+- `references/examples/docker-helm-release-jenkinsfile.md` — a repository
+  that's just a Dockerfile plus a Rancher/Helm catalog template, with
+  nothing to build or test before release — the whole pipeline is one
+  tag-triggered release stage.
+
+All four share `eeacms/gitflow` as the standard EEA release-automation
+tool regardless of language/stack — reach for it whenever a project needs
+version bumping, changelog generation, or tag/PR-driven release logic, the
+same way `mission-aipossible`'s own Jenkinsfile does for Docker Hub
+releases.
 
 ## EEA README badges (ask proactively, don't add unasked)
 
