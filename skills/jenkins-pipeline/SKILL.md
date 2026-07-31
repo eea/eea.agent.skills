@@ -26,7 +26,7 @@ Use this skill when you need to create or update:
 - Docker Hub release automation
 - reusable CI layouts for JavaScript, Python, or mixed application repositories
 - developer-reproducible Docker test flows that match Jenkins exactly
-- README CI/quality badges (Jenkins pipeline, SonarQube) — but only when the developer asks, and as a conversation about which badges and branch, not a template to apply blindly; see the EEA-specific override for the exact questions to ask and URL conventions
+- README CI/quality badges (Jenkins pipeline, SonarQube) — raised proactively once the Jenkinsfile is finalized (see the EEA-specific override for when and why), as a conversation about which badges and branch rather than a template to apply blindly
 
 ## Required workflow
 
@@ -548,12 +548,16 @@ withSonarQubeEnv('Sonarqube') {
 }
 ```
 
-## EEA README badges (opt-in, ask first)
+## EEA README badges (ask proactively, don't add unasked)
 
-Never add CI/quality badges to a README on your own initiative — this is
-only ever done at the developer's request, and even then it's a
-conversation, not a template to apply blindly. When a developer asks for
-badges (or asks something like "can we add build/coverage badges"), ask:
+Once the Jenkinsfile is finalized, proactively ask whether the developer
+wants README CI/quality badges — see "EEA cross-skill routing" below for
+when in the workflow this happens and why (badges need a working Jenkins
+job path and Sonar project key, which only exist once the pipeline is
+written). Don't wait for the developer to bring it up unprompted — most
+won't know this convention exists — but never add badges without an
+explicit yes, and never apply a fixed template. It's a conversation. Once
+they say yes, ask:
 
 1. Do they want badges in the README at all, and for which branch(es)?
    Default to just the repository's default branch unless they say
@@ -606,13 +610,9 @@ specific non-default branch anyway (e.g. documenting a `develop` line
 alongside `main` in the same README), that's their call to make explicitly —
 just don't default to it or suggest it unprompted.
 
-## EEA reference implementation
-
-When choosing patterns for test container lifecycle, result publishing, or SonarQube wiring, align with the Jenkinsfile used by `eea/volto-addon-template`.
+## EEA cross-skill routing
 
 Before finalizing a Jenkinsfile, cross-check every non-core step and `options {}` entry against `references/eea-available-plugins.md` (see "EEA plugin/step constraint" above).
-
-## EEA cross-skill routing
 
 When building or updating Jenkins pipelines with quality gates, also apply the `code-quality` skill and the `testing` skill. Use them to decide:
 - which rules are safe to auto-fix
@@ -623,6 +623,15 @@ When building or updating Jenkins pipelines with quality gates, also apply the `
 If the repository already fails its own lint, typing, or tests before the Jenkinsfile is written, route into `quality-fixes` first. The Jenkins skill should surface the expected failures, ask whether to repair them, and only then finalize the pipeline so the first push-triggered Jenkins run is less likely to fail.
 
 Before finalizing the `Trivy test` stage, also apply `docker-expert`'s "Trivy CVE preflight for release Dockerfiles": build the release image locally, scan it for `CRITICAL` findings, fix what has a published fix, and add what doesn't to `.trivyignore` with a reason. Do this preflight the same way the lint/test preflight above works — surface what's found, fix or document it, and only then generate the Jenkinsfile's Trivy stage — so the first Jenkins run isn't the first time anyone learns the release image has an unresolved CRITICAL CVE.
+
+After the Jenkinsfile is finalized (Jenkins job path and `sonar.projectKey`
+known), proactively ask the developer whether they want README CI/quality
+badges added — don't wait for them to think to ask. A developer setting up
+Jenkins for the first time generally won't know EEA has a badge convention
+at all, but the badges genuinely can't be filled in with a working URL
+until the pipeline exists (the Jenkins job path and Sonar project key they
+need come directly from the Jenkinsfile you just wrote). See "EEA README
+badges" above for the questions to ask once they say yes.
 
 <!-- END EEA-OVERRIDES -->
 
