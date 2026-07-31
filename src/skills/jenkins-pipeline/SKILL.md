@@ -150,6 +150,18 @@ publishHTML(target : [
   - application containers used for integration tests
   - database / queue / backend dependency containers
   - browser-test containers
+- When copying a directory out of a container with `docker cp
+  <container>:<src-dir> <dest-dir>`, always use a trailing `/.` on the
+  source (`docker cp <container>:<src-dir>/. <dest-dir>`). Without it,
+  `docker cp`'s behavior depends on whether `<dest-dir>` already exists: if
+  it does (e.g. because an earlier stage already ran `mkdir -p <dest-dir>`
+  to stage output directories), Docker nests the source directory *inside*
+  the destination instead of copying its contents, silently producing
+  `<dest-dir>/<src-dir-basename>/coverage.xml` instead of
+  `<dest-dir>/coverage.xml` — invisible until something downstream (like
+  Sonarqube) looks for a file at the expected flat path and finds nothing.
+  The trailing `/.` always copies contents, regardless of whether the
+  destination pre-exists.
 
 ## Auto-fix stage guidance
 
@@ -227,6 +239,19 @@ See `references/dockerfile-test-template.md` for the expected layout.
     `.coveragerc`) to keep the same measured scope while producing
     fully-qualified relative paths (`analysis/analyzer.py`,
     `pre_analysis/analyzer.py`) in every report format.
+- `sonar.python.xunit.reportPath` takes a **single path** (wildcards
+  supported), unlike `sonar.python.coverage.reportPaths` which is an
+  explicit comma-delimited list. When unit and integration tests each
+  produce their own `junit.xml` in a differently-named directory, do not
+  comma-join the two paths into that property — it gets treated as one
+  literal pattern that matches neither file, even though both genuinely
+  exist on disk. Use a single glob that matches both directories instead,
+  e.g. `./*-reports-current/junit.xml` for
+  `xunit-reports-current/`/`integration-reports-current/` — the double
+  check is worth it: verify the *actual* files really exist at the *exact*
+  configured path (`ls -la` right before the scan, or read back the
+  property value character for character) rather than assuming a "no
+  report found" warning always means the file is missing.
 
 ## Trivy guidance
 
