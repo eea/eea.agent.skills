@@ -240,19 +240,24 @@ See `references/dockerfile-test-template.md` for the expected layout.
     `.coveragerc`) to keep the same measured scope while producing
     fully-qualified relative paths (`analysis/analyzer.py`,
     `pre_analysis/analyzer.py`) in every report format.
-- `sonar.python.xunit.reportPath` takes a **single path** (wildcards
-  supported), unlike `sonar.python.coverage.reportPaths` which is an
-  explicit comma-delimited list. When unit and integration tests each
-  produce their own `junit.xml` in a differently-named directory, do not
-  comma-join the two paths into that property — it gets treated as one
-  literal pattern that matches neither file, even though both genuinely
-  exist on disk. Use a single glob that matches both directories instead,
-  e.g. `./*-reports-current/junit.xml` for
-  `xunit-reports-current/`/`integration-reports-current/` — the double
-  check is worth it: verify the *actual* files really exist at the *exact*
-  configured path (`ls -la` right before the scan, or read back the
-  property value character for character) rather than assuming a "no
-  report found" warning always means the file is missing.
+- Do not set `sonar.python.xunit.reportPath`. It looked like a path-format
+  problem at first (comma-joining two `junit.xml` paths, since the property
+  takes a single path/glob rather than a comma-delimited list like
+  `sonar.python.coverage.reportPaths`), but switching to a single wildcard
+  glob (`./*-reports-current/junit.xml`) produced the *identical* "No
+  report was found" warning on a real Jenkins PR build, even though an
+  `ls -la` run immediately before the scan step confirmed both `junit.xml`
+  files genuinely existed at the exact configured paths. Two different
+  values failing identically against files provably present means this
+  specific sensor doesn't respect a custom value at all in current
+  SonarQube versions — not a pattern-syntax bug to keep chasing. It's safe
+  to drop: Jenkins' own `junit` step already publishes per-test pass/fail
+  to the GitHub check independently of this property, and the Quality Gate
+  itself is driven by coverage (`sonar.python.coverage.reportPaths`, which
+  does work) and static analysis, not by this sensor. Keeping it around
+  only produces a permanent, misleading warning with no functional benefit
+  — same reasoning applies to `sonar.junit.reportPaths` (the Java-oriented
+  generic property) on a project with no Java sensor to consume it.
 
 ## Trivy guidance
 
