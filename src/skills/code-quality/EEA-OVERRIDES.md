@@ -25,16 +25,23 @@ If the repository uses Jenkins, quality work is not complete until the code woul
 
 ## EEA auto-fix policy
 
-For EEA Jenkins pipelines, recommend a dedicated pre-lint stage such as `Auto-fix code style` when the repository allows automated rewrites.
+Do not recommend a Jenkins `Auto-fix code style` stage. EEA Jenkins is not
+permitted to commit changes back to the repository, so a CI-side auto-fix
+stage either discards its own rewrites when the container is removed, or
+requires auto-committing from CI — the thing EEA policy avoids. Auto-fix
+runs **before the commit** instead, as part of writing or repairing code:
 
-That stage may run tools like:
 - `ruff check --fix`
 - `ruff format`
 - `black`
 - `isort`
 - `prettier --write`
 
-After that stage, the pipeline should run strict verification stages that must already pass without manual intervention.
+Run these using the exact same `Dockerfile.test` image and command strings
+Jenkins' `Code linting` stage will use, so what gets committed is already
+what Jenkins would accept. The Jenkins pipeline then only needs strict,
+read-only verification stages (`--check`/no-`--fix`) that must already
+pass — it never re-fixes anything itself.
 
 ## EEA warning about Ruff docstring rules
 

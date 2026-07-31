@@ -177,14 +177,13 @@ pipeline {
 
 ## EEA stage requirements
 
-EEA Jenkins pipeline outputs should include these stages:
+EEA Jenkins pipeline outputs should include these stages. No `Auto-fix code
+style` stage — auto-fixing (`ruff check --fix`, `ruff format`, `black`,
+`isort`, `prettier --write`) happens pre-commit, using the same commands
+Jenkins' `Code linting` stage verifies with `--check`/no-`--fix` flags. See
+the jenkins-pipeline `SKILL.md` "Pre-commit auto-fix, not a Jenkins stage"
+section for why.
 
-0. `Auto-fix code style` (recommended when the repository has safe mechanical rewrites)
-   - examples: `ruff check --fix`, `ruff format`, `black`, `isort`, `prettier --write`
-   - keep this separate from strict linting
-   - if fixes are made inside a container, ensure they land back in the workspace before later stages run
-   - prefer exposing the same Docker auto-fix command to developers locally instead of auto-committing from Jenkins
-   - on pull-request or branch builds, prefer a patch artifact or explicit failure message instead of silently mutating the source branch
 1. `Code linting`
    - one or more parallel sub-stages
    - examples: ESLint, Stylelint, Prettier, Ruff, Flake8, mypy

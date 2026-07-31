@@ -93,19 +93,19 @@ Jenkinsfile written after it is a fact.
    release repo with nothing to test), check `references/examples/` for a
    closer-matching real EEA pipeline first.
 9. Embed the **exact** commands verified in Phase 3 into the matching
-   stages (`Auto-fix code style`, `Code linting`, `Unit test`, `Integration
-   test`) — do not restate, simplify, or "clean up" them when writing the
-   Jenkinsfile. If a command needs to change, go back to Phase 3, rerun it
-   there, confirm it still passes, and only then carry the new string
-   into the Jenkinsfile.
+   stages (`Code linting`, `Unit test`, `Integration test`) — do not
+   restate, simplify, or "clean up" them when writing the Jenkinsfile. If a
+   command needs to change, go back to Phase 3, rerun it there, confirm it
+   still passes, and only then carry the new string into the Jenkinsfile.
 10. Keep one concern per stage. Prefer more small stages instead of one
     large stage.
 11. Run all code-quality and test commands inside Docker containers
     created from `Dockerfile.test` — never on the host, matching what
     Phase 3 already validated.
-12. Add an `Auto-fix code style` stage before strict linting when the
-    repository benefits from safe mechanical rewrites (Phase 3, step 6,
-    will already have told you whether it does).
+12. Do not add an `Auto-fix code style` stage to the Jenkinsfile — see
+    "Pre-commit auto-fix, not a Jenkins stage" below for why, and make sure
+    `Code linting` runs the strict, read-only form of each command
+    (`--check`, no `--fix`), since Phase 3 already fixed what was fixable.
 13. Ensure every non-`--rm` test container is explicitly removed with
     `docker rm -v` in `finally` / `post` cleanup logic.
 14. Keep Docker images available after the job finishes; do not add
@@ -122,8 +122,7 @@ Generated Jenkinsfiles must satisfy all of the following:
   - `stages {}`
   - `post { always { cleanWs(...) } changed { emailext(...) } }`
 - Use multiple stages, with one pipeline concern per stage.
-- Include an `Auto-fix code style` stage when the repository has safe mechanical rewrites worth running in CI.
-- If an auto-fix stage is used, keep it separate from strict linting and limit it to safe rewrites such as import sorting, formatting, and known-safe lint fixes.
+- Do not include an `Auto-fix code style` stage — see "Pre-commit auto-fix, not a Jenkins stage" below.
 - The pipeline must expose the exact Docker-based commands a developer can run locally to reproduce each Jenkins quality/test stage.
 - Include a `Code linting` stage with one or more parallel sub-stages.
 - Include a `Unit test` stage that:
@@ -150,14 +149,13 @@ Use this stage sequence unless the repository has a strong reason to differ:
 1. `Checkout`
 2. `Versioning`
 3. `Build test image`
-4. `Auto-fix code style`
-5. `Code linting`
-6. `Unit test`
-7. `Build release image`
-8. `Integration test`
-9. `Sonarqube test`
-10. `Trivy test`
-11. `Release on Docker Hub`
+4. `Code linting`
+5. `Unit test`
+6. `Build release image`
+7. `Integration test`
+8. `Sonarqube test`
+9. `Trivy test`
+10. `Release on Docker Hub`
 
 If needed, split these into nested stages, but preserve the same responsibilities.
 
@@ -200,14 +198,10 @@ publishHTML(target : [
 - Use deterministic container names derived from `BUILD_TAG.toLowerCase()`.
 - For containers that must stay alive long enough for `docker cp`, do not use `--rm`.
 - Wrap long-running test containers in `try/finally` blocks.
-- If an auto-fix stage writes changes inside a container, either:
-  - mount the workspace so rewrites land directly in the checked-out repository, or
-  - copy the changed files back out before strict lint and tests continue.
 - In cleanup, prefer:
   - `docker stop <name>` with `returnStatus: true`
   - `docker rm -v <name>` with `returnStatus: true`
 - Apply cleanup to:
-  - lint fix containers
   - unit test containers
   - application containers used for integration tests
   - database / queue / backend dependency containers
@@ -225,22 +219,28 @@ publishHTML(target : [
   The trailing `/.` always copies contents, regardless of whether the
   destination pre-exists.
 
-## Auto-fix stage guidance
+## Pre-commit auto-fix, not a Jenkins stage
 
-When a repository has safe mechanical rewrites, prefer a dedicated stage such as `Auto-fix code style` before strict linting.
+Do not add an `Auto-fix code style` stage to the Jenkinsfile. Jenkins is
+not permitted to commit changes back to the repository (see the
+`code-quality` skill), so a CI-side auto-fix stage has no useful outcome:
+either the rewrites it makes are discarded when the container is removed
+(pure waste — the build still has to be re-run after a human applies the
+same fix), or it tries to commit/push the fix itself, which is exactly the
+auto-commit-from-CI pattern EEA does not want.
 
-Good candidates for this stage:
-- `ruff check --fix` for a restricted, safe rule set
-- `ruff format`
-- `black`
-- `isort`
-- `prettier --write`
+Auto-fixing belongs **before the commit**, not in CI: it's Phase 3 of the
+"Required workflow" above (run the safe fixers — `ruff check --fix`,
+`ruff format`, `black`, `isort`, `prettier --write` — inside the same
+`Dockerfile.test` image Jenkins will use, using the exact same commands,
+then rerun the check). By the time a Jenkinsfile is generated, the code
+should already be clean; `Code linting` in Jenkins is a **strict, read-only
+verification** of that (`--check` flags, no `--fix`), not a second chance
+to fix things. A lint failure in Jenkins means the pre-commit auto-fix step
+was skipped or a check exists that isn't mechanically fixable — not
+something for the pipeline itself to repair.
 
-Prefer narrow, proven-safe rewrites over broad fixer runs. Example: if Ruff docstring (`D`) rules create a large non-fixable failure set, auto-fix only safe subsets such as imports or formatting first, then run strict lint separately.
-
-On branch builds, do not auto-commit from Jenkins by default. Prefer making the same safe auto-fix commands available to developers locally via Docker, then fail with a clear message or export a patch artifact when rewrites would be needed.
-
-Do not assume the auto-fix stage can solve:
+Do not assume any auto-fixer, wherever it runs, can solve:
 - test failures
 - mypy/type failures
 - logic bugs

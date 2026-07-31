@@ -26,7 +26,10 @@ default template:
   is worth the added pipeline complexity.
 - Auto-fix (`make ci-fix`) commits straight back to the PR branch and fails
   the build on purpose (`sh 'exit 1'`) to force a fresh CI run — the same
-  push-and-reset-build pattern as the Python/Plone egg example.
+  push-and-reset-build pattern as the Python/Plone egg example. Also real,
+  historical EEA practice, also not the currently recommended approach —
+  see the jenkins-pipeline `SKILL.md`'s "Pre-commit auto-fix, not a Jenkins
+  stage" section.
 - Integration tests spin up a real backend (`eeacms/plone-backend`) and a
   Cypress runner container linked to it, capture videos/screenshots/JUnit
   results via `docker cp`, then prune passing tests' videos to keep only

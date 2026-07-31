@@ -43,6 +43,14 @@ Use this skill when you need to:
 3. Separate safe auto-fixes from non-fixable policy rules.
 4. Do not assume one tool can fix everything.
 5. Do not declare success until the same commands used by Jenkins pass.
+6. Auto-fix before the commit, not in CI. If the repository has (or will
+   have) a Jenkins pipeline, run its `Code linting` stage's safe-fixer
+   commands (`ruff check --fix`, `ruff format`, `black`, `isort`,
+   `prettier --write`, etc.) yourself — using the same `Dockerfile.test`
+   image and command strings Jenkins uses — every time you add or modify
+   code, before it gets committed. Jenkins can't commit fixes back, so if
+   auto-fixable debt reaches CI, the pre-commit step was skipped; don't
+   rely on a Jenkins-side auto-fix stage to catch it.
 
 ## Required workflow
 
@@ -112,19 +120,27 @@ The preferred EEA setup is:
 
 ## Recommended quality-stage model
 
-For CI and Jenkins design, prefer this split:
+`Auto-fix code style` (safe rewrites only — import sorting, formatting) is
+**not** a Jenkins/CI stage. Jenkins is not permitted to commit changes back
+to the repository, so a CI-side auto-fix stage either discards its own
+rewrites when the container is removed (useless) or has to auto-commit
+(the thing EEA doesn't want). Run auto-fix **before the commit** — as part
+of writing or repairing the code, using the exact same commands and Docker
+image Jenkins' lint stage will later run in strict/read-only form
+(`--check`, no `--fix`). By the time code is committed, it should already
+be clean; Jenkins verifies that, it doesn't re-fix it.
 
-1. `Auto-fix code style`
-   - safe rewrites only
-   - may update imports/formatting
-2. `Code linting`
-   - strict lint gates after auto-fix
-3. `Type checks`
+For CI and Jenkins design itself, prefer this split:
+
+1. `Code linting`
+   - strict lint gates, read-only (`--check`/no-`--fix`) — the code should
+     already be clean because auto-fix already ran pre-commit
+2. `Type checks`
    - mypy/pyright/tsc/etc.
-4. `Unit test`
-5. `Integration test` when needed
+3. `Unit test`
+4. `Integration test` when needed
 
-This split prevents teams from confusing “fixable formatting debt” with “real quality failures”.
+This split prevents teams from confusing “fixable formatting debt” with “real quality failures” — and keeps the fixing itself out of CI entirely.
 
 ## How to handle failing lint on existing code
 

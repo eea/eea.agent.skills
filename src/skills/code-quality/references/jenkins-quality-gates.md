@@ -2,45 +2,60 @@
 
 Use this reference when a repository must pass Jenkins without requiring a human to run formatter or fixer commands manually.
 
-## Recommended stage split
+## Auto-fix runs before the commit, not in Jenkins
 
-1. Auto-fix code style
-2. Code linting
-3. Type checks
-4. Unit test
-5. Integration test
+Jenkins is not permitted to commit changes back to the repository, so
+there is no `Auto-fix code style` *Jenkins* stage. A CI-side auto-fix step
+either discards its own rewrites when the container is removed (the fix
+never reaches the repository, so the build still needs a human to apply it
+and re-push) or has to auto-commit — the pattern EEA policy avoids.
+
+Instead, run the safe fixers yourself, before committing, using the exact
+same Docker image and command strings the Jenkins `Code linting` stage will
+verify with `--check`/no-`--fix` flags:
+
+- `ruff check --fix <paths>`
+- `ruff format <paths>` or `black <paths>`
+- `isort <paths>`
+- `eslint --fix <paths>` when safe
+- `prettier --write <paths>`
+
+By the time code is committed, it should already be clean. Jenkins then
+only ever needs to *verify*, never *fix*.
+
+## Recommended Jenkins stage split
+
+1. `Code linting` — strict, read-only (`--check`/no-`--fix`)
+2. `Type checks` — `mypy`, `tsc --noEmit`, etc.
+3. `Unit test`
+4. `Integration test`
 
 ## Why this split works
 
-- `Auto-fix code style` handles safe mechanical rewrites.
-- `Code linting` confirms no strict lint failures remain.
+- `Code linting` confirms no strict lint failures remain — it assumes
+  pre-commit auto-fix already ran, so a failure here means either that step
+  was skipped or the finding isn't mechanically fixable.
 - `Type checks` catches issues fixers cannot solve.
-- tests verify behavior instead of style.
+- Tests verify behavior instead of style.
 
 ## Example command families
 
 Python:
-- `ruff check --fix <paths>`
-- `ruff format <paths>` or `black <paths>`
-- `mypy <paths>`
-- `pytest --junitxml=... --cov=... --cov-report=xml:... --cov-report=html:...`
+- pre-commit: `ruff check --fix <paths>`, `ruff format <paths>` or `black <paths>`
+- Jenkins `Code linting`: `ruff check <paths>` (no `--fix`), `black --check <paths>`
+- Jenkins `Type checks`: `mypy <paths>`
+- Jenkins `Unit test`: `pytest --junitxml=... --cov=... --cov-report=xml:... --cov-report=html:...`
 
 JavaScript/TypeScript:
-- `eslint --fix <paths>` when safe
-- `prettier --write <paths>`
-- `tsc --noEmit`
-- `npm test` / `vitest` / `jest`
+- pre-commit: `eslint --fix <paths>` when safe, `prettier --write <paths>`
+- Jenkins `Code linting`: `eslint <paths>` (no `--fix`), `prettier --check <paths>`
+- Jenkins `Type checks`: `tsc --noEmit`
+- Jenkins `Unit test`: `npm test` / `vitest` / `jest`
 
 ## Important guardrail
 
-Do not use the auto-fix stage as an excuse to generate sloppy code. Its job is to remove mechanical drift, not to compensate for poor generation quality.
-
-## Auto-commit option
-
-On branch builds, teams may choose to auto-commit safe auto-fix output. If this is used:
-- restrict it to deterministic style rewrites
-- never auto-commit semantic or risky changes
-- rerun strict lint and tests after the commit candidate is produced
+Do not use auto-fix as an excuse to generate sloppy code. Its job is to
+remove mechanical drift, not to compensate for poor generation quality.
 
 ## Ruff guidance
 
@@ -52,8 +67,8 @@ If Ruff is configured with heavy docstring enforcement, use one of these approac
 ## Success criteria
 
 A repository passes code quality when:
-- auto-fix stage makes no further changes, or any changes are automatically handled
-- strict lint is green
+- the pre-commit auto-fix commands make no further changes (nothing left to fix)
+- strict lint is green in Jenkins
 - type checks are green
 - required tests are green
 - the same command path used by Jenkins is green

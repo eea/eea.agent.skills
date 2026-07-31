@@ -16,7 +16,12 @@ Dockerfile.test-based pattern this skill defaults to:
 - Auto-fix stages (`ruff format`, `ruff check`) commit and push straight
   back to the PR branch and then fail the build on purpose
   (`sh 'exit 1'`) to force a fresh CI run against the fixed commit, rather
-  than just failing with a diagnostic.
+  than just failing with a diagnostic. This is real, historical EEA
+  practice in this repo — it is **not** the currently recommended
+  approach. The jenkins-pipeline `SKILL.md`'s "Pre-commit auto-fix, not a
+  Jenkins stage" section explains why: auto-fixing now happens before the
+  commit, using the same commands Jenkins verifies with `--check`/no-`--fix`
+  flags, rather than having CI mutate and push code itself.
 - Release automation (versioning, changelog, PyPI + internal egg-repo
   publish) is delegated entirely to the `eeacms/gitflow` Docker image,
   driven by env vars — no manual version-bump/publish scripting in the
