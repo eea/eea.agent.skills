@@ -37,10 +37,18 @@ runs **before the commit** instead, as part of writing or repairing code:
 - `isort`
 - `prettier --write`
 
-Run these using the exact same `Dockerfile.test` image and command strings
-Jenkins' `Code linting` stage will use, so what gets committed is already
-what Jenkins would accept. The Jenkins pipeline then only needs strict,
-read-only verification stages (`--check`/no-`--fix`) that must already
+Run these with the same command strings and tool versions
+`Dockerfile.test`/Jenkins' `Code linting` stage use, so what gets committed
+is already what Jenkins would accept — but that doesn't mean running them
+through Docker every time. Once `Dockerfile.test` itself has been built and
+validated once (mandatory the first time the Jenkinsfile is created — see
+`jenkins-pipeline`'s Required workflow), prefer running natively on the
+host whenever the installed tool versions match what `Dockerfile.test`
+pins; see `code-quality`'s "Native tools vs Docker for pre-commit
+auto-fix" for the version-check procedure. Falling back to Docker on every
+commit is unnecessary overhead once that parity is confirmed. The Jenkins
+pipeline then only needs strict, read-only verification stages
+(`--check`/no-`--fix`) that must already
 pass — it never re-fixes anything itself.
 
 ## EEA warning about Ruff docstring rules

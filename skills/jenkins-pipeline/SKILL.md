@@ -231,14 +231,25 @@ auto-commit-from-CI pattern EEA does not want.
 
 Auto-fixing belongs **before the commit**, not in CI: it's Phase 3 of the
 "Required workflow" above (run the safe fixers — `ruff check --fix`,
-`ruff format`, `black`, `isort`, `prettier --write` — inside the same
-`Dockerfile.test` image Jenkins will use, using the exact same commands,
-then rerun the check). By the time a Jenkinsfile is generated, the code
-should already be clean; `Code linting` in Jenkins is a **strict, read-only
-verification** of that (`--check` flags, no `--fix`), not a second chance
-to fix things. A lint failure in Jenkins means the pre-commit auto-fix step
-was skipped or a check exists that isn't mechanically fixable — not
-something for the pipeline itself to repair.
+`ruff format`, `black`, `isort`, `prettier --write` — using the exact
+commands Jenkins will use, then rerun the check). By the time a Jenkinsfile
+is generated, the code should already be clean; `Code linting` in Jenkins
+is a **strict, read-only verification** of that (`--check` flags, no
+`--fix`), not a second chance to fix things. A lint failure in Jenkins
+means the pre-commit auto-fix step was skipped or a check exists that
+isn't mechanically fixable — not something for the pipeline itself to
+repair.
+
+Phase 2/3 (building `Dockerfile.test` and running the commands inside it)
+is mandatory the *first* time — that's what proves the commands going into
+the Jenkinsfile actually work in the environment Jenkins uses. It is not
+mandatory on every later commit: once that parity is established, prefer
+running the same auto-fix commands natively on the host when the installed
+tool versions match what `Dockerfile.test` pins — see `code-quality`'s
+"Native tools vs Docker for pre-commit auto-fix". Requiring a Docker build
+for every routine commit is exactly the overhead a developer shouldn't
+have to pay once the Jenkinsfile already exists and Dockerfile.test hasn't
+changed.
 
 Do not assume any auto-fixer, wherever it runs, can solve:
 - test failures

@@ -43,14 +43,17 @@ Use this skill when you need to:
 3. Separate safe auto-fixes from non-fixable policy rules.
 4. Do not assume one tool can fix everything.
 5. Do not declare success until the same commands used by Jenkins pass.
-6. Auto-fix before the commit, not in CI. If the repository has (or will
-   have) a Jenkins pipeline, run its `Code linting` stage's safe-fixer
-   commands (`ruff check --fix`, `ruff format`, `black`, `isort`,
-   `prettier --write`, etc.) yourself — using the same `Dockerfile.test`
-   image and command strings Jenkins uses — every time you add or modify
-   code, before it gets committed. Jenkins can't commit fixes back, so if
-   auto-fixable debt reaches CI, the pre-commit step was skipped; don't
-   rely on a Jenkins-side auto-fix stage to catch it.
+6. Auto-fix before the commit, not in CI. Run the same safe-fixer commands
+   Jenkins' `Code linting` stage verifies (`ruff check --fix`, `ruff
+   format`, `black`, `isort`, `prettier --write`, etc.) every time you add
+   or modify code, before it gets committed. Jenkins can't commit fixes
+   back, so if auto-fixable debt reaches CI, the pre-commit step was
+   skipped; don't rely on a Jenkins-side auto-fix stage to catch it.
+   Prefer running these natively on the host rather than through Docker
+   when the installed tool versions match `Dockerfile.test` — see "Native
+   tools vs Docker for pre-commit auto-fix" below. Don't skip the check
+   just because it's usually fast; skipping it is exactly how
+   auto-fixable debt reaches CI in the first place.
 
 ## Required workflow
 
@@ -117,6 +120,40 @@ The preferred EEA setup is:
 - Jenkins and the developer use the same Docker image or same `Dockerfile.test`
 - Jenkins and the developer use the same command strings
 - those commands are documented in plain shell form, not hidden behind tooling the developer may not have
+
+## Native tools vs Docker for pre-commit auto-fix
+
+Building and running `Dockerfile.test` on every commit is real overhead a
+developer shouldn't have to pay for routine code changes. It's mandatory
+exactly once per repository: when the Jenkinsfile is first created (or
+`Dockerfile.test` changes), build the image and run the lint/type/test
+commands inside it to confirm `Dockerfile.test` itself is correct and the
+commands that will go into the Jenkinsfile actually work — see the
+jenkins-pipeline skill's "Required workflow" Phase 2/3 for that. That step
+does not repeat on every later commit.
+
+After that initial validation, for ongoing day-to-day auto-fixing:
+
+1. Read the exact tool versions `Dockerfile.test` installs (pinned
+   versions in its `RUN pip install`/`RUN npm install` lines,
+   `requirements.txt`, `pyproject.toml`, or `package.json`).
+2. Check what's installed on the host for each tool (`ruff --version`,
+   `black --version`, `mypy --version`, `npx eslint --version`, `npx
+   prettier --version`, etc. — prefer the project-local install, e.g. a
+   `.venv` or `node_modules`, over a global one, since that's what's
+   actually pinned).
+3. If a tool's host version matches what `Dockerfile.test` installs, run
+   its auto-fix command natively — no `docker build`/`docker run` needed.
+   This is the common case and is what makes routine auto-fixing fast.
+4. If a tool is missing locally, or its version differs from what
+   `Dockerfile.test` pins, either install/upgrade it locally to match
+   before running natively, or fall back to running that one tool through
+   Docker for this pass — don't silently run a mismatched version and
+   call it verified, since a fixer or linter can behave differently
+   across versions.
+5. This version check itself is cheap (a handful of `--version` calls) and
+   worth doing every time, even though the auto-fix commands themselves
+   usually run natively afterward.
 
 ## Recommended quality-stage model
 
