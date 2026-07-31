@@ -236,8 +236,76 @@ When asked to generate a Jenkins pipeline, provide:
 
 <!-- BEGIN EEA-OVERRIDES -->
 # EEA-Specific Overrides
-<!-- EEA-Overrides-Version: 1.1 -->
-<!-- Last-Sync: 2026-07-30 -->
+<!-- EEA-Overrides-Version: 1.2 -->
+<!-- Last-Sync: 2026-07-31 -->
+
+## EEA Trivy severity gate
+
+Gate the build on `CRITICAL` findings only, not `HIGH,CRITICAL`. A
+`HIGH,CRITICAL` gate is noisy in practice — a real scan of a
+`python:3.11-slim` (Debian trixie) release image turned up 33 `HIGH` findings
+in base-OS packages the repository owner has no control over, on top of the
+`CRITICAL` ones. `HIGH` should stay visible, not block the pipeline.
+
+Still generate a `HIGH,CRITICAL` report and archive it as a build artifact so
+`HIGH` findings stay visible, but only the `CRITICAL`-severity scan should set
+the stage's exit code. If the repository has a `.trivyignore` (for CVEs that
+are accepted risk — e.g. no fixed version published upstream yet — with a
+comment explaining why), pass it to *both* scans via `--ignorefile` so
+accepted findings don't reappear in the report or fail the gate. Because
+`.trivyignore` lives in the checked-out workspace and the trivy container
+can't see it via a bind mount (see the Docker-outside-of-Docker constraint
+below), get it in with `docker create` + `docker cp` + `docker start`, the
+same way any other workspace file has to reach a spawned container here:
+
+```groovy
+stage('Trivy test') {
+  steps {
+    sh '''
+      mkdir -p trivy-reports
+
+      docker create --name "$TRIVY_CONTAINER" \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        "$TRIVY_IMAGE" image --no-progress --format table --severity HIGH,CRITICAL \
+        --ignorefile /tmp/.trivyignore --output /tmp/trivy-image.txt "$RELEASE_IMAGE"
+      docker cp .trivyignore "$TRIVY_CONTAINER":/tmp/.trivyignore
+      docker start -a "$TRIVY_CONTAINER" || true
+      docker cp "$TRIVY_CONTAINER":/tmp/trivy-image.txt trivy-reports/trivy-image.txt
+      docker rm -v "$TRIVY_CONTAINER"
+    '''
+    archiveArtifacts artifacts: 'trivy-reports/*.txt', fingerprint: true, allowEmptyArchive: false
+
+    sh '''
+      docker create --name "$TRIVY_GATE_CONTAINER" \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        "$TRIVY_IMAGE" image --no-progress --severity CRITICAL --exit-code 1 \
+        --ignorefile /tmp/.trivyignore "$RELEASE_IMAGE"
+      docker cp .trivyignore "$TRIVY_GATE_CONTAINER":/tmp/.trivyignore
+      docker start -a "$TRIVY_GATE_CONTAINER"
+      status=$?
+      docker rm -v "$TRIVY_GATE_CONTAINER"
+      exit $status
+    '''
+  }
+}
+```
+
+The first block never fails the stage (`|| true` on the scan itself) — it
+only produces the full report for the archived artifact. The second block is
+the actual gate and only fails on `CRITICAL`. Archive before the gating call
+so the report is still available if the build fails. If the repository has
+no `.trivyignore`, drop `--ignorefile` and the two `docker cp .trivyignore
+...` lines and use a plain `docker run --rm` for each scan instead of
+create/cp/start.
+
+Validated CVE example: a scan turned up 4 `CRITICAL` findings, all in
+`perl-base` on Debian trixie (`CVE-2026-13221`, `CVE-2026-42496`,
+`CVE-2026-57433`, `CVE-2026-8376`), none with a fixed version published by
+Debian. Since `python:3.11-slim` was already on the latest Debian release, no
+Dockerfile version bump could resolve them — the right move was documenting
+them in `.trivyignore` with a reason (unfixed upstream, `perl-base` isn't
+part of the app's own code path) rather than loosening the gate further or
+leaving the build red waiting on an upstream patch.
 
 ## EEA plugin/step constraint
 
