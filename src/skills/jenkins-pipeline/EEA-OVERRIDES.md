@@ -368,8 +368,26 @@ when in the workflow this happens and why (badges need a working Jenkins
 job path and Sonar project key, which only exist once the pipeline is
 written). Don't wait for the developer to bring it up unprompted — most
 won't know this convention exists — but never add badges without an
-explicit yes, and never apply a fixed template. It's a conversation. Once
-they say yes, ask:
+explicit yes, and never apply a fixed template. It's a conversation.
+
+**Check the README for existing badges first.** Before asking anything
+else, look for markdown image links pointing at
+`ci.eionet.europa.eu/buildStatus` or
+`sonarqube.eea.europa.eu/api/project_badges` already in the README. If any
+exist:
+- Tell the developer what's already there (which ones, for which
+  branch/job).
+- Ask whether to keep them alongside whatever gets added now, replace them
+  entirely, or leave the README's badges untouched — don't default to
+  appending new badges next to old ones without asking; that produces
+  duplicate or redundant badge rows nobody wanted.
+- If the developer's request already says "regenerate", "replace", or
+  "redo" the badges, treat that as the answer — remove every existing
+  recognized badge first, then add the newly-chosen set. No need to ask
+  the replace-vs-keep question again in that case, since they already
+  answered it.
+
+Once badges are wanted (new or replacing), ask:
 
 1. Do they want badges in the README at all, and for which branch(es)?
    Default to just the repository's default branch unless they say
