@@ -768,6 +768,26 @@ they say yes, ask:
    | Reliability | `reliability_rating` |
    | Security | `security_rating` |
 
+   **All 7 must be individually choosable — never bundle or drop any of
+   them to fit a tool's option limit.** A structured multi-select question
+   UI commonly caps out at 4 selectable options; asking "which do you
+   want" through one and stopping there silently produces exactly the
+   bug this skill hit once already: 3 distinct rating badges (Reliability,
+   Security, Maintainability) collapsed into a single "ratings" option,
+   and Duplications and Security Hotspots Reviewed dropped from the list
+   entirely, without the developer ever seeing them as choices. If the
+   available question tool caps out below 7 options, either:
+   - split the ask into two batched multi-select questions (e.g. 4 badges
+     in one, the remaining 3 in the next), so each stays individually
+     selectable, or
+   - enumerate the complete list of all 7 as plain text in the question
+     itself (not just as option labels), so the developer sees every name
+     even if only some are individually clickable, and can say "also add
+     X" for whatever wasn't clickable.
+   Do not silently decide that grouping several metrics under one label is
+   good enough — the developer asked to see the full menu, not a
+   pre-curated subset.
+
    Badge/link pattern for each chosen measure metric:
 
    ```markdown
