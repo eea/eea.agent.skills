@@ -313,6 +313,28 @@ measure badges above — it does not take a `metric=` parameter:
 [![Quality Gate](https://sonarqube.eea.europa.eu/api/project_badges/quality_gate?project=<repo>)](https://sonarqube.eea.europa.eu/dashboard?id=<repo>)
 ```
 
+It also renders visually differently from every other badge here: the
+Quality Gate badge is a large square icon (~94×71px), while the Jenkins
+pipeline badge and all 6 measure badges are small flat single-line badges
+(~20px tall). Don't interleave the Quality Gate badge into a line of flat
+badges — it breaks the row's alignment and looks inconsistent. Put it on
+its own line (first, since it's the headline pass/fail signal), then all
+the flat badges — Pipeline plus whichever measure badges were chosen —
+together on one shared line, since they're visually consistent with each
+other:
+
+```markdown
+[![Quality Gate](https://sonarqube.eea.europa.eu/api/project_badges/quality_gate?project=<repo>)](https://sonarqube.eea.europa.eu/dashboard?id=<repo>)
+
+[![Pipeline](...)](...)
+[![Coverage](...)](...)
+[![Duplications](...)](...)
+[![Security Hotspots](...)](...)
+[![Maintainability](...)](...)
+[![Reliability](...)](...)
+[![Security](...)](...)
+```
+
 Recommendation on Quality Gates generally: gate on **New Code** conditions
 (0 new bugs, 0 new vulnerabilities, new-code coverage above a threshold,
 low new-code duplication) rather than absolute/overall-code thresholds.
@@ -389,9 +411,15 @@ exist:
 
 Once badges are wanted (new or replacing), ask:
 
-1. Do they want badges in the README at all, and for which branch(es)?
-   Default to just the repository's default branch unless they say
-   otherwise — see why below.
+1. Do they want badges in the README at all, and for which branch(es)? Ask
+   this explicitly rather than assuming the current branch — and if the
+   current branch is a short-lived feature/PR branch that will be merged
+   and deleted, say so as part of the question: badges pinned to it will
+   look frozen or broken once it's gone (see "Only ever point badges at
+   the default branch" below for why), so it's usually not what they want
+   unless they're only checking the badges render correctly before the
+   merge. Default to just the repository's default branch unless they
+   explicitly want a non-default branch too.
 2. Do they want a Jenkins pipeline badge? If yes, use this confirmed
    pattern (image URL uses `%2F`-joined path segments; the link target uses
    literal `/job/<segment>/job/<segment>/...` path segments — these are two
@@ -417,10 +445,19 @@ Once badges are wanted (new or replacing), ask:
    |---|---|
    | Coverage | `coverage` |
    | Duplications | `duplicated_lines_density` |
-   | Security Hotspots Reviewed | `security_hotspots_reviewed` |
+   | Security Hotspots | `security_hotspots` |
    | Maintainability | `sqale_rating` |
    | Reliability | `reliability_rating` |
    | Security | `security_rating` |
+
+   `security_hotspots` (a hotspot **count**), not `security_hotspots_reviewed`
+   (a %-reviewed metric that does not exist for this endpoint) — confirmed by
+   the badge API itself: querying with `security_hotspots_reviewed` returns
+   an HTTP 400 with the exact list of accepted `metric` values, and
+   `security_hotspots_reviewed` is not in it. If a future check ever turns
+   up a different accepted-metric list, trust that error response over this
+   table — it's the actual server enforcing the value, not documentation
+   that can drift.
 
    **All 7 must be individually choosable — never bundle or drop any of
    them to fit a tool's option limit.** A structured multi-select question
@@ -428,7 +465,7 @@ Once badges are wanted (new or replacing), ask:
    want" through one and stopping there silently produces exactly the
    bug this skill hit once already: 3 distinct rating badges (Reliability,
    Security, Maintainability) collapsed into a single "ratings" option,
-   and Duplications and Security Hotspots Reviewed dropped from the list
+   and Duplications and Security Hotspots dropped from the list
    entirely, without the developer ever seeing them as choices. If the
    available question tool caps out below 7 options, either:
    - split the ask into two batched multi-select questions (e.g. 4 badges
