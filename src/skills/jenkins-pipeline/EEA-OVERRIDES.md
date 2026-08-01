@@ -425,6 +425,38 @@ specific non-default branch anyway (e.g. documenting a `develop` line
 alongside `main` in the same README), that's their call to make explicitly —
 just don't default to it or suggest it unprompted.
 
+### Badges for a specific non-default branch (when the developer explicitly asks)
+
+This only makes sense as a genuinely multi-branch README section — a
+second row documenting a long-lived branch (`develop`, a release line)
+alongside the default-branch row, the same dual-row convention seen in
+older EEA READMEs (one row per branch, each with its own Jenkins job and
+its own Sonar branch). It is not a substitute for the default-branch badge
+on an otherwise single-branch README — see above for why that goes stale.
+
+For that branch's row:
+- SonarQube measure badge: add `&branch=<branch>` to **both** the badge
+  image URL and its dashboard link:
+  ```markdown
+  [![<Label>](https://sonarqube.eea.europa.eu/api/project_badges/measure?project=<repo>&branch=<branch>&metric=<metric>)](https://sonarqube.eea.europa.eu/dashboard?id=<repo>&branch=<branch>)
+  ```
+  Same for the Quality Gate badge:
+  ```markdown
+  [![Quality Gate](https://sonarqube.eea.europa.eu/api/project_badges/quality_gate?project=<repo>&branch=<branch>)](https://sonarqube.eea.europa.eu/dashboard?id=<repo>&branch=<branch>)
+  ```
+- Jenkins pipeline badge: point at that branch's own job, using the
+  existing pattern with `<branch>` filled in
+  (`.../buildStatus/icon?job=<org-folder>%2F<repo>%2F<branch>&subject=<branch>`)
+  — no separate pattern needed, the placeholder already supports this.
+- The branch must actually have been analyzed by Jenkins with
+  `sonar.branch.name=<branch>` at least once, or the badge shows "not
+  found" the same way the unscoped default-branch badge does when `main`
+  hasn't been analyzed yet — see below.
+- Reserve this for long-lived branches, not throwaway feature/PR branches.
+  A short-lived branch's Sonar data may eventually be cleaned up once the
+  branch is inactive/deleted, at which point its badge would start
+  showing "not found" again with no code change to explain why.
+
 ### SonarQube badges show "not found" until the default branch itself has been analyzed
 
 An unscoped SonarQube badge URL (no `&branch=`) shows whatever the
