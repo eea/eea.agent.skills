@@ -789,6 +789,27 @@ specific non-default branch anyway (e.g. documenting a `develop` line
 alongside `main` in the same README), that's their call to make explicitly —
 just don't default to it or suggest it unprompted.
 
+### SonarQube badges show "not found" until the default branch itself has been analyzed
+
+An unscoped SonarQube badge URL (no `&branch=`) shows whatever the
+project's designated **default branch** in Sonar has — not "the latest
+analysis of any kind." If every Jenkins run so far only ever analyzed a
+feature branch (`sonar.branch.name=<feature>`) or a pull request
+(`sonar.pullrequest.key=...`), the default branch itself (typically `main`)
+has no data yet, and the badge renders `Quality gate has not been found` /
+`Measure has not been found` — confirmed directly by curling
+`api/project_badges/quality_gate`/`measure` with and without `&branch=`:
+without it, "not found"; with `&branch=<feature-branch-that-was-actually-analyzed>`,
+real data. This is not a badge URL bug — the syntax is correct, there's
+just nothing yet for the branch it's implicitly asking about.
+
+This resolves itself the first time Jenkins runs directly on the default
+branch (merging the PR that introduces the Jenkinsfile is normally what
+does this). Tell the developer this explicitly when adding badges during
+initial Jenkins setup: they will show "not found" until that first
+default-branch build completes — that's expected, not a sign something is
+broken.
+
 ## EEA cross-skill routing
 
 Before finalizing a Jenkinsfile, cross-check every non-core step and `options {}` entry against `references/eea-available-plugins.md` (see "EEA plugin/step constraint" above).
