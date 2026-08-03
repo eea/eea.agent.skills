@@ -605,12 +605,15 @@ section for why.
 
 ## EEA multi-arch Docker build and release
 
-Only relevant when a repository's release image needs to run on `arm64`
-as well as `amd64` (e.g. Volto add-ons, or images meant to run on
-Apple Silicon dev machines or ARM-based production hosts) — most EEA
-repos don't need this and should keep the plain single-arch
-`docker build`/`docker push` pattern from the `Release on Docker Hub`
-stage above.
+When finalizing a Jenkinsfile, ask the developer whether the release image
+needs to run on `arm64` as well as `amd64` (e.g. Volto add-ons, or images
+meant to run on Apple Silicon dev machines or ARM-based production hosts)
+— don't silently decide either way, and don't assume most repos need it
+(most don't, and should keep the plain single-arch `docker build`/`docker
+push` pattern from the `Release on Docker Hub` stage above). Make clear
+this isn't a now-or-never decision: multi-arch support can be added later
+with no cost to not having it today — it only touches the release stage,
+not anything earlier in the pipeline.
 
 Multi-platform images cannot be produced with the classic
 `docker.build(...)` / `dockerImage.push()` Jenkins Docker Pipeline plugin
@@ -706,6 +709,12 @@ label may time out or starve other jobs.
 
 ## EEA Helm chart / Rancher catalog release stage
 
+When finalizing a Jenkinsfile, ask the developer whether releases should
+automatically update a Helm chart / Rancher catalog entry — don't decide
+this silently either way. Make clear it can be added later with no cost to
+skipping it now: the stage below is safe to add pre-emptively even before
+a chart exists (see below), so there's no rush to decide up front.
+
 ```groovy
 stage('Release helm chart (on tag)') {
   when {
@@ -724,19 +733,36 @@ stage('Release helm chart (on tag)') {
 Same `eeacms/gitflow` release tool used everywhere else in EEA pipelines
 (see "EEA real-world pipeline examples" above), pointed at a Rancher
 catalog template path via `RANCHER_CATALOG_PATHS` and gated to only run on
-tag builds. Safe to add **even when the repository has no Helm
-chart/Rancher catalog template yet** — it's a no-op until one exists at
-that path, and adding the stage preemptively means a chart can be added
-later with no further Jenkinsfile changes. `jekinsdockerhub` and
-`eea-jenkins-token` are confirmed real, working credential IDs — seen
-across multiple independent real EEA Jenkinsfiles
-(`eea.docker.jenkins.master`, `eionet.xmlconv`) that actually exercised
-this exact stage in production, unlike `dockerhub`, which looked plausible
-but turned out not to exist as an actual credential entry (`Could not find
-credentials entry with ID 'dockerhub'` the first time a stage using it
-really ran — it had only ever been copied forward, never exercised). Still
-confirm against the actual Jenkins instance/folder before trusting either
-name blindly for a *new* org or credential scope.
+tag builds. This also updates **Rancher Fleet** files when they exist in
+the repository — Fleet is Rancher's GitOps continuous-delivery mechanism
+for the Rancher 2-managed Kubernetes clusters EEA runs, and `eeacms/gitflow`
+keeps Fleet manifests in sync with the release the same way it keeps the
+Helm/Rancher catalog entry in sync, with no separate stage or tool needed.
+
+Safe to add **even when the repository has no Helm chart/Rancher catalog
+template yet** — it's a no-op until one exists at that path, and adding
+the stage preemptively means a chart can be added later with no further
+Jenkinsfile changes. `jekinsdockerhub` and `eea-jenkins-token` are
+confirmed real, working credential IDs — seen across multiple independent
+real EEA Jenkinsfiles (`eea.docker.jenkins.master`, `eionet.xmlconv`) that
+actually exercised this exact stage in production, unlike `dockerhub`,
+which looked plausible but turned out not to exist as an actual credential
+entry (`Could not find credentials entry with ID 'dockerhub'` the first
+time a stage using it really ran — it had only ever been copied forward,
+never exercised). Still confirm against the actual Jenkins instance/folder
+before trusting either name blindly for a *new* org or credential scope.
+
+### Adding a Helm chart to a repo that already has a Jenkinsfile
+
+This can come from the other direction too: a developer might ask to add
+a Helm chart (or Rancher Fleet files) to a repository, unrelated to any
+Jenkinsfile work, on a repo that already has a working Jenkinsfile. Check
+whether that Jenkinsfile already has a `Release helm chart` stage — if it
+doesn't, proactively propose adding one now that there's an actual chart
+for it to release, rather than leaving the developer to remember to come
+back and wire up automation separately. This mirrors the badge-asking
+pattern elsewhere in this skill: surface the option at the moment it
+becomes relevant, don't wait to be asked.
 
 ## EEA Docker cleanup policy
 
@@ -1096,6 +1122,13 @@ When building or updating Jenkins pipelines with quality gates, also apply the `
 If the repository already fails its own lint, typing, or tests before the Jenkinsfile is written, route into `quality-fixes` first. The Jenkins skill should surface the expected failures, ask whether to repair them, and only then finalize the pipeline so the first push-triggered Jenkins run is less likely to fail.
 
 Before finalizing the `Trivy test` stage, also apply `docker-expert`'s "Trivy CVE preflight for release Dockerfiles": build the release image locally, scan it for `CRITICAL` findings, fix what has a published fix, and add what doesn't to `.trivyignore` with a reason. Do this preflight the same way the lint/test preflight above works — surface what's found, fix or document it, and only then generate the Jenkinsfile's Trivy stage — so the first Jenkins run isn't the first time anyone learns the release image has an unresolved CRITICAL CVE.
+
+Before generating the Jenkinsfile's release stages, ask whether multi-arch
+(`arm64`) builds and/or a Helm chart / Rancher Fleet release stage are
+wanted — see "EEA multi-arch Docker build and release" and "EEA Helm
+chart / Rancher catalog release stage" above. Make clear both can be
+added later with no cost to skipping them now, so the developer doesn't
+feel pressured into a decision they don't have the information for yet.
 
 After the Jenkinsfile is finalized (Jenkins job path and `sonar.projectKey`
 known), proactively ask the developer whether they want README CI/quality
