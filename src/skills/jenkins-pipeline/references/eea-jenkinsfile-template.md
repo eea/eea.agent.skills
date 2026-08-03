@@ -147,7 +147,14 @@ pipeline {
         }
       }
       steps {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+        // 'jekinsdockerhub' is the credential ID confirmed across multiple
+        // real EEA Jenkinsfiles (eea.docker.jenkins.master,
+        // eionet.xmlconv) — not 'dockerhub', which looked plausible but
+        // isn't a real credential entry and fails with "Could not find
+        // credentials entry with ID 'dockerhub'" the first time a stage
+        // using it actually runs. Still confirm against the actual Jenkins
+        // instance/folder rather than assuming either name is universal.
+        withCredentials([usernamePassword(credentialsId: 'jekinsdockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
           sh '''echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin'''
           sh '''docker tag $RELEASE_IMAGE $DOCKERHUB_IMAGE:$IMAGE_TAG'''
           sh '''docker push $DOCKERHUB_IMAGE:$IMAGE_TAG'''

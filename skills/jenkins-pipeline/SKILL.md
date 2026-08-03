@@ -653,7 +653,7 @@ stage('Release on Docker Hub') {
         checkout scm
         tagName = env.BRANCH_NAME == 'main' ? 'latest' : env.BRANCH_NAME
       }
-      withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+      withCredentials([usernamePassword(credentialsId: 'jekinsdockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
         sh '''
           ls /proc/sys/fs/binfmt_misc/qemu-aarch64 2>/dev/null || docker run --privileged --rm tonistiigi/binfmt --install arm64
           docker buildx create --name "${IMAGE_NAME}-builder" --driver docker-container 2>/dev/null || true
@@ -702,11 +702,16 @@ catalog template path via `RANCHER_CATALOG_PATHS` and gated to only run on
 tag builds. Safe to add **even when the repository has no Helm
 chart/Rancher catalog template yet** — it's a no-op until one exists at
 that path, and adding the stage preemptively means a chart can be added
-later with no further Jenkinsfile changes. Confirm the actual credential
-IDs (`eea-jenkins-token`, `jekinsdockerhub` here) match what this specific
-Jenkins instance/org actually has configured rather than assuming — other
-EEA repos use different credential ID naming (e.g. `dockerhub` in the
-single-arch release pattern above).
+later with no further Jenkinsfile changes. `jekinsdockerhub` and
+`eea-jenkins-token` are confirmed real, working credential IDs — seen
+across multiple independent real EEA Jenkinsfiles
+(`eea.docker.jenkins.master`, `eionet.xmlconv`) that actually exercised
+this exact stage in production, unlike `dockerhub`, which looked plausible
+but turned out not to exist as an actual credential entry (`Could not find
+credentials entry with ID 'dockerhub'` the first time a stage using it
+really ran — it had only ever been copied forward, never exercised). Still
+confirm against the actual Jenkins instance/folder before trusting either
+name blindly for a *new* org or credential scope.
 
 ## EEA Docker cleanup policy
 
