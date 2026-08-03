@@ -321,14 +321,17 @@ stage('Release on Docker Hub') {
   when {
     anyOf {
       buildingTag()
-      branch 'main'
+      expression { env.BRANCH_NAME == env.DEFAULT_BRANCH }
     }
   }
   steps {
     node(label: 'docker-big-jobs') {
       script {
         checkout scm
-        tagName = env.BRANCH_NAME == 'main' ? 'latest' : env.BRANCH_NAME
+        // env.DEFAULT_BRANCH is a hardcoded literal set from the
+        // repository's actual default branch (checked in Phase 1, never
+        // assumed to be 'main' — plenty of EEA repos still use 'master').
+        tagName = env.BRANCH_NAME == env.DEFAULT_BRANCH ? 'latest' : env.BRANCH_NAME
       }
       withCredentials([usernamePassword(credentialsId: 'jekinsdockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
         sh '''

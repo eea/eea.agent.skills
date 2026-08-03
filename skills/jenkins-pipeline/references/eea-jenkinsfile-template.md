@@ -18,6 +18,10 @@ pipeline {
     // silent until a release build runs on the branch this stage is gated
     // on and pushes to e.g. "eeacms/main" instead of the real repo name.
     GIT_NAME = "your-repo-name"
+    // Hardcoded literal too, checked via `git remote show origin` or the
+    // GitHub API in Phase 1 — never assume 'main'; plenty of EEA repos
+    // still default to 'master'.
+    DEFAULT_BRANCH = "main"
     IMAGE_NAME = BUILD_TAG.toLowerCase()
     TEST_IMAGE = "${IMAGE_NAME}-test"
     RELEASE_IMAGE = "${GIT_NAME}:${env.BUILD_NUMBER}"
@@ -46,7 +50,7 @@ pipeline {
             }
             env.IMAGE_TAG = env.TAG_NAME
           } else {
-            env.IMAGE_TAG = env.BRANCH_NAME == 'master' ? env.APP_VERSION : "${env.APP_VERSION}-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+            env.IMAGE_TAG = "${env.APP_VERSION}-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
           }
         }
       }
@@ -163,7 +167,10 @@ pipeline {
       when {
         allOf {
           environment name: 'CHANGE_ID', value: ''
-          branch 'master'
+          anyOf {
+            expression { env.BRANCH_NAME == env.DEFAULT_BRANCH }
+            buildingTag()
+          }
         }
       }
       steps {
@@ -175,9 +182,21 @@ pipeline {
         // using it actually runs. Still confirm against the actual Jenkins
         // instance/folder rather than assuming either name is universal.
         withCredentials([usernamePassword(credentialsId: 'jekinsdockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
-          sh '''echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin'''
-          sh '''docker tag $RELEASE_IMAGE $DOCKERHUB_IMAGE:$IMAGE_TAG'''
-          sh '''docker push $DOCKERHUB_IMAGE:$IMAGE_TAG'''
+          sh '''
+            echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            # A version-numbered tag must correspond to an actual release
+            # (a git tag) — pushing it on every plain branch build would
+            # ship e.g. "1.2.0" before that version is actually tagged.
+            # :latest tracks the newest default-branch build regardless.
+            if [ -n "${TAG_NAME:-}" ]; then
+              docker tag "$RELEASE_IMAGE" "$DOCKERHUB_IMAGE:$IMAGE_TAG"
+              docker push "$DOCKERHUB_IMAGE:$IMAGE_TAG"
+            fi
+            if [ "$BRANCH_NAME" = "$DEFAULT_BRANCH" ]; then
+              docker tag "$RELEASE_IMAGE" "$DOCKERHUB_IMAGE:latest"
+              docker push "$DOCKERHUB_IMAGE:latest"
+            fi
+          '''
         }
       }
     }

@@ -46,6 +46,12 @@ Jenkinsfile written after it is a fact.
    - integration / e2e test commands
    - coverage output capabilities
    - Docker build context and release image details
+   - the repository's actual default branch (`git remote show origin |
+     grep 'HEAD branch'`, or `gh repo view --json defaultBranchRef`) —
+     don't assume `main`; plenty of EEA repos still default to `master`,
+     and getting this wrong means every "default branch" check in the
+     generated Jenkinsfile (the Docker Hub release gate, the `:latest`
+     tag, the untagged-`IMAGE_TAG` fallback) silently never fires
    - whether this repo fits the Docker-based JS/Python default at all, or
      matches one of the alternate real shapes in `references/examples/`
      instead (Java/Maven via Jenkins tool installations, a Python
@@ -375,19 +381,57 @@ See `references/dockerfile-test-template.md` for the expected layout.
       error("Git tag (${env.TAG_NAME}) does not match pyproject.toml version (${env.BASE_VERSION}) — bump pyproject.toml to match the tag before releasing.")
     }
     env.VERSION = env.TAG_NAME
-  } else if (env.BRANCH_NAME == 'main') {
+  } else if (env.BRANCH_NAME == env.DEFAULT_BRANCH) {
     env.VERSION = env.BASE_VERSION
   } else {
     env.VERSION = "${env.BASE_VERSION}-${env.SANITIZED_BRANCH}-${env.BUILD_NUMBER}-${env.GIT_SHA_SHORT}"
   }
   ```
+  `env.DEFAULT_BRANCH` is a hardcoded literal set in the `environment {}`
+  block from the repository's actual default branch — checked via `git
+  remote show origin` or the GitHub API in Phase 1, never assumed to be
+  `main` (plenty of EEA repos still default to `master`).
   Failing loudly on a mismatch turns a silent mis-tagged release into an
   immediate, fixable build failure — it also catches the human error
   (forgetting to bump the version file before tagging) at the moment it
   happens rather than after a wrong image is already on Docker Hub.
 - For branch builds (no tag), derive the version from the project's
   source-of-truth file (`package.json`, `pyproject.toml`, etc.), appending
-  branch/build metadata if the existing release flow expects it.
+  branch/build metadata if the existing release flow expects it — this
+  value is still useful for things like `sonar.projectVersion`, just not
+  for what gets pushed to Docker Hub (see below).
+- **A version-numbered Docker tag must correspond to an actual release
+  (a git tag), never a plain branch build.** Confirmed as a real bug in
+  practice: a Jenkinsfile that unconditionally pushes
+  `$DOCKERHUB_REPOSITORY:$VERSION` on every default-branch build ends up
+  pushing e.g. `0.1.0` on the *first* merge that happens to carry that
+  version string in `package.json`/`pyproject.toml` — well before `0.1.0`
+  is actually tagged/released. Push the version tag only when
+  `env.TAG_NAME` is set; push `:latest` on default-branch builds instead
+  (`:latest` means "newest build of the default branch," not "newest
+  release" — those can differ):
+  ```groovy
+  if (env.TAG_NAME) {
+    docker.tag(RELEASE_IMAGE, "${DOCKERHUB_REPOSITORY}:${env.TAG_NAME}")
+    // push the version tag
+  }
+  if (env.BRANCH_NAME == env.DEFAULT_BRANCH) {
+    docker.tag(RELEASE_IMAGE, "${DOCKERHUB_REPOSITORY}:latest")
+    // push :latest
+  }
+  ```
+  The `when` clause gating the whole release stage also needs
+  `buildingTag()` alongside the default-branch check — otherwise a tag
+  build never reaches this stage at all and the `env.TAG_NAME` branch
+  above is dead code:
+  ```groovy
+  when {
+    anyOf {
+      expression { env.BRANCH_NAME == env.DEFAULT_BRANCH }
+      buildingTag()
+    }
+  }
+  ```
 - Use Jenkins credentials for Docker Hub authentication.
 - Separate image build from image push into different stages.
 - Push tags only from the intended protected branch or release context.
@@ -729,14 +773,17 @@ stage('Release on Docker Hub') {
   when {
     anyOf {
       buildingTag()
-      branch 'main'
+      expression { env.BRANCH_NAME == env.DEFAULT_BRANCH }
     }
   }
   steps {
     node(label: 'docker-big-jobs') {
       script {
         checkout scm
-        tagName = env.BRANCH_NAME == 'main' ? 'latest' : env.BRANCH_NAME
+        // env.DEFAULT_BRANCH is a hardcoded literal set from the
+        // repository's actual default branch (checked in Phase 1, never
+        // assumed to be 'main' — plenty of EEA repos still use 'master').
+        tagName = env.BRANCH_NAME == env.DEFAULT_BRANCH ? 'latest' : env.BRANCH_NAME
       }
       withCredentials([usernamePassword(credentialsId: 'jekinsdockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
         sh '''
