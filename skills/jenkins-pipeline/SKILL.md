@@ -342,8 +342,33 @@ See `references/dockerfile-test-template.md` for the expected layout.
 
 ## Versioning and release guidance
 
-- Derive version from the project source of truth when possible (`package.json`, `pyproject.toml`, Git tags, etc.).
-- For branch builds, append branch / build metadata if the existing release flow expects it.
+- On a tag build (`env.TAG_NAME` set), the Docker image version **must be
+  the git tag itself**, not independently read from `package.json`/
+  `pyproject.toml` — those are two different sources that can silently
+  drift apart (confirmed in practice: a repo tagged `0.1.0` while
+  `pyproject.toml` still said `0.2.0` pushed a Docker image tagged
+  `0.2.0`, completely ignoring the tag that supposedly triggered the
+  release). Read the version file for comparison, not as the source of
+  truth for the pushed tag:
+  ```groovy
+  if (env.TAG_NAME) {
+    if (env.BASE_VERSION != env.TAG_NAME) {
+      error("Git tag (${env.TAG_NAME}) does not match pyproject.toml version (${env.BASE_VERSION}) — bump pyproject.toml to match the tag before releasing.")
+    }
+    env.VERSION = env.TAG_NAME
+  } else if (env.BRANCH_NAME == 'main') {
+    env.VERSION = env.BASE_VERSION
+  } else {
+    env.VERSION = "${env.BASE_VERSION}-${env.SANITIZED_BRANCH}-${env.BUILD_NUMBER}-${env.GIT_SHA_SHORT}"
+  }
+  ```
+  Failing loudly on a mismatch turns a silent mis-tagged release into an
+  immediate, fixable build failure — it also catches the human error
+  (forgetting to bump the version file before tagging) at the moment it
+  happens rather than after a wrong image is already on Docker Hub.
+- For branch builds (no tag), derive the version from the project's
+  source-of-truth file (`package.json`, `pyproject.toml`, etc.), appending
+  branch/build metadata if the existing release flow expects it.
 - Use Jenkins credentials for Docker Hub authentication.
 - Separate image build from image push into different stages.
 - Push tags only from the intended protected branch or release context.

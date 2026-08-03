@@ -27,7 +27,19 @@ pipeline {
       steps {
         script {
           env.APP_VERSION = sh(script: "jq -r '.version' package.json", returnStdout: true).trim()
-          env.IMAGE_TAG = env.BRANCH_NAME == 'master' ? env.APP_VERSION : "${env.APP_VERSION}-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+          // On a tag build, the image tag must be the git tag itself, not
+          // package.json's version read independently — those can drift
+          // apart (a repo tagged 0.1.0 while package.json still says
+          // 0.2.0 would otherwise silently push a 0.2.0 image). Fail
+          // loudly on a mismatch instead of shipping the wrong tag.
+          if (env.TAG_NAME) {
+            if (env.APP_VERSION != env.TAG_NAME) {
+              error("Git tag (${env.TAG_NAME}) does not match package.json version (${env.APP_VERSION}) — bump package.json to match the tag before releasing.")
+            }
+            env.IMAGE_TAG = env.TAG_NAME
+          } else {
+            env.IMAGE_TAG = env.BRANCH_NAME == 'master' ? env.APP_VERSION : "${env.APP_VERSION}-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+          }
         }
       }
     }
