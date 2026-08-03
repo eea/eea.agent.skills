@@ -571,6 +571,142 @@ section for why.
    - compute tags before release
 7. `Release on Docker Hub`
    - authenticate with Jenkins credentials and push the release image
+   - if the repository needs `arm64` alongside `amd64`, use the multi-arch
+     buildx pattern instead of a plain `docker build`/`docker push` — see
+     "EEA multi-arch Docker build and release" below
+   - optionally followed by a Helm chart / Rancher catalog release stage —
+     see "EEA Helm chart / Rancher catalog release stage" below; safe to
+     add even before the repository has a chart yet
+
+## EEA multi-arch Docker build and release
+
+Only relevant when a repository's release image needs to run on `arm64`
+as well as `amd64` (e.g. Volto add-ons, or images meant to run on
+Apple Silicon dev machines or ARM-based production hosts) — most EEA
+repos don't need this and should keep the plain single-arch
+`docker build`/`docker push` pattern from the `Release on Docker Hub`
+stage above.
+
+Multi-platform images cannot be produced with the classic
+`docker.build(...)` / `dockerImage.push()` Jenkins Docker Pipeline plugin
+DSL — that only ever handles single-arch images. Multi-arch requires
+`docker buildx` directly via `sh`, the same way the plain single-arch
+release stage already authenticates with raw `docker login`/`docker
+push`/`docker logout` rather than the `docker.withRegistry()` DSL.
+
+### One-time-per-build-node setup (idempotent, safe to repeat every run)
+
+```groovy
+sh '''
+  ls /proc/sys/fs/binfmt_misc/qemu-aarch64 2>/dev/null || docker run --privileged --rm tonistiigi/binfmt --install arm64
+  docker buildx create --name "${IMAGE_NAME}-builder" --driver docker-container 2>/dev/null || true
+  docker buildx use "${IMAGE_NAME}-builder"
+'''
+```
+
+`tonistiigi/binfmt` registers QEMU emulation for `arm64` on the (typically
+`amd64`) build node — check for it first rather than reinstalling every
+run. The `buildx` builder instance is a small persistent container; create
+it idempotently (`|| true`) and reuse it across builds rather than
+removing it in cleanup — recreating it every run is wasted overhead, and
+unlike test containers it holds no per-build state worth cleaning up.
+
+### Fast sanity check: does it build for every platform? (no push, no load)
+
+```groovy
+stage('Multi-platform build check') {
+  steps {
+    sh '''
+      ls /proc/sys/fs/binfmt_misc/qemu-aarch64 2>/dev/null || docker run --privileged --rm tonistiigi/binfmt --install arm64
+      docker buildx create --name "${IMAGE_NAME}-builder" --driver docker-container 2>/dev/null || true
+      docker buildx use "${IMAGE_NAME}-builder"
+      docker buildx build --platform linux/amd64,linux/arm64 .
+    '''
+  }
+}
+```
+
+Deliberately has no `-t`/`--push`/`--load` — `buildx` can't `--load` a
+multi-platform result into the local image store at all (only single-arch
+builds can be loaded locally), so this only ever validates that the
+Dockerfile builds cleanly on every target platform, catching arm64-only
+breakage (a dependency with no arm64 wheel/binary, an arch-specific base
+image issue) before it reaches the actual release. Decide whether to run
+it on every build (safer, but QEMU-emulated arm64 steps are meaningfully
+slower than native) or only right before the release stage (cheaper, but
+arm64 breakage surfaces later) — there's a real cost/coverage tradeoff
+here, not a single right answer.
+
+### Actual release: multi-arch build + push
+
+```groovy
+stage('Release on Docker Hub') {
+  when {
+    anyOf {
+      buildingTag()
+      branch 'main'
+    }
+  }
+  steps {
+    node(label: 'docker-big-jobs') {
+      script {
+        checkout scm
+        tagName = env.BRANCH_NAME == 'main' ? 'latest' : env.BRANCH_NAME
+      }
+      withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+        sh '''
+          ls /proc/sys/fs/binfmt_misc/qemu-aarch64 2>/dev/null || docker run --privileged --rm tonistiigi/binfmt --install arm64
+          docker buildx create --name "${IMAGE_NAME}-builder" --driver docker-container 2>/dev/null || true
+          docker buildx use "${IMAGE_NAME}-builder"
+          echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+          docker buildx build --platform linux/amd64,linux/arm64 -t "$registry:$tagName" --push .
+          docker logout
+        '''
+      }
+    }
+  }
+}
+```
+
+`--push` is mandatory here (the substitute for `--load`, since a
+multi-platform result can't be loaded locally) — it assembles and pushes
+the multi-arch manifest list directly to the registry in one step, so
+there's no separate local image to `docker tag`/`docker push` afterward
+the way the single-arch pattern does it. `node(label: 'docker-big-jobs')`
+reflects that multi-arch builds (especially the QEMU-emulated `arm64` leg)
+are meaningfully heavier than a native single-arch build — confirm the
+actual node label with enough resources exists for this repo's Jenkins
+setup rather than assuming `docker-big-jobs` is universal; a smaller/busier
+label may time out or starve other jobs.
+
+## EEA Helm chart / Rancher catalog release stage
+
+```groovy
+stage('Release helm chart (on tag)') {
+  when {
+    buildingTag()
+  }
+  steps {
+    node(label: 'docker') {
+      withCredentials([string(credentialsId: 'eea-jenkins-token', variable: 'GITHUB_TOKEN'), usernamePassword(credentialsId: 'jekinsdockerhub', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
+        sh '''docker pull eeacms/gitflow; docker run -i --rm --name="$BUILD_TAG-release" -e GIT_BRANCH="$BRANCH_NAME" -e GIT_NAME="$GIT_NAME" -e DOCKERHUB_REPO="$registry" -e GIT_TOKEN="$GITHUB_TOKEN" -e DOCKERHUB_USER="$DOCKERHUB_USER" -e DOCKERHUB_PASS="$DOCKERHUB_PASS" -e DEPENDENT_DOCKERFILE_URL="$DEPENDENT_DOCKERFILE_URL" -e RANCHER_CATALOG_PATHS="$template" -e GITFLOW_BEHAVIOR="RUN_ON_TAG" eeacms/gitflow'''
+      }
+    }
+  }
+}
+```
+
+Same `eeacms/gitflow` release tool used everywhere else in EEA pipelines
+(see "EEA real-world pipeline examples" above), pointed at a Rancher
+catalog template path via `RANCHER_CATALOG_PATHS` and gated to only run on
+tag builds. Safe to add **even when the repository has no Helm
+chart/Rancher catalog template yet** — it's a no-op until one exists at
+that path, and adding the stage preemptively means a chart can be added
+later with no further Jenkinsfile changes. Confirm the actual credential
+IDs (`eea-jenkins-token`, `jekinsdockerhub` here) match what this specific
+Jenkins instance/org actually has configured rather than assuming — other
+EEA repos use different credential ID naming (e.g. `dockerhub` in the
+single-arch release pattern above).
 
 ## EEA Docker cleanup policy
 
