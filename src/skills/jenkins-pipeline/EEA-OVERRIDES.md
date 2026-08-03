@@ -217,14 +217,28 @@ section for why.
 ## EEA multi-arch Docker build and release
 
 When finalizing a Jenkinsfile, ask the developer whether the release image
-needs to run on `arm64` as well as `amd64` (e.g. Volto add-ons, or images
-meant to run on Apple Silicon dev machines or ARM-based production hosts)
-— don't silently decide either way, and don't assume most repos need it
-(most don't, and should keep the plain single-arch `docker build`/`docker
-push` pattern from the `Release on Docker Hub` stage above). Make clear
-this isn't a now-or-never decision: multi-arch support can be added later
-with no cost to not having it today — it only touches the release stage,
-not anything earlier in the pipeline.
+needs to run on `arm64` as well as `amd64` — don't silently decide either
+way, and don't assume the developer already knows what these mean.
+Explain them in plain terms when asking, since not every developer works
+with CPU architectures day to day:
+
+- **`amd64`** (aka `x86_64`) is the architecture almost all cloud servers
+  and most developers' Windows/Linux machines use. **This is the default**
+  — if nothing is said, build `amd64` only.
+- **`arm64`** (aka `aarch64`) is the architecture Apple Silicon Macs
+  (M1/M2/M3/M4+) use natively, and increasingly some cloud instances
+  (e.g. AWS Graviton) and lower-power/edge hosts. Building for it too means
+  the same image runs natively (no emulation) on those machines as well.
+
+Only add `arm64` when there's an actual reason to (e.g. this is a Volto
+add-on, the image needs to run on ARM-based production hosts, or
+developers on Apple Silicon want native-speed local runs instead of
+emulated `amd64`) — most EEA repos don't need it and should keep the plain
+single-arch `docker build`/`docker push` pattern from the `Release on
+Docker Hub` stage above. Make clear this isn't a now-or-never decision:
+multi-arch support can be added later with no cost to not having it today
+— it only touches the release stage, not anything earlier in the
+pipeline.
 
 Multi-platform images cannot be produced with the classic
 `docker.build(...)` / `dockerImage.push()` Jenkins Docker Pipeline plugin
@@ -735,11 +749,13 @@ If the repository already fails its own lint, typing, or tests before the Jenkin
 Before finalizing the `Trivy test` stage, also apply `docker-expert`'s "Trivy CVE preflight for release Dockerfiles": build the release image locally, scan it for `CRITICAL` findings, fix what has a published fix, and add what doesn't to `.trivyignore` with a reason. Do this preflight the same way the lint/test preflight above works — surface what's found, fix or document it, and only then generate the Jenkinsfile's Trivy stage — so the first Jenkins run isn't the first time anyone learns the release image has an unresolved CRITICAL CVE.
 
 Before generating the Jenkinsfile's release stages, ask whether multi-arch
-(`arm64`) builds and/or a Helm chart / Rancher Fleet release stage are
-wanted — see "EEA multi-arch Docker build and release" and "EEA Helm
-chart / Rancher catalog release stage" above. Make clear both can be
-added later with no cost to skipping them now, so the developer doesn't
-feel pressured into a decision they don't have the information for yet.
+(`arm64`, in addition to the `amd64` default — explain what these mean
+rather than assuming the developer already knows) builds and/or a Helm
+chart / Rancher Fleet release stage are wanted — see "EEA multi-arch
+Docker build and release" and "EEA Helm chart / Rancher catalog release
+stage" above. Make clear both can be added later with no cost to skipping
+them now, so the developer doesn't feel pressured into a decision they
+don't have the information for yet.
 
 After the Jenkinsfile is finalized (Jenkins job path and `sonar.projectKey`
 known), proactively ask the developer whether they want README CI/quality
