@@ -46,17 +46,32 @@ Jenkinsfile written after it is a fact.
    - integration / e2e test commands
    - coverage output capabilities
    - Docker build context and release image details
+   - whether this repo fits the Docker-based JS/Python default at all, or
+     matches one of the alternate real shapes in `references/examples/`
+     instead (Java/Maven via Jenkins tool installations, a Python
+     egg/Plone add-on, a Dockerfile-only release repo). Decide this now —
+     it changes what Phase 2 means, not just what Phase 4 generates.
 
 ### Phase 2 — Build the exact environment CI will run in
 
-2. If `Dockerfile.test` does not exist, use `docker-expert` to create it
-   now. Do not move on to testing without it — every command in Phase 3
-   must run inside this image, not on the host, because that's what the
-   Jenkinsfile will do too. A check that only ever ran on the host has not
-   actually been validated against what Jenkins will execute.
-3. Build it: `docker build -f Dockerfile.test -t <repo>-test:preflight .`.
+2. **If this repo fits the Docker-based default:** if `Dockerfile.test`
+   does not exist, use `docker-expert` to create it now. Do not move on to
+   testing without it — every command in Phase 3 must run inside this
+   image, not on the host, because that's what the Jenkinsfile will do
+   too. A check that only ever ran on the host has not actually been
+   validated against what Jenkins will execute.
+   Build it: `docker build -f Dockerfile.test -t <repo>-test:preflight .`.
    If this fails, fix the Dockerfile.test itself before doing anything
    else — nothing downstream can be trusted until the image builds.
+3. **If this repo instead matches a `references/examples/` pattern that
+   uses Jenkins-provided tools instead of a project-owned test image**
+   (e.g. Java/Maven's `tools { maven 'maven3'; jdk 'Java17' }`) — do not
+   create a `Dockerfile.test`; it would go unused by the Jenkinsfile you
+   generate in Phase 4 and just adds dead weight to the repo. Preflight
+   instead against a public image that matches the Jenkins tool version
+   (e.g. `docker run --rm -v "$PWD":/workspace -w /workspace
+   maven:<version>-eclipse-temurin-<jdk> <command>`) as a stand-in for
+   what the Jenkins `tools{}` block provides.
 
 ### Phase 3 — Preflight with the exact commands the Jenkinsfile will use
 
@@ -138,6 +153,10 @@ Generated Jenkinsfiles must satisfy all of the following:
   - saves JUnit XML
   - saves LCOV as `lcov.info` when available
   - publishes the results in Jenkins
+  - **may be omitted** when the repository genuinely has nothing to
+    integration-test against — a CLI tool or library with no server/DB to
+    stand up. Don't omit it just because writing the tests is more work;
+    only when there's no running application for it to exercise.
 - Include a `Sonarqube test` stage that passes source path, test result paths, and LCOV paths to `sonar-scanner`.
 - Include a `Trivy test` stage that scans the release Docker image.
 - Include versioning and Docker Hub release stages.

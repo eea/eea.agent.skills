@@ -9,7 +9,15 @@ pipeline {
   }
 
   environment {
-    GIT_NAME = env.JOB_BASE_NAME
+    // Hardcoded literal, not env.JOB_BASE_NAME — on a Multibranch Pipeline
+    // job that resolves to the *branch* name, not the repo name (confirmed
+    // against both the real eionet.xmlconv Java pipeline, which hardcodes
+    // it for the same reason, and eea-ai-mission-aipossible's real working
+    // Jenkinsfile, which hardcodes its image basenames outright rather
+    // than deriving them from any Jenkins env var). Getting this wrong is
+    // silent until a release build runs on the branch this stage is gated
+    // on and pushes to e.g. "eeacms/main" instead of the real repo name.
+    GIT_NAME = "your-repo-name"
     IMAGE_NAME = BUILD_TAG.toLowerCase()
     TEST_IMAGE = "${IMAGE_NAME}-test"
     RELEASE_IMAGE = "${GIT_NAME}:${env.BUILD_NUMBER}"

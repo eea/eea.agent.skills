@@ -46,17 +46,32 @@ Jenkinsfile written after it is a fact.
    - integration / e2e test commands
    - coverage output capabilities
    - Docker build context and release image details
+   - whether this repo fits the Docker-based JS/Python default at all, or
+     matches one of the alternate real shapes in `references/examples/`
+     instead (Java/Maven via Jenkins tool installations, a Python
+     egg/Plone add-on, a Dockerfile-only release repo). Decide this now —
+     it changes what Phase 2 means, not just what Phase 4 generates.
 
 ### Phase 2 — Build the exact environment CI will run in
 
-2. If `Dockerfile.test` does not exist, use `docker-expert` to create it
-   now. Do not move on to testing without it — every command in Phase 3
-   must run inside this image, not on the host, because that's what the
-   Jenkinsfile will do too. A check that only ever ran on the host has not
-   actually been validated against what Jenkins will execute.
-3. Build it: `docker build -f Dockerfile.test -t <repo>-test:preflight .`.
+2. **If this repo fits the Docker-based default:** if `Dockerfile.test`
+   does not exist, use `docker-expert` to create it now. Do not move on to
+   testing without it — every command in Phase 3 must run inside this
+   image, not on the host, because that's what the Jenkinsfile will do
+   too. A check that only ever ran on the host has not actually been
+   validated against what Jenkins will execute.
+   Build it: `docker build -f Dockerfile.test -t <repo>-test:preflight .`.
    If this fails, fix the Dockerfile.test itself before doing anything
    else — nothing downstream can be trusted until the image builds.
+3. **If this repo instead matches a `references/examples/` pattern that
+   uses Jenkins-provided tools instead of a project-owned test image**
+   (e.g. Java/Maven's `tools { maven 'maven3'; jdk 'Java17' }`) — do not
+   create a `Dockerfile.test`; it would go unused by the Jenkinsfile you
+   generate in Phase 4 and just adds dead weight to the repo. Preflight
+   instead against a public image that matches the Jenkins tool version
+   (e.g. `docker run --rm -v "$PWD":/workspace -w /workspace
+   maven:<version>-eclipse-temurin-<jdk> <command>`) as a stand-in for
+   what the Jenkins `tools{}` block provides.
 
 ### Phase 3 — Preflight with the exact commands the Jenkinsfile will use
 
@@ -138,6 +153,10 @@ Generated Jenkinsfiles must satisfy all of the following:
   - saves JUnit XML
   - saves LCOV as `lcov.info` when available
   - publishes the results in Jenkins
+  - **may be omitted** when the repository genuinely has nothing to
+    integration-test against — a CLI tool or library with no server/DB to
+    stand up. Don't omit it just because writing the tests is more work;
+    only when there's no running application for it to exercise.
 - Include a `Sonarqube test` stage that passes source path, test result paths, and LCOV paths to `sonar-scanner`.
 - Include a `Trivy test` stage that scans the release Docker image.
 - Include versioning and Docker Hub release stages.
@@ -401,14 +420,41 @@ in base-OS packages the repository owner has no control over, on top of the
 
 Still generate a `HIGH,CRITICAL` report and archive it as a build artifact so
 `HIGH` findings stay visible, but only the `CRITICAL`-severity scan should set
-the stage's exit code. If the repository has a `.trivyignore` (for CVEs that
-are accepted risk — e.g. no fixed version published upstream yet — with a
-comment explaining why), pass it to *both* scans via `--ignorefile` so
-accepted findings don't reappear in the report or fail the gate. Because
-`.trivyignore` lives in the checked-out workspace and the trivy container
-can't see it via a bind mount (see the Docker-outside-of-Docker constraint
-below), get it in with `docker create` + `docker cp` + `docker start`, the
-same way any other workspace file has to reach a spawned container here:
+the stage's exit code.
+
+**Most repos have no `.trivyignore` yet — this is the common case.** When
+there's no `.trivyignore` to get into the scan container, use a plain
+`docker run --rm` for each scan:
+
+```groovy
+stage('Trivy test') {
+  steps {
+    sh '''
+      mkdir -p trivy-reports
+      docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+        "$TRIVY_IMAGE" image --no-progress --format table --severity HIGH,CRITICAL \
+        "$RELEASE_IMAGE" | tee trivy-reports/trivy-image.txt
+    '''
+    archiveArtifacts artifacts: 'trivy-reports/*.txt', fingerprint: true, allowEmptyArchive: false
+
+    sh '''
+      docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+        "$TRIVY_IMAGE" image --no-progress --severity CRITICAL --exit-code 1 \
+        "$RELEASE_IMAGE"
+    '''
+  }
+}
+```
+
+Only reach for the more complex pattern below once the repository actually
+has a `.trivyignore` (for CVEs that are accepted risk — e.g. no fixed version
+published upstream yet — with a comment explaining why): pass it to *both*
+scans via `--ignorefile` so accepted findings don't reappear in the report or
+fail the gate. Because `.trivyignore` lives in the checked-out workspace and
+the trivy container can't see it via a bind mount (see the
+Docker-outside-of-Docker constraint below), get it in with `docker create` +
+`docker cp` + `docker start` instead of the plain `docker run --rm` above —
+the same way any other workspace file has to reach a spawned container here:
 
 ```groovy
 stage('Trivy test') {
@@ -445,10 +491,7 @@ stage('Trivy test') {
 The first block never fails the stage (`|| true` on the scan itself) — it
 only produces the full report for the archived artifact. The second block is
 the actual gate and only fails on `CRITICAL`. Archive before the gating call
-so the report is still available if the build fails. If the repository has
-no `.trivyignore`, drop `--ignorefile` and the two `docker cp .trivyignore
-...` lines and use a plain `docker run --rm` for each scan instead of
-create/cp/start.
+so the report is still available if the build fails.
 
 Validated CVE example: a scan turned up 4 `CRITICAL` findings, all in
 `perl-base` on Debian trixie (`CVE-2026-13221`, `CVE-2026-42496`,

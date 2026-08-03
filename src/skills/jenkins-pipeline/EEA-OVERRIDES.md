@@ -12,14 +12,41 @@ in base-OS packages the repository owner has no control over, on top of the
 
 Still generate a `HIGH,CRITICAL` report and archive it as a build artifact so
 `HIGH` findings stay visible, but only the `CRITICAL`-severity scan should set
-the stage's exit code. If the repository has a `.trivyignore` (for CVEs that
-are accepted risk — e.g. no fixed version published upstream yet — with a
-comment explaining why), pass it to *both* scans via `--ignorefile` so
-accepted findings don't reappear in the report or fail the gate. Because
-`.trivyignore` lives in the checked-out workspace and the trivy container
-can't see it via a bind mount (see the Docker-outside-of-Docker constraint
-below), get it in with `docker create` + `docker cp` + `docker start`, the
-same way any other workspace file has to reach a spawned container here:
+the stage's exit code.
+
+**Most repos have no `.trivyignore` yet — this is the common case.** When
+there's no `.trivyignore` to get into the scan container, use a plain
+`docker run --rm` for each scan:
+
+```groovy
+stage('Trivy test') {
+  steps {
+    sh '''
+      mkdir -p trivy-reports
+      docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+        "$TRIVY_IMAGE" image --no-progress --format table --severity HIGH,CRITICAL \
+        "$RELEASE_IMAGE" | tee trivy-reports/trivy-image.txt
+    '''
+    archiveArtifacts artifacts: 'trivy-reports/*.txt', fingerprint: true, allowEmptyArchive: false
+
+    sh '''
+      docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+        "$TRIVY_IMAGE" image --no-progress --severity CRITICAL --exit-code 1 \
+        "$RELEASE_IMAGE"
+    '''
+  }
+}
+```
+
+Only reach for the more complex pattern below once the repository actually
+has a `.trivyignore` (for CVEs that are accepted risk — e.g. no fixed version
+published upstream yet — with a comment explaining why): pass it to *both*
+scans via `--ignorefile` so accepted findings don't reappear in the report or
+fail the gate. Because `.trivyignore` lives in the checked-out workspace and
+the trivy container can't see it via a bind mount (see the
+Docker-outside-of-Docker constraint below), get it in with `docker create` +
+`docker cp` + `docker start` instead of the plain `docker run --rm` above —
+the same way any other workspace file has to reach a spawned container here:
 
 ```groovy
 stage('Trivy test') {
@@ -56,10 +83,7 @@ stage('Trivy test') {
 The first block never fails the stage (`|| true` on the scan itself) — it
 only produces the full report for the archived artifact. The second block is
 the actual gate and only fails on `CRITICAL`. Archive before the gating call
-so the report is still available if the build fails. If the repository has
-no `.trivyignore`, drop `--ignorefile` and the two `docker cp .trivyignore
-...` lines and use a plain `docker run --rm` for each scan instead of
-create/cp/start.
+so the report is still available if the build fails.
 
 Validated CVE example: a scan turned up 4 `CRITICAL` findings, all in
 `perl-base` on Debian trixie (`CVE-2026-13221`, `CVE-2026-42496`,
