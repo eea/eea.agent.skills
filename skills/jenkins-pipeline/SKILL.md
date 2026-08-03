@@ -368,19 +368,25 @@ See `references/dockerfile-test-template.md` for the expected layout.
 ## Versioning and release guidance
 
 - On a tag build (`env.TAG_NAME` set), the Docker image version **must be
-  the git tag itself**, not independently read from `package.json`/
-  `pyproject.toml` — those are two different sources that can silently
-  drift apart (confirmed in practice: a repo tagged `0.1.0` while
-  `pyproject.toml` still said `0.2.0` pushed a Docker image tagged
-  `0.2.0`, completely ignoring the tag that supposedly triggered the
-  release). Read the version file for comparison, not as the source of
-  truth for the pushed tag:
+  the git tag itself, unconditionally** — not independently read from
+  `package.json`/`pyproject.toml`, and not gated on the two agreeing. The
+  git tag is the actual thing a developer asked to release; the version
+  file is a secondary signal that's useful to cross-check but not
+  authoritative enough to block a release over. Treat a mismatch as a
+  **warning, not a hard failure** — plenty of legitimate cases produce
+  one deliberately: alpha/beta/rc pre-releases, a `v`-prefixed tag
+  convention (`v1.2.3` vs a version file that just says `1.2.3`), or a
+  version file that's intentionally not bumped until some other
+  release-automation step runs. Failing the build in those cases would
+  block a perfectly intentional release:
   ```groovy
   if (env.TAG_NAME) {
-    if (env.BASE_VERSION != env.TAG_NAME) {
-      error("Git tag (${env.TAG_NAME}) does not match pyproject.toml version (${env.BASE_VERSION}) — bump pyproject.toml to match the tag before releasing.")
-    }
     env.VERSION = env.TAG_NAME
+    def normalizedTag = env.TAG_NAME.replaceFirst(/^v/, '')
+    if (env.BASE_VERSION != env.TAG_NAME && env.BASE_VERSION != normalizedTag) {
+      echo "WARNING: git tag (${env.TAG_NAME}) does not match pyproject.toml version (${env.BASE_VERSION}) — pushing ${env.VERSION} anyway. Bump pyproject.toml to match if this wasn't intentional."
+      currentBuild.result = 'UNSTABLE'
+    }
   } else if (env.BRANCH_NAME == env.DEFAULT_BRANCH) {
     env.VERSION = env.BASE_VERSION
   } else {
@@ -391,10 +397,11 @@ See `references/dockerfile-test-template.md` for the expected layout.
   block from the repository's actual default branch — checked via `git
   remote show origin` or the GitHub API in Phase 1, never assumed to be
   `main` (plenty of EEA repos still default to `master`).
-  Failing loudly on a mismatch turns a silent mis-tagged release into an
-  immediate, fixable build failure — it also catches the human error
-  (forgetting to bump the version file before tagging) at the moment it
-  happens rather than after a wrong image is already on Docker Hub.
+  `currentBuild.result = 'UNSTABLE'` still surfaces the mismatch loudly
+  (yellow build, visible in GitHub Checks and email notifications)
+  without blocking the release the developer explicitly asked for by
+  pushing the tag — this turns a silent mis-tagged surprise into a
+  visible-but-non-blocking signal instead of an outright failure.
 - For branch builds (no tag), derive the version from the project's
   source-of-truth file (`package.json`, `pyproject.toml`, etc.), appending
   branch/build metadata if the existing release flow expects it — this

@@ -39,16 +39,20 @@ pipeline {
       steps {
         script {
           env.APP_VERSION = sh(script: "jq -r '.version' package.json", returnStdout: true).trim()
-          // On a tag build, the image tag must be the git tag itself, not
-          // package.json's version read independently — those can drift
-          // apart (a repo tagged 0.1.0 while package.json still says
-          // 0.2.0 would otherwise silently push a 0.2.0 image). Fail
-          // loudly on a mismatch instead of shipping the wrong tag.
+          // On a tag build, the image tag is always the git tag itself,
+          // unconditionally — never gated on matching package.json. A
+          // mismatch is only a warning: alpha/beta/rc pre-releases, a
+          // v-prefixed tag convention, or a version file that's
+          // deliberately not bumped until later are all legitimate, and
+          // hard-failing would block a release the developer explicitly
+          // asked for by pushing the tag.
           if (env.TAG_NAME) {
-            if (env.APP_VERSION != env.TAG_NAME) {
-              error("Git tag (${env.TAG_NAME}) does not match package.json version (${env.APP_VERSION}) — bump package.json to match the tag before releasing.")
-            }
             env.IMAGE_TAG = env.TAG_NAME
+            def normalizedTag = env.TAG_NAME.replaceFirst(/^v/, '')
+            if (env.APP_VERSION != env.TAG_NAME && env.APP_VERSION != normalizedTag) {
+              echo "WARNING: git tag (${env.TAG_NAME}) does not match package.json version (${env.APP_VERSION}) — pushing ${env.IMAGE_TAG} anyway. Bump package.json to match if this wasn't intentional."
+              currentBuild.result = 'UNSTABLE'
+            }
           } else {
             env.IMAGE_TAG = "${env.APP_VERSION}-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
           }
