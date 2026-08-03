@@ -32,6 +32,18 @@ full console log is needed:
 ```bash
 gh api repos/<owner>/<repo>/commits/<sha>/check-runs --jq '.check_runs[] | {name, conclusion, output}'
 ```
+Confirmed live against a real PR: the aggregate `Jenkins` check's
+`output.text` includes a full per-stage timing breakdown (which stage ran,
+how long it took) even on success — genuinely useful for spotting which
+stage to look at without opening the Jenkins UI at all. Some checks
+(commonly ones from other GitHub Actions/apps, not Jenkins itself) instead
+report `output.summary`/`output.text` as `null` with a nonzero
+`annotations_count` — the actual detail lives at a separate endpoint in
+that case:
+```bash
+gh api repos/<owner>/<repo>/commits/<sha>/check-runs --jq '.check_runs[] | select(.output.summary == null and .output.annotations_count > 0) | {name, id: .id}'
+gh api repos/<owner>/<repo>/check-runs/<id>/annotations
+```
 
 This requires `gh` installed and authenticated in the working environment
 (`gh auth status`). If it isn't available, fall back to asking the user
