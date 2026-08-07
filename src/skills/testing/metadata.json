@@ -1,0 +1,18 @@
+{
+  "id": "testing",
+  "name": "Testing",
+  "description": "Keep developer test commands identical to Jenkins, and raise real test coverage with tests that exercise actual behavior rather than gaming the coverage number.",
+  "version": "1.0.0",
+  "eeaspecific": true,
+  "upstream": null,
+  "added_date": "2026-07-29",
+  "triggers": [
+    "testing",
+    "docker tests",
+    "unit tests",
+    "integration tests",
+    "jenkins parity",
+    "developer reproducibility",
+    "test coverage"
+  ]
+}

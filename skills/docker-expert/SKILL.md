@@ -528,6 +528,81 @@ When the Docker task is complete, consider these EEA skills:
 - All containers must comply with EEA security policy SC-01
 - Proxy exceptions required for external dependencies
 - Contact: EEA Platform Team for registry access issues
+
+### Dockerfile.test for Jenkins Pipelines
+
+This is the canonical contract for `Dockerfile.test` — `jenkins-pipeline` and
+`testing` both reference this section rather than restating it, since the
+same image is what Jenkins runs and what developers run locally to
+reproduce it exactly.
+
+When an EEA project needs Jenkins-based linting, unit tests, and integration tests in Docker:
+
+```dockerfile
+FROM node:20-bookworm
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
+COPY . .
+ENV CI=true
+CMD ["npm", "run", "test:ci"]
+```
+
+Required contract for `Dockerfile.test`:
+- The full repository source is copied into the image.
+- Development and test dependencies are installed, not just production dependencies.
+- The image can run linting, unit tests, and integration helpers.
+- Unit test results can be copied out as `junit.xml`.
+- Coverage can be copied out as `coverage/lcov.info` and `coverage/lcov-report/index.html`.
+- The image should be suitable for `docker run --name <container> ...` so Jenkins can use `docker cp` and then `docker rm -v`.
+- For mixed Python + Node repositories, prefer starting from a Node base image and installing Python tooling into it rather than copying `node` / `npm` binaries across images.
+- If `requirements.txt`, `pyproject.toml`, and lockfiles disagree, inspect which dependency source is actually buildable before freezing the Dockerfile around the wrong install path.
+- If `npm ci` fails because of peer dependency resolution in an existing project, use `--legacy-peer-deps` only as an explicit repository-specific decision, not as a universal default.
+
+### Trivy CVE preflight for release Dockerfiles
+
+Before considering a production `Dockerfile` finished (the one that builds
+the release image — not `Dockerfile.test`), scan it locally the same way the
+EEA Jenkins Trivy stage will, so the first Jenkins run doesn't fail on a CVE
+that could have been fixed or accepted up front. This mirrors the gate
+described in the `jenkins-pipeline` skill's "EEA Trivy severity gate".
+
+1. Build the release image locally:
+   ```bash
+   docker build -t <repo>-release:preflight .
+   ```
+2. Scan it for `CRITICAL` findings — the same severity the Jenkins gate
+   enforces:
+   ```bash
+   docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+     aquasec/trivy:<pinned-version> image --no-progress --format table \
+     --severity CRITICAL <repo>-release:preflight
+   ```
+   Also run a `HIGH,CRITICAL` pass so you see what will show up in the
+   archived Jenkins report even though it won't gate the build — otherwise
+   `HIGH` findings are a surprise the first time someone reads that report.
+3. For each `CRITICAL` finding, check the `Fixed Version` column Trivy
+   reports:
+   - If a fixed version exists — a newer base image tag, or a pinnable
+     package/dependency version — update the Dockerfile (bump the base
+     image tag, pin the package to the fixed version, e.g.
+     `apt-get install <pkg>=<fixed-version>`), then rebuild and rescan.
+     Repeat until no fixable `CRITICAL` finding remains.
+   - If `Fixed Version` is blank (no patch published upstream yet, e.g.
+     Trivy status `affected` or `fix_deferred`), do not block on it or
+     loosen the gate. Add it to `.trivyignore` instead, with a comment
+     giving: the package/CVE, that no upstream fix exists as of the scan
+     date, and whether the vulnerable package is even reachable from the
+     application's own code (most OS/apt transitive dependencies are not).
+4. Never add a finding to `.trivyignore` just because a fix is inconvenient
+   — only for confirmed no-fix-available cases, each with its own comment
+   explaining why. Don't blanket-ignore an entire severity tier.
+5. Clean up the local preflight image and any containers created for the
+   scan once done (`docker rmi <repo>-release:preflight`, `docker rm -v
+   <name>` for named scan containers) — this is a local-only check, not
+   something to leave running or leave images behind for.
+
+
 <!-- END EEA-OVERRIDES -->
 
 <!-- Merged Build: upstream SKILL.md + EEA-OVERRIDES.md -->

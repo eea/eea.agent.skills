@@ -140,6 +140,78 @@ skills:
     added_date: "2026-05-21"
     notes: Self-contained EEA skill with DESIGN.md reference doc and assets/ for official logos
 
+  - id: jenkins-pipeline
+    name: Jenkins Pipeline
+    description: Build Jenkins declarative pipelines for EEA projects with Docker-based testing, SonarQube, Trivy, versioning, and Docker Hub release automation.
+    category: devops
+    upstream: null
+    triggers:
+      - jenkins
+      - jenkinsfile
+      - pipeline
+      - sonarqube
+      - trivy
+      - docker hub
+      - ci/cd
+    version: "1.0.0"
+    eeaspecific: true
+    added_date: "2026-07-29"
+    notes: EEA-original Jenkins skill covering EEA Jenkinsfile format, Dockerfile.test contract, SonarQube, Trivy, versioning, and Docker Hub release guidance.
+
+  - id: code-quality
+    name: Code Quality
+    description: Produce and repair code so it passes repository linting, typing, tests, Docker checks, and Jenkins quality gates with minimal manual intervention.
+    category: software-development
+    upstream: null
+    triggers:
+      - code quality
+      - lint
+      - ruff
+      - mypy
+      - tests
+      - jenkins
+      - ai generated code
+    version: "1.0.0"
+    eeaspecific: true
+    added_date: "2026-07-29"
+    notes: Self-contained EEA skill for creating and repairing code so it passes real repository and Jenkins quality gates without relying on repeated manual fixer runs.
+
+  - id: quality-fixes
+    name: Quality Fixes
+    description: Diagnose and repair failing lint, typing, test, Docker, and Jenkins quality gates until the real blocking commands pass.
+    category: software-development
+    upstream: null
+    triggers:
+      - fix lint
+      - fix tests
+      - fix jenkins
+      - quality failures
+      - ruff failures
+      - mypy failures
+      - ci failures
+    version: "1.0.0"
+    eeaspecific: true
+    added_date: "2026-07-29"
+    notes: Self-contained EEA skill for repairing repositories that already fail code-quality or Jenkins verification before delivery.
+
+  - id: testing
+    name: Testing
+    description: Keep developer test commands identical to Jenkins, and raise real test coverage with tests that exercise actual behavior rather than gaming the coverage number.
+    category: software-development
+    upstream: null
+    triggers:
+      - testing
+      - docker tests
+      - unit tests
+      - integration tests
+      - jenkins parity
+      - developer reproducibility
+      - test coverage
+    version: "1.0.0"
+    eeaspecific: true
+    added_date: "2026-07-29"
+    notes: EEA-original skill covering the dev/Jenkins test-command parity contract and, going forward, guidance for closing real coverage gaps with meaningful tests rather than ones that only move the number.
+
 # Future skills placeholder
 # - chart: Data visualization and chart generation
 # - doc: Technical documentation generation

@@ -1,0 +1,18 @@
+{
+  "id": "code-quality",
+  "name": "Code Quality",
+  "description": "Produce and repair code so it passes repository linting, typing, tests, Docker checks, and Jenkins quality gates with minimal manual intervention.",
+  "version": "1.0.0",
+  "eeaspecific": true,
+  "upstream": null,
+  "added_date": "2026-07-29",
+  "triggers": [
+    "code quality",
+    "lint",
+    "ruff",
+    "mypy",
+    "tests",
+    "jenkins",
+    "ai generated code"
+  ]
+}

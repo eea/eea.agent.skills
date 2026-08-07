@@ -1,0 +1,18 @@
+{
+  "id": "jenkins-pipeline",
+  "name": "Jenkins Pipeline",
+  "description": "Build Jenkins declarative pipelines for EEA projects with Docker-based testing, SonarQube, Trivy, versioning, and Docker Hub release automation.",
+  "version": "1.0.0",
+  "eeaspecific": true,
+  "upstream": null,
+  "added_date": "2026-07-29",
+  "triggers": [
+    "jenkins",
+    "jenkinsfile",
+    "pipeline",
+    "sonarqube",
+    "trivy",
+    "docker hub",
+    "ci/cd"
+  ]
+}
