@@ -4,11 +4,7 @@
   "description": "Build Jenkins declarative pipelines for EEA projects with Docker-based testing, SonarQube, Trivy, versioning, and Docker Hub release automation.",
   "version": "1.0.0",
   "eeaspecific": true,
-  "upstream": {
-    "source": "aj-geddes/useful-ai-prompts",
-    "path": "skills/jenkins-pipeline",
-    "url": "https://github.com/aj-geddes/useful-ai-prompts"
-  },
+  "upstream": null,
   "added_date": "2026-07-29",
   "triggers": [
     "jenkins",

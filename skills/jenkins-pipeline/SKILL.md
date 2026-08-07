@@ -6,10 +6,8 @@ description: >
   Trivy image scanning, semantic versioning, and Docker Hub release.
 license: MIT
 metadata:
-  author: aj-geddes, EEA
+  author: EEA
   version: "1.0.0"
-  upstream_source: aj-geddes/useful-ai-prompts
-  upstream_url: https://github.com/aj-geddes/useful-ai-prompts
   eeaspecific: "true"
 ---
 
@@ -166,6 +164,17 @@ Generated Jenkinsfiles must satisfy all of the following:
 - Include a `Sonarqube test` stage that passes source path, test result paths, and LCOV paths to `sonar-scanner`.
 - Include a `Trivy test` stage that scans the release Docker image.
 - Include versioning and Docker Hub release stages.
+  - If the repository has no pre-existing Dockerfile of any kind and isn't
+    a service/application meant to run anywhere (a library, a one-off
+    script, a teaching/test artifact), do not silently invent a release
+    Dockerfile just to give this stage something to build — ask whether a
+    Docker Hub release is actually wanted first, the same way multi-arch
+    and Helm/Fleet release are asked about rather than assumed. Unlike
+    `Integration test`, this stage has no default "may be omitted"
+    carve-out — the default is still to include it — but for a repo with
+    no real deployment story, inventing the thing being released is a
+    bigger unilateral decision than the stage's own Groovy, and deserves
+    the same conversation as the other optional release stages.
 - Leave no stopped test containers behind. Named containers must be removed with `docker rm -v`.
 
 ## Stage blueprint
@@ -658,6 +667,36 @@ pipeline {
 }
 ```
 
+## Never pre-declare a dynamically-computed environment{} variable
+
+If a value (an image tag, a computed name, anything derived from a
+built-in like `BUILD_TAG`/`BUILD_NUMBER`) needs to exist as an exported
+shell variable for later `sh` steps, either:
+- compute it directly as an expression in the top-level `environment{}`
+  block (referencing earlier entries in that same block by bare name, and
+  real Jenkins built-ins with the `env.` prefix — e.g. `RELEASE_IMAGE =
+  "${DOCKERHUB_REPOSITORY}:${env.BUILD_TAG.toLowerCase()}"`), or
+- if it genuinely needs conditional/branching logic to compute (like the
+  `VERSION` value in the Versioning stage, which depends on
+  `env.TAG_NAME`/branch checks), compute it via `env.X = ...` inside a
+  `script {}` step — but only for a name that was **never** declared in
+  any `environment{}` block in the first place.
+
+Do not do both — do not pre-declare `SOMEVAR = ''` (or any placeholder) in
+the top-level `environment{}` block and then try to override it later via
+`env.SOMEVAR = ...` inside a stage's `script {}` step. The pre-declared
+value wins for every `sh` step regardless of the later assignment, and
+this fails silently: no error, no exception, just every `sh` step seeing
+the original placeholder. Confirmed via a real Jenkins run: exactly this
+pattern for `RELEASE_IMAGE` produced `docker build -t "$RELEASE_IMAGE" .`
+executing as `docker build -t '' .`, failing with `invalid tag "":
+repository name must have at least one component` — the script step that
+set `env.RELEASE_IMAGE` ran without error, and the value was simply never
+seen by the following `sh` step. This is easy to miss in local preflight
+testing (running the shell commands directly, or testing the Groovy logic
+in isolation) since it's specifically a Jenkins declarative-engine
+env-block-vs-script-block interaction, not a Docker or shell problem.
+
 ## EEA stage requirements
 
 EEA Jenkins pipeline outputs should include these stages. No `Auto-fix code
@@ -841,6 +880,15 @@ stage('Release helm chart (on tag)') {
 }
 ```
 
+All three credential-derived values above (`GIT_TOKEN`, `DOCKERHUB_USER`,
+`DOCKERHUB_PASS`) are bound via `withCredentials`, so Jenkins masks their
+literal values everywhere they appear in the build's console log — not
+just on the `docker run` line that sets them, but anywhere in the log
+stream, including output the spawned `eeacms/gitflow` container itself
+writes to stdout/stderr (e.g. if it ever dumps its environment while
+erroring). Putting each `-e` flag on its own line would not change this:
+masking works by scanning for the literal secret value, not by line.
+
 Same `eeacms/gitflow` release tool used everywhere else in EEA pipelines
 (see "EEA real-world pipeline examples" above), pointed at a Rancher
 catalog template path via `RANCHER_CATALOG_PATHS` and gated to only run on
@@ -942,13 +990,29 @@ not guessed):
 
 ```groovy
 sh '''
-  curl -s -XPOST -u "${SONAR_AUTH_TOKEN}:" "${SONAR_HOST_URL}api/alm_settings/set_github_binding" \
+  response=$(curl -s -w "\\n%{http_code}" -XPOST -u "${SONAR_AUTH_TOKEN}:" "${SONAR_HOST_URL}api/alm_settings/set_github_binding" \
     -d "almSetting=GitHubEEA" \
     -d "project=$GIT_NAME" \
     -d "repository=eea/$GIT_NAME" \
-    -d "summaryCommentEnabled=true"
+    -d "summaryCommentEnabled=true")
+  http_code=$(echo "$response" | tail -n1)
+  body=$(echo "$response" | sed "\\$d")
+  if [ "$http_code" -ge 400 ]; then
+    echo "WARNING: GitHubEEA binding call failed (HTTP $http_code): $body"
+    echo "PR decoration will not work until this is resolved -- check the CI token's Administer permission on this SonarQube project."
+  fi
 '''
 ```
+
+A bare `curl -s` with no response check (an earlier version of this
+snippet) fails *silently*: the call 403s, the build stays green, and
+nothing in the console log explains why PR decoration never shows up — a
+developer would have to know to go query the raw Sonar API themselves.
+The version above still doesn't fail the build over this (it's a
+nice-to-have, not a blocking gate — see the general "warn, don't
+hard-fail when there's a legitimate exception" principle), but it does
+make the failure visible in the build log with an actionable hint,
+instead of disappearing.
 
 - Required params: `almSetting` (the integration name, `GitHubEEA`),
   `project` (`sonar.projectKey`), `repository` (the GitHub repo). Optional:
@@ -1033,7 +1097,13 @@ it:
   test image.
 - `references/examples/java-maven-jenkinsfile.md` — a Java/Maven WAR
   application, using Jenkins `tools { maven; jdk }` instead of a
-  Dockerfile.test, JaCoCo coverage, and `mvn sonar:sonar`.
+  Dockerfile.test, JaCoCo coverage, and `mvn sonar:sonar`. If the
+  generated `pom.xml` doesn't already declare
+  `org.sonarsource.scanner.maven:sonar-maven-plugin` explicitly, add it —
+  otherwise `mvn sonar:sonar`'s prefix resolution depends on the
+  executing Jenkins node's own Maven settings and can pass or fail
+  depending on which node picks up the build; see that reference file for
+  the real Jenkins run this was confirmed against.
 - `references/examples/nodejs-volto-jenkinsfile.md` — a Volto (React/Plone
   frontend) add-on that must test against multiple core-framework versions
   in parallel and run a full Cypress integration suite against a real
@@ -1230,7 +1300,7 @@ When building or updating Jenkins pipelines with quality gates, also apply the `
 - whether a Ruff configuration contains non-fixable docstring debt that should not be treated as a mechanical cleanup problem
 - what exact Docker commands developers should run locally to reproduce Jenkins
 
-If the repository already fails its own lint, typing, or tests before the Jenkinsfile is written, route into `quality-fixes` first. The Jenkins skill should surface the expected failures, ask whether to repair them, and only then finalize the pipeline so the first push-triggered Jenkins run is less likely to fail.
+If the repository already fails its own lint, typing, or tests before the Jenkinsfile is written, route into `quality-fixes` first. The Jenkins skill should surface the expected failures, ask whether to repair them, and only then finalize the pipeline so the first push-triggered Jenkins run is less likely to fail. That push-triggered run is not hypothetical or delayed — EEA's GitHub↔Jenkins integration is org-wide (every repo's commits, PR events, and tags auto-trigger Jenkins with no manual step), so once the Jenkinsfile is pushed, a real build starts within seconds; see `references/diagnosing-failed-builds.md`'s "A push already triggers a real build" section before assuming a missing build means something is broken.
 
 Before finalizing the `Trivy test` stage, also apply `docker-expert`'s "Trivy CVE preflight for release Dockerfiles": build the release image locally, scan it for `CRITICAL` findings, fix what has a published fix, and add what doesn't to `.trivyignore` with a reason. Do this preflight the same way the lint/test preflight above works — surface what's found, fix or document it, and only then generate the Jenkinsfile's Trivy stage — so the first Jenkins run isn't the first time anyone learns the release image has an unresolved CRITICAL CVE.
 

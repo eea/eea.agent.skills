@@ -6,10 +6,8 @@ description: >
   Trivy image scanning, semantic versioning, and Docker Hub release.
 license: MIT
 metadata:
-  author: aj-geddes, EEA
+  author: EEA
   version: "1.0.0"
-  upstream_source: aj-geddes/useful-ai-prompts
-  upstream_url: https://github.com/aj-geddes/useful-ai-prompts
   eeaspecific: "true"
 ---
 
@@ -166,6 +164,17 @@ Generated Jenkinsfiles must satisfy all of the following:
 - Include a `Sonarqube test` stage that passes source path, test result paths, and LCOV paths to `sonar-scanner`.
 - Include a `Trivy test` stage that scans the release Docker image.
 - Include versioning and Docker Hub release stages.
+  - If the repository has no pre-existing Dockerfile of any kind and isn't
+    a service/application meant to run anywhere (a library, a one-off
+    script, a teaching/test artifact), do not silently invent a release
+    Dockerfile just to give this stage something to build — ask whether a
+    Docker Hub release is actually wanted first, the same way multi-arch
+    and Helm/Fleet release are asked about rather than assumed. Unlike
+    `Integration test`, this stage has no default "may be omitted"
+    carve-out — the default is still to include it — but for a repo with
+    no real deployment story, inventing the thing being released is a
+    bigger unilateral decision than the stage's own Groovy, and deserves
+    the same conversation as the other optional release stages.
 - Leave no stopped test containers behind. Named containers must be removed with `docker rm -v`.
 
 ## Stage blueprint

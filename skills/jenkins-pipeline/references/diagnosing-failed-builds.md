@@ -1,5 +1,28 @@
 # Diagnosing and fixing a failed Jenkins build
 
+## 0. A push already triggers a real build — no manual step needed
+
+EEA's GitHub↔Jenkins integration is org-wide: commits, PR opens/updates,
+PR comments, and tag pushes across every repo in the EEA GitHub org are
+sent to Jenkins and auto-trigger the corresponding build, the same way the
+EEA-AI org folder auto-discovers a new branch/repo with no manual scan
+(confirmed live: pushing a Jenkinsfile fix to a branch started a real
+build within seconds, with no separate "add job" or "trigger build" step).
+This means:
+- Once a Jenkinsfile (or any change to a branch it already covers) is
+  pushed, a build is already running or about to be — don't tell a
+  developer to go manually trigger one, and don't assume "no build yet"
+  means something is broken; check status (section 1 below) before
+  concluding that.
+- A brand-new branch or repo still needs the Jenkins org folder to have
+  discovered it at least once (see "EEA cross-skill routing" in
+  `EEA-OVERRIDES.md`) before this applies — the org-wide trigger fires
+  Jenkins jobs that already exist, it doesn't create the job itself.
+- SonarQube/Sonar-branch-scoped badges (see the badges section in
+  `EEA-OVERRIDES.md`) will keep showing "not found" until this
+  auto-triggered build actually finishes at least once — that's normal,
+  not a badge bug, and usually resolves within a few minutes of the push.
+
 EEA Jenkins publishes build status as **GitHub Checks** — one overall
 `Jenkins` check plus one per named stage (e.g. `Tests / Unit test`, `Tests
 / Integration test`), confirmed both by the `github-checks` plugin being

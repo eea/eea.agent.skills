@@ -25,6 +25,28 @@ this skill defaults to:
 - SonarQube is invoked via `mvn sonar:sonar` (the Maven Sonar plugin) rather
   than the standalone `sonar-scanner` CLI, and coverage import uses
   `sonar.coverage.jacoco.xmlReportPaths` (JaCoCo XML), not Cobertura/LCOV.
+  **`mvn sonar:sonar` is a bare plugin-prefix invocation — it only resolves
+  to `org.sonarsource.scanner.maven:sonar-maven-plugin` if that groupId is
+  either declared in the project's own `pom.xml`, or registered as a plugin
+  group in whichever Jenkins node/container's `~/.m2/settings.xml` happens
+  to run the build.** The source repo this example was extracted from
+  presumably already had the plugin declared (inherited from an older
+  template) or always built on a node with that ambient config, so this
+  never surfaced there — but generating a `pom.xml` from scratch without
+  declaring the plugin produces a Jenkinsfile that works or fails to
+  resolve `sonar:sonar` depending on which node/container picks up the
+  build, confirmed via a real Jenkins run where build #1 succeeded and
+  build #2 (no Jenkinsfile/pom.xml change at all) failed with `No plugin
+  found for prefix 'sonar'`. Always add the plugin explicitly to the
+  generated `pom.xml`'s `<build><plugins>`:
+  ```xml
+  <plugin>
+    <groupId>org.sonarsource.scanner.maven</groupId>
+    <artifactId>sonar-maven-plugin</artifactId>
+    <version><!-- current stable, check Maven Central --></version>
+  </plugin>
+  ```
+  so prefix resolution works from the project's own POM regardless of node.
 - Docker build/push and the Rancher-catalog release both happen directly in
   the main pipeline (build+push on every non-PR build with the branch name
   as the tag; the `eeacms/gitflow` release stage is gated on

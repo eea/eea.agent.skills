@@ -1,7 +1,7 @@
 {
   "id": "testing",
   "name": "Testing",
-  "description": "Define and run developer-reproducible test commands that match Jenkins exactly, with Docker as the canonical execution environment.",
+  "description": "Keep developer test commands identical to Jenkins, and raise real test coverage with tests that exercise actual behavior rather than gaming the coverage number.",
   "version": "1.0.0",
   "eeaspecific": true,
   "upstream": null,
@@ -12,6 +12,7 @@
     "unit tests",
     "integration tests",
     "jenkins parity",
-    "developer reproducibility"
+    "developer reproducibility",
+    "test coverage"
   ]
 }

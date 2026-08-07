@@ -1,37 +1,19 @@
 # Dockerfile.test template
 
-Use this template when the repository needs a dedicated Docker image for linting, unit tests, and integration tests.
+See `docker-expert/EEA-OVERRIDES.md`'s "Dockerfile.test for Jenkins
+Pipelines" section for the canonical artifact contract (what the image must
+contain, dependency-install rules, mixed-language guidance) and a worked
+Node.js `Dockerfile.test` example. This file only adds the Jenkins-stage
+command mapping for a Node.js-shaped repo — adapt the script names to the
+repository's actual `package.json`:
 
-```dockerfile
-FROM node:20-bookworm
+- `npm run lint` → `Code linting` stage
+- `npm run test:ci` → `Unit test` stage, produces `/app/junit.xml` and
+  `/app/coverage/lcov.info` + `/app/coverage/lcov-report/index.html`
+- `npm run start:ci` / `npm run test:integration:ci` → `Integration test`
+  stage, produces optional `/app/integration-junit.xml`
 
-WORKDIR /app
-
-COPY package.json package-lock.json* ./
-RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
-
-COPY . .
-
-RUN mkdir -p /app/coverage/lcov-report
-
-ENV CI=true
-ENV FORCE_COLOR=1
-
-CMD ["npm", "run", "test:ci"]
-```
-
-For mixed Python + Node repositories, prefer a single test image based on the runtime that already supports the stricter frontend toolchain, then install the secondary language toolchain into that image. In practice, this often means using a Node base image and adding Python, rather than copying Node/NPM binaries into a Python image.
-
-Expected command contract:
-- `npm run lint`
-- `npm run test:ci`
-- `npm run start:ci`
-- `npm run test:integration:ci`
-
-Expected artifact contract inside the container:
-- `/app/junit.xml`
-- `/app/coverage/lcov.info`
-- `/app/coverage/lcov-report/index.html`
-- optional `/app/integration-junit.xml`
-
-Adapt the base image and package manager to the repository. The important part is the artifact contract, not Node.js specifically.
+This same image is what developers build and run locally to reproduce CI
+exactly — see the `testing` skill's parity contract — so keep it as the
+single source of truth rather than maintaining a separate local-only image,
+or the two will drift.

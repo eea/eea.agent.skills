@@ -116,10 +116,7 @@ Always identify:
 
 If Jenkins is present, local verification is incomplete until the generated code would pass those same stages.
 
-The preferred EEA setup is:
-- Jenkins and the developer use the same Docker image or same `Dockerfile.test`
-- Jenkins and the developer use the same command strings
-- those commands are documented in plain shell form, not hidden behind tooling the developer may not have
+For the EEA parity contract this implies (same Docker image, same command strings, documented in plain shell form), see the `testing` skill — it owns that principle and the self-check for verifying it holds.
 
 ## Native tools vs Docker for pre-commit auto-fix
 

@@ -531,6 +531,11 @@ When the Docker task is complete, consider these EEA skills:
 
 ### Dockerfile.test for Jenkins Pipelines
 
+This is the canonical contract for `Dockerfile.test` — `jenkins-pipeline` and
+`testing` both reference this section rather than restating it, since the
+same image is what Jenkins runs and what developers run locally to
+reproduce it exactly.
+
 When an EEA project needs Jenkins-based linting, unit tests, and integration tests in Docker:
 
 ```dockerfile
