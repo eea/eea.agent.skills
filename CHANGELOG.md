@@ -6,6 +6,20 @@ This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic ve
 
 ---
 
+## 2026-09-18 — Add Handoff Skill
+
+### Added
+- New `handoff` skill (`src/skills/handoff/`): frozen fork of the upstream context-handoff skill, with a placeholder `EEA-OVERRIDES.md` and `metadata.json`.
+- `catalog.yaml` entry for `handoff`
+
+### Changed
+- Removed the upstream `argument-hint` frontmatter field, which the Agent Skills specification rejects (`agentskills validate` failed before this change).
+
+### Why
+Brings the session-handoff workflow into the EEA harness so it is installed for every EEA developer and agent. No EEA-specific overrides are needed.
+
+---
+
 ## 2026-08-07 — Fix PR #1 Review Findings and Refocus the Testing Skill
 
 ### Fixed
