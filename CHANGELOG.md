@@ -6,6 +6,20 @@ This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic ve
 
 ---
 
+## 2026-09-18 — Add Volto Cypress Writer Skill
+
+### Added
+- New `volto-cypress-writer` skill (`src/skills/volto-cypress-writer/`):
+  - `SKILL.md` with a generic Plone/Volto Cypress workflow that discovers the project `specPattern`, helper layout, and commands
+  - `EEA-OVERRIDES.md` with EEA-wide Cypress policy (Volto version matrix, CI targets, local reproduction)
+  - `metadata.json` with skill index data
+- `catalog.yaml` entry for `volto-cypress-writer`
+
+### Why
+The skill previously hardcoded the `eea-website` layout (`frontend/src/addons`, `cypress/e2e`). It is now generic across EEA Volto generations, which use different spec directories (`cypress/e2e` vs `cypress/tests`), add-on locations, and test runners.
+
+---
+
 ## 2026-08-07 — Fix PR #1 Review Findings and Refocus the Testing Skill
 
 ### Fixed

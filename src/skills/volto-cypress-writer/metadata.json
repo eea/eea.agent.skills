@@ -1,0 +1,18 @@
+{
+  "id": "volto-cypress-writer",
+  "name": "Volto Cypress Writer",
+  "description": "Cypress E2E writing and maintenance for Plone/Volto add-ons and projects in EEA, including UI-first setup, selectors, helpers, flake reduction, and Cypress commands.",
+  "version": "1.0.0",
+  "eeaspecific": true,
+  "upstream": null,
+  "added_date": "2026-09-18",
+  "triggers": [
+    "cypress",
+    "e2e",
+    "acceptance test",
+    "volto",
+    "add-on",
+    "selector",
+    "flaky test"
+  ]
+}
