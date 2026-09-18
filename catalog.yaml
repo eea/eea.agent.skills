@@ -212,6 +212,26 @@ skills:
     added_date: "2026-07-29"
     notes: EEA-original skill covering the dev/Jenkins test-command parity contract and, going forward, guidance for closing real coverage gaps with meaningful tests rather than ones that only move the number.
 
+  - id: plone-frontend-developer
+    name: Plone Frontend Developer
+    description: Senior Plone/Volto frontend engineering for EEA projects, covering debugging add-ons, UI bugs, blocks/components, theme, routing, tokens, and build/test issues.
+    category: frontend
+    upstream: null
+    triggers:
+      - plone
+      - volto
+      - frontend
+      - add-on
+      - block
+      - theme
+      - react
+      - i18n
+      - design token
+    version: "1.0.0"
+    eeaspecific: true
+    added_date: "2026-09-18"
+    notes: EEA-original skill covering Plone/Volto frontend work across all EEA project generations; discovers the project layout instead of hardcoding paths.
+
 # Future skills placeholder
 # - chart: Data visualization and chart generation
 # - doc: Technical documentation generation
