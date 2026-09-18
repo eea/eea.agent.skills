@@ -6,6 +6,17 @@ This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic ve
 
 ---
 
+## 2026-09-18 — Add Grill Me Skill
+
+### Added
+- New `grill-me` skill (`src/skills/grill-me/`): frozen fork of the upstream plan/design interview skill, with a placeholder `EEA-OVERRIDES.md` and `metadata.json`.
+- `catalog.yaml` entry for `grill-me`
+
+### Why
+Brings the plan stress-testing workflow into the EEA harness so it is installed for every EEA developer and agent. No EEA-specific overrides are needed.
+
+---
+
 ## 2026-08-07 — Fix PR #1 Review Findings and Refocus the Testing Skill
 
 ### Fixed
