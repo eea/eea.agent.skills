@@ -6,6 +6,23 @@ This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic ve
 
 ---
 
+## 2026-09-18 — Add Plone Backend Developer Skill
+
+### Added
+- New `plone-backend-developer` skill (`src/skills/plone-backend-developer/`):
+  - `SKILL.md` with a generic Plone 6 backend workflow for any EEA project
+  - `references/plone-project-layouts.md` covering the buildout (`develop/`) and container-based generations
+  - `EEA-OVERRIDES.md` with EEA-wide backend policy (Plone version, RelStorage, Jenkins release)
+  - `metadata.json` with skill index data
+- `catalog.yaml` entry for `plone-backend-developer`
+
+### Why
+The skill previously described only the `eea-website` backend layout. It is now
+generic across EEA Plone projects and discovers the project build system and
+commands instead of hardcoding paths.
+
+---
+
 ## 2026-08-07 — Fix PR #1 Review Findings and Refocus the Testing Skill
 
 ### Fixed

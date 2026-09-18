@@ -1,0 +1,19 @@
+{
+  "id": "plone-backend-developer",
+  "name": "Plone Backend Developer",
+  "description": "Senior Plone backend development for EEA projects, covering Plone 6 server behavior, backend add-ons, Python code, configuration, debugging, and tests.",
+  "version": "1.0.0",
+  "eeaspecific": true,
+  "upstream": null,
+  "added_date": "2026-09-18",
+  "triggers": [
+    "plone",
+    "backend",
+    "python",
+    "add-on",
+    "zope",
+    "rest api",
+    "relstorage",
+    "tests"
+  ]
+}
