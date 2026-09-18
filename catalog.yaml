@@ -212,6 +212,25 @@ skills:
     added_date: "2026-07-29"
     notes: EEA-original skill covering the dev/Jenkins test-command parity contract and, going forward, guidance for closing real coverage gaps with meaningful tests rather than ones that only move the number.
 
+  - id: caveman
+    name: Caveman
+    description: Ultra-compressed communication mode for token-efficient, terse responses with adjustable intensity levels.
+    category: productivity
+    upstream:
+      source: JuliusBrussee/caveman
+      path: skills/caveman
+      url: https://github.com/JuliusBrussee/caveman
+    triggers:
+      - caveman
+      - terse
+      - less tokens
+      - brief
+      - compressed
+    version: "1.0.0"
+    eeaspecific: false
+    added_date: "2026-09-18"
+    notes: Frozen fork of JuliusBrussee/caveman as of 2026-09-18; differs from current upstream.
+
 # Future skills placeholder
 # - chart: Data visualization and chart generation
 # - doc: Technical documentation generation

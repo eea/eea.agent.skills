@@ -6,6 +6,17 @@ This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic ve
 
 ---
 
+## 2026-09-18 — Add Caveman Skill
+
+### Added
+- New `caveman` skill (`src/skills/caveman/`): frozen fork of the upstream caveman communication-mode skill, with a placeholder `EEA-OVERRIDES.md` and `metadata.json`.
+- `catalog.yaml` entry for `caveman`
+
+### Why
+Brings the token-efficient communication mode into the EEA harness so it is installed for every EEA developer and agent. No EEA-specific overrides are needed.
+
+---
+
 ## 2026-08-07 — Fix PR #1 Review Findings and Refocus the Testing Skill
 
 ### Fixed

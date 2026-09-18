@@ -1,0 +1,20 @@
+{
+  "id": "caveman",
+  "name": "Caveman",
+  "description": "Ultra-compressed communication mode for token-efficient, terse responses with adjustable intensity levels.",
+  "version": "1.0.0",
+  "eeaspecific": false,
+  "upstream": {
+    "source": "JuliusBrussee/caveman",
+    "path": "skills/caveman",
+    "url": "https://github.com/JuliusBrussee/caveman"
+  },
+  "added_date": "2026-09-18",
+  "triggers": [
+    "caveman",
+    "terse",
+    "less tokens",
+    "brief",
+    "compressed"
+  ]
+}
