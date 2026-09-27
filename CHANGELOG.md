@@ -34,6 +34,17 @@ instead of hardcoding paths.
 The skill previously described only the `eea-website` backend layout. It is now
 generic across EEA Plone projects and discovers the project build system and
 commands instead of hardcoding paths.
+## 2026-09-18 — Add Volto Cypress Writer Skill
+
+### Added
+- New `volto-cypress-writer` skill (`src/skills/volto-cypress-writer/`):
+  - `SKILL.md` with a generic Plone/Volto Cypress workflow that discovers the project `specPattern`, helper layout, and commands
+  - `EEA-OVERRIDES.md` with EEA-wide Cypress policy (Volto version matrix, CI targets, local reproduction)
+  - `metadata.json` with skill index data
+- `catalog.yaml` entry for `volto-cypress-writer`
+
+### Why
+The skill previously hardcoded the `eea-website` layout (`frontend/src/addons`, `cypress/e2e`). It is now generic across EEA Volto generations, which use different spec directories (`cypress/e2e` vs `cypress/tests`), add-on locations, and test runners.
 
 ---
 

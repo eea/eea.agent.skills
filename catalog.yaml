@@ -249,6 +249,23 @@ skills:
     eeaspecific: true
     added_date: "2026-09-18"
     notes: EEA-original skill covering Plone 6 backend work across all EEA project generations; discovers the project layout instead of hardcoding paths.
+  - id: volto-cypress-writer
+    name: Volto Cypress Writer
+    description: Cypress E2E writing and maintenance for Plone/Volto add-ons and projects in EEA, including UI-first setup, selectors, helpers, flake reduction, and Cypress commands.
+    category: frontend
+    upstream: null
+    triggers:
+      - cypress
+      - e2e
+      - acceptance test
+      - volto
+      - add-on
+      - selector
+      - flaky test
+    version: "1.0.0"
+    eeaspecific: true
+    added_date: "2026-09-18"
+    notes: EEA-original skill covering Cypress for Plone/Volto add-ons and projects; discovers the project specPattern and commands instead of hardcoding them.
 
 # Future skills placeholder
 # - chart: Data visualization and chart generation
