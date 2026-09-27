@@ -6,6 +6,16 @@ This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic ve
 
 ---
 
+## 2026-09-27 — Document OpenCode Single-Source Harness Wiring Decision
+
+### Added
+- `docs/decisions/opencode-harness-single-source.md`: records the decision that OpenCode receives the EEA harness solely via the `~/.claude/CLAUDE.md` symlink (Claude Code compatibility), with no EEA harness/rules URLs in `opencode.json` `instructions`. Documents the installer ordering gap: on a fresh install `install_opencode` runs before `install_claude`, so the harness URL is merged into `opencode.json` even though the CLAUDE.md symlink will also supply the harness — the harness loads twice and `verify.sh` flags the duplication. The installer fix (detect an existing CLAUDE.md harness symlink before merging, or reorder the install steps) is deferred to a later phase.
+
+### Why
+A real global install on a machine with both OpenCode and Claude Code ended up with the harness injected twice into LLM context (merged URLs + CLAUDE.md compatibility path). This decision records the accepted single-source wiring and the known installer gap so the follow-up fix has full context without re-deriving it.
+
+---
+
 ## 2026-08-07 — Fix PR #1 Review Findings and Refocus the Testing Skill
 
 ### Fixed
