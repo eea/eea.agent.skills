@@ -142,6 +142,16 @@ The canonical org harness ([`harness/EEA-HARNESS.md`](harness/EEA-HARNESS.md)) i
 | `react-native-skills` | React Native/Expo best practices | mobile | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) |
 | `react-view-transitions` | View transitions, animations, shared elements | frontend | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) |
 | `eea-design-system` | EEA design system for Volto-based web applications | design | Self-contained (EEA-specific) |
+| `jenkins-pipeline` | EEA Jenkins declarative pipelines with Docker tests, SonarQube, Trivy, and releases | devops | Self-contained (EEA-specific) |
+| `code-quality` | Produce and repair code so it passes repository and Jenkins quality gates | software-development | Self-contained (EEA-specific) |
+| `quality-fixes` | Diagnose and repair failing lint, typing, test, Docker, and Jenkins gates | software-development | Self-contained (EEA-specific) |
+| `testing` | Developer/Jenkins test-command parity and meaningful test coverage | software-development | Self-contained (EEA-specific) |
+| `plone-frontend-developer` | Plone/Volto frontend engineering for any EEA project or add-on | frontend | Self-contained (EEA-specific) |
+| `plone-backend-developer` | Plone 6 backend development for any EEA project | backend | Self-contained (EEA-specific) |
+| `volto-cypress-writer` | Cypress E2E for Plone/Volto add-ons and projects | frontend | Self-contained (EEA-specific) |
+| `caveman` | Ultra-compressed communication mode for token-efficient responses | productivity | [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) |
+| `grill-me` | Relentlessly interview a plan or design until every branch is resolved | productivity | [mattpocock/skills](https://github.com/mattpocock/skills) |
+| `handoff` | Compact a conversation into a handoff document for the next agent | productivity | [mattpocock/skills](https://github.com/mattpocock/skills) |
 
 ### Installing Skills
 
@@ -287,4 +297,4 @@ MIT — See [LICENSE](LICENSE)
 
 ---
 
-*Last updated: 2026-05-21 after skills-ref validation integration and eea-design-system skill addition*
+*Last updated: 2026-09-18 after adding Plone/Volto and productivity skills*
