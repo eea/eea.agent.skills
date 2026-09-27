@@ -6,6 +6,23 @@ This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic ve
 
 ---
 
+## 2026-09-18 — Add Plone Frontend Developer Skill
+
+### Added
+- New `plone-frontend-developer` skill (`src/skills/plone-frontend-developer/`):
+  - `SKILL.md` with a generic Plone/Volto frontend workflow for any EEA project or add-on
+  - `references/volto-project-layouts.md` covering the legacy add-on, Cookieplone add-on, and Cookieplone project generations
+  - `EEA-OVERRIDES.md` with EEA-wide frontend policy (supported Volto versions, `@eeacms` add-ons, Jenkins release)
+  - `metadata.json` with skill index data
+- `catalog.yaml` entry for `plone-frontend-developer`
+
+### Why
+The skill previously described only the `eea-website` layout. It is now generic
+across EEA Plone/Volto projects and discovers the project layout and commands
+instead of hardcoding paths.
+
+---
+
 ## 2026-08-07 — Fix PR #1 Review Findings and Refocus the Testing Skill
 
 ### Fixed

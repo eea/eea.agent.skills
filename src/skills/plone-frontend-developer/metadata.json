@@ -1,0 +1,20 @@
+{
+  "id": "plone-frontend-developer",
+  "name": "Plone Frontend Developer",
+  "description": "Senior Plone/Volto frontend engineering for EEA projects: debugging add-ons, UI bugs, blocks/components, theme, routing, tokens, build/test issues.",
+  "version": "1.0.0",
+  "eeaspecific": true,
+  "upstream": null,
+  "added_date": "2026-09-18",
+  "triggers": [
+    "plone",
+    "volto",
+    "frontend",
+    "add-on",
+    "block",
+    "theme",
+    "react",
+    "i18n",
+    "design token"
+  ]
+}
