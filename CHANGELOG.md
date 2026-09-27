@@ -6,6 +6,16 @@ This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic ve
 
 ---
 
+## 2026-09-27 — Document OpenCode Single-Source Harness Wiring Decision
+
+### Added
+- `docs/decisions/opencode-harness-single-source.md`: records the decision that OpenCode receives the EEA harness solely via the `~/.claude/CLAUDE.md` symlink (Claude Code compatibility), with no EEA harness/rules URLs in `opencode.json` `instructions`. Documents the installer ordering gap: on a fresh install `install_opencode` runs before `install_claude`, so the harness URL is merged into `opencode.json` even though the CLAUDE.md symlink will also supply the harness — the harness loads twice and `verify.sh` flags the duplication. The installer fix (detect an existing CLAUDE.md harness symlink before merging, or reorder the install steps) is deferred to a later phase.
+
+### Why
+A real global install on a machine with both OpenCode and Claude Code ended up with the harness injected twice into LLM context (merged URLs + CLAUDE.md compatibility path). This decision records the accepted single-source wiring and the known installer gap so the follow-up fix has full context without re-deriving it.
+
+---
+
 ## 2026-09-18 — Add Plone Frontend Developer Skill
 
 ### Added
@@ -20,6 +30,9 @@ This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic ve
 The skill previously described only the `eea-website` layout. It is now generic
 across EEA Plone/Volto projects and discovers the project layout and commands
 instead of hardcoding paths.
+
+---
+
 ## 2026-09-18 — Add Plone Backend Developer Skill
 
 ### Added
@@ -34,6 +47,9 @@ instead of hardcoding paths.
 The skill previously described only the `eea-website` backend layout. It is now
 generic across EEA Plone projects and discovers the project build system and
 commands instead of hardcoding paths.
+
+---
+
 ## 2026-09-18 — Add Volto Cypress Writer Skill
 
 ### Added
@@ -45,6 +61,9 @@ commands instead of hardcoding paths.
 
 ### Why
 The skill previously hardcoded the `eea-website` layout (`frontend/src/addons`, `cypress/e2e`). It is now generic across EEA Volto generations, which use different spec directories (`cypress/e2e` vs `cypress/tests`), add-on locations, and test runners.
+
+---
+
 ## 2026-09-18 — Add Caveman Skill
 
 ### Added
@@ -53,6 +72,9 @@ The skill previously hardcoded the `eea-website` layout (`frontend/src/addons`, 
 
 ### Why
 Brings the token-efficient communication mode into the EEA harness so it is installed for every EEA developer and agent. No EEA-specific overrides are needed.
+
+---
+
 ## 2026-09-18 — Add Grill Me Skill
 
 ### Added
@@ -61,6 +83,9 @@ Brings the token-efficient communication mode into the EEA harness so it is inst
 
 ### Why
 Brings the plan stress-testing workflow into the EEA harness so it is installed for every EEA developer and agent. No EEA-specific overrides are needed.
+
+---
+
 ## 2026-09-18 — Add Handoff Skill
 
 ### Added
