@@ -266,6 +266,24 @@ skills:
     eeaspecific: true
     added_date: "2026-09-18"
     notes: EEA-original skill covering Cypress for Plone/Volto add-ons and projects; discovers the project specPattern and commands instead of hardcoding them.
+  - id: caveman
+    name: Caveman
+    description: Ultra-compressed communication mode for token-efficient, terse responses with adjustable intensity levels.
+    category: productivity
+    upstream:
+      source: JuliusBrussee/caveman
+      path: skills/caveman
+      url: https://github.com/JuliusBrussee/caveman
+    triggers:
+      - caveman
+      - terse
+      - less tokens
+      - brief
+      - compressed
+    version: "1.0.0"
+    eeaspecific: false
+    added_date: "2026-09-18"
+    notes: Frozen fork of JuliusBrussee/caveman as of 2026-09-18; differs from current upstream.
 
 # Future skills placeholder
 # - chart: Data visualization and chart generation

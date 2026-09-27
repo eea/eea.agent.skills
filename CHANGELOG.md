@@ -45,6 +45,14 @@ commands instead of hardcoding paths.
 
 ### Why
 The skill previously hardcoded the `eea-website` layout (`frontend/src/addons`, `cypress/e2e`). It is now generic across EEA Volto generations, which use different spec directories (`cypress/e2e` vs `cypress/tests`), add-on locations, and test runners.
+## 2026-09-18 — Add Caveman Skill
+
+### Added
+- New `caveman` skill (`src/skills/caveman/`): frozen fork of the upstream caveman communication-mode skill, with a placeholder `EEA-OVERRIDES.md` and `metadata.json`.
+- `catalog.yaml` entry for `caveman`
+
+### Why
+Brings the token-efficient communication mode into the EEA harness so it is installed for every EEA developer and agent. No EEA-specific overrides are needed.
 
 ---
 
