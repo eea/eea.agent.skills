@@ -1,0 +1,19 @@
+{
+  "id": "grill-me",
+  "name": "Grill Me",
+  "description": "Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree.",
+  "version": "1.0.0",
+  "eeaspecific": false,
+  "upstream": {
+    "source": "mattpocock/skills",
+    "path": "skills/productivity/grill-me",
+    "url": "https://github.com/mattpocock/skills"
+  },
+  "added_date": "2026-09-18",
+  "triggers": [
+    "grill me",
+    "stress-test plan",
+    "interview",
+    "design review"
+  ]
+}

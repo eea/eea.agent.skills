@@ -284,6 +284,23 @@ skills:
     eeaspecific: false
     added_date: "2026-09-18"
     notes: Frozen fork of JuliusBrussee/caveman as of 2026-09-18; differs from current upstream.
+  - id: grill-me
+    name: Grill Me
+    description: Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree.
+    category: productivity
+    upstream:
+      source: mattpocock/skills
+      path: skills/productivity/grill-me
+      url: https://github.com/mattpocock/skills
+    triggers:
+      - grill me
+      - stress-test plan
+      - interview
+      - design review
+    version: "1.0.0"
+    eeaspecific: false
+    added_date: "2026-09-18"
+    notes: Frozen fork of mattpocock/skills as of 2026-09-18; differs from current upstream.
 
 # Future skills placeholder
 # - chart: Data visualization and chart generation
