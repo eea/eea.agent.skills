@@ -301,6 +301,23 @@ skills:
     eeaspecific: false
     added_date: "2026-09-18"
     notes: Frozen fork of mattpocock/skills as of 2026-09-18; differs from current upstream.
+  - id: handoff
+    name: Handoff
+    description: Compact the current conversation into a handoff document for another agent to pick up.
+    category: productivity
+    upstream:
+      source: mattpocock/skills
+      path: skills/productivity/handoff
+      url: https://github.com/mattpocock/skills
+    triggers:
+      - handoff
+      - context transfer
+      - continue work
+      - new session
+    version: "1.0.0"
+    eeaspecific: false
+    added_date: "2026-09-18"
+    notes: Frozen fork of mattpocock/skills as of 2026-09-18; differs from current upstream. The upstream `argument-hint` frontmatter field was removed for Agent Skills spec compliance.
 
 # Future skills placeholder
 # - chart: Data visualization and chart generation

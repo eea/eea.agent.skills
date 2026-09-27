@@ -1,0 +1,19 @@
+{
+  "id": "handoff",
+  "name": "Handoff",
+  "description": "Compact the current conversation into a handoff document for another agent to pick up.",
+  "version": "1.0.0",
+  "eeaspecific": false,
+  "upstream": {
+    "source": "mattpocock/skills",
+    "path": "skills/productivity/handoff",
+    "url": "https://github.com/mattpocock/skills"
+  },
+  "added_date": "2026-09-18",
+  "triggers": [
+    "handoff",
+    "context transfer",
+    "continue work",
+    "new session"
+  ]
+}

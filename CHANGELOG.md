@@ -61,6 +61,17 @@ Brings the token-efficient communication mode into the EEA harness so it is inst
 
 ### Why
 Brings the plan stress-testing workflow into the EEA harness so it is installed for every EEA developer and agent. No EEA-specific overrides are needed.
+## 2026-09-18 — Add Handoff Skill
+
+### Added
+- New `handoff` skill (`src/skills/handoff/`): frozen fork of the upstream context-handoff skill, with a placeholder `EEA-OVERRIDES.md` and `metadata.json`.
+- `catalog.yaml` entry for `handoff`
+
+### Changed
+- Removed the upstream `argument-hint` frontmatter field, which the Agent Skills specification rejects (`agentskills validate` failed before this change).
+
+### Why
+Brings the session-handoff workflow into the EEA harness so it is installed for every EEA developer and agent. No EEA-specific overrides are needed.
 
 ---
 
