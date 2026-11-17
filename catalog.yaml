@@ -319,6 +319,25 @@ skills:
     added_date: "2026-09-18"
     notes: Frozen fork of mattpocock/skills as of 2026-09-18; differs from current upstream. The upstream `argument-hint` frontmatter field was removed for Agent Skills spec compliance.
 
+  - id: security-audit
+    name: Security Audit
+    description: Multi-phase security audit and vulnerability review for codebases, APIs, services, CLI tools, libraries, and daemons. Produces independently verified, machine-readable findings with source evidence and safe reproductions.
+    category: security
+    upstream:
+      source: cloudflare/security-audit-skill
+      path: skills/security-audit
+      url: https://github.com/cloudflare/security-audit-skill
+    triggers:
+      - security audit
+      - security review
+      - vulnerability
+      - pen test
+      - find vulnerabilities
+      - security question
+    version: "1.0.0"
+    eeaspecific: false
+    added_date: "2026-11-16"
+    notes: Frozen fork of cloudflare/security-audit-skill as of 2026-11-16. SKILL.md links to 19 sibling companion files (phase prompts, report schema, Node.js validators) distributed via the COMPANION-FILES.txt manifest.
 # Future skills placeholder
 # - chart: Data visualization and chart generation
 # - doc: Technical documentation generation

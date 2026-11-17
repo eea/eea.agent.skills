@@ -152,6 +152,7 @@ The canonical org harness ([`harness/EEA-HARNESS.md`](harness/EEA-HARNESS.md)) i
 | `caveman` | Ultra-compressed communication mode for token-efficient responses | productivity | [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) |
 | `grill-me` | Relentlessly interview a plan or design until every branch is resolved | productivity | [mattpocock/skills](https://github.com/mattpocock/skills) |
 | `handoff` | Compact a conversation into a handoff document for the next agent | productivity | [mattpocock/skills](https://github.com/mattpocock/skills) |
+| `security-audit` | Multi-phase security audit with independently verified, machine-readable findings | security | [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill) |
 
 ### Installing Skills
 

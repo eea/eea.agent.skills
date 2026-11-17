@@ -62,6 +62,21 @@ build_skill() {
         cp -r "$skill_dir/assets" "$dist_skill_dir/"
     fi
 
+    # Copy companion files listed in COMPANION-FILES.txt if present.
+    # Skills whose SKILL.md links to sibling files (e.g. security-audit)
+    # list them here so the merged skill keeps resolvable relative links.
+    if [ -f "$skill_dir/COMPANION-FILES.txt" ]; then
+        while IFS= read -r companion; do
+            [ -z "$companion" ] && continue
+            case "$companion" in \#*) continue ;; esac
+            if [ ! -f "$skill_dir/$companion" ]; then
+                echo "ERROR: companion file '$companion' listed for '$skill_name' not found"
+                exit 1
+            fi
+            cp "$skill_dir/$companion" "$dist_skill_dir/$companion"
+        done < "$skill_dir/COMPANION-FILES.txt"
+    fi
+
     echo "✓ Built: $skill_name -> $dist_skill_dir/SKILL.md"
 }
 

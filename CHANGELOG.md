@@ -6,6 +6,27 @@ This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic ve
 
 ---
 
+## 2026-11-16 — Add Security Audit Skill
+
+### Added
+- New `security-audit` skill (`src/skills/security-audit/`), a frozen fork of [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill) (MIT) as of 2026-11-16:
+  - `SKILL.md` (upstream, unmodified): six-phase audit workflow — reconnaissance, coverage-led hunting, candidate validation, structured output, independent record verification, target-neutral reporting
+  - 19 companion files distributed beside `SKILL.md`: phase prompts (`RECONNAISSANCE.md`, `HUNTING.md`, `ATTACK-CLASSES.md`, domain companions), `report-schema.json`, and the zero-dependency Node.js validators (`validate-findings.cjs`, `validate-coverage-ledger.cjs`) with their test suites
+  - `COMPANION-FILES.txt` manifest consumed by `scripts/build.sh`
+  - `EEA-OVERRIDES.md` with EEA-specific patterns (confidential finding handling, Docker-based compliant sandbox, EEA project context)
+  - `metadata.json` with skill index data
+- `scripts/build.sh`: copies companion files listed in a skill's `COMPANION-FILES.txt` into the merged `skills/<name>/` output. No behavior change for existing skills (none have a manifest).
+- `catalog.yaml` entry for `security-audit` (new `security` category)
+
+### Why
+EEA projects need an agent skill that finds logic and trust-boundary vulnerabilities beyond what dependency and image scanners cover, with independently verified, machine-readable findings. This skill is the single-repo seed of Cloudflare's vulnerability-discovery harness and is MIT-licensed.
+
+### Notes
+- Upstream `SKILL.md` is ~190 lines (~17 KB), above the 5k-token soft limit; CI will warn on token count. The body is the upstream's, and the skill's design keeps the heavy phase prompts in companion files that load only when used.
+- Tested at addition: upstream validator suites (65 tests) pass, `agentskills` spec validation passes, and a guided audit of a seeded vulnerable sample produced correctly classified findings (confirmed / needs_validation / rejected) that pass the skill's `validate-findings.cjs`.
+
+---
+
 ## 2026-09-27 — Document OpenCode Single-Source Harness Wiring Decision
 
 ### Added

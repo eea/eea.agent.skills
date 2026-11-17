@@ -1,0 +1,21 @@
+{
+  "id": "security-audit",
+  "name": "Security Audit",
+  "description": "Multi-phase security audit and vulnerability review for codebases, APIs, services, CLI tools, libraries, and daemons. Produces independently verified, machine-readable findings with source evidence and safe reproductions.",
+  "version": "1.0.0",
+  "eeaspecific": false,
+  "upstream": {
+    "source": "cloudflare/security-audit-skill",
+    "path": "skills/security-audit",
+    "url": "https://github.com/cloudflare/security-audit-skill"
+  },
+  "added_date": "2026-11-16",
+  "triggers": [
+    "security audit",
+    "security review",
+    "vulnerability",
+    "pen test",
+    "find vulnerabilities",
+    "security question"
+  ]
+}
