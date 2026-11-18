@@ -1,0 +1,20 @@
+{
+  "id": "tdd",
+  "name": "TDD",
+  "description": "Failing-test-first bug-fix cadence: make the broken behavior executable before changing production code, with explicit guardrails for when a test is impractical.",
+  "version": "1.0.0",
+  "eeaspecific": false,
+  "upstream": {
+    "source": "cursor/plugins",
+    "path": "pstack/skills/tdd",
+    "url": "https://github.com/cursor/plugins"
+  },
+  "added_date": "2026-11-18",
+  "triggers": [
+    "tdd",
+    "failing test",
+    "regression test",
+    "test first",
+    "write a test for this bug"
+  ]
+}
