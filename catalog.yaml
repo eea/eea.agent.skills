@@ -341,7 +341,7 @@ skills:
 
   - id: unslop
     name: Unslop
-    description: Cut AI tells from writing: AI vocabulary, filler, hedging, and formatting tells, with a stable rule-id catalog.
+    description: Cut AI vocabulary, filler, hedging, and formatting tells from any writing, with a stable rule-id catalog.
     category: writing
     upstream:
       source: cursor/plugins
@@ -360,7 +360,7 @@ skills:
 
   - id: technical-writing
     name: Technical Writing
-    description: Layered technical-writing standard: Diátaxis structure, Google developer style sentences, STE instruction rules, and Global English syntax for docs, RFCs, readmes, PR descriptions, and commit messages.
+    description: Layered technical-writing standard (Diátaxis structure, Google developer style sentences, STE instruction rules, Global English syntax) for docs, RFCs, readmes, PR descriptions, and commit messages.
     category: writing
     upstream:
       source: cursor/plugins
@@ -400,7 +400,7 @@ skills:
 
   - id: tdd
     name: TDD
-    description: Failing-test-first bug-fix cadence: make the broken behavior executable before changing production code, with explicit guardrails for when a test is impractical.
+    description: Failing-test-first bug-fix cadence. Makes the broken behavior executable before changing production code, with explicit guardrails for when a test is impractical.
     category: software-development
     upstream:
       source: cursor/plugins
@@ -437,7 +437,7 @@ skills:
 
   - id: correct
     name: Correct
-    description: Find the mistakes agents keep repeating in a repo and make each one impossible, fixing at the highest level that works: architecture, types, lint, test, docs last.
+    description: Find the mistakes agents keep repeating in a repo and make each one impossible, fixing at the highest level that works (architecture, types, lint, test, docs last).
     category: software-development
     upstream:
       source: cursor/plugins
