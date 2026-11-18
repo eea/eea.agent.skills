@@ -27,6 +27,7 @@ This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic ve
 - Upstream bodies are byte-identical to pstack v0.15.43 (verified by diff). Frontmatter is normalized to `name` + `description` per repo convention (handoff precedent): the Cursor-only `disable-model-invocation` field is removed, and descriptions are enriched where the upstream ones were too thin for trigger matching (`unslop`, `tdd`).
 - `benchmark-checklist`'s "Other perf material" section and `blast-radius`'s `how`/`why` mention reference pstack skills/playbooks that are not yet ported (planned in later PRs); the references are descriptive, not links.
 - EEA-specific deltas live only in `EEA-OVERRIDES.md`; the org-wide harness is untouched.
+- Decision record: `docs/decisions/pstack-evaluation.md` (port sequence, binding porting conventions, and the `catalog.yaml` unquoted-colon gotcha that failed the first CI run).
 
 ---
 
