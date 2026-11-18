@@ -1,0 +1,20 @@
+{
+  "id": "unslop",
+  "name": "Unslop",
+  "description": "Cut AI tells from writing: AI vocabulary, filler, hedging, and formatting tells, with a stable rule-id catalog.",
+  "version": "1.0.0",
+  "eeaspecific": false,
+  "upstream": {
+    "source": "cursor/plugins",
+    "path": "pstack/skills/unslop",
+    "url": "https://github.com/cursor/plugins"
+  },
+  "added_date": "2026-11-18",
+  "triggers": [
+    "unslop",
+    "ai tells",
+    "clean up writing",
+    "remove ai slop",
+    "tighten the writing"
+  ]
+}

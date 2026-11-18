@@ -153,6 +153,12 @@ The canonical org harness ([`harness/EEA-HARNESS.md`](harness/EEA-HARNESS.md)) i
 | `grill-me` | Relentlessly interview a plan or design until every branch is resolved | productivity | [mattpocock/skills](https://github.com/mattpocock/skills) |
 | `handoff` | Compact a conversation into a handoff document for the next agent | productivity | [mattpocock/skills](https://github.com/mattpocock/skills) |
 | `security-audit` | Multi-phase security audit with independently verified, machine-readable findings | security | [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill) |
+| `unslop` | Cut AI tells from writing, stable rule-id catalog | writing | [cursor/plugins (pstack)](https://github.com/cursor/plugins/tree/main/pstack) |
+| `technical-writing` | Layered doc standard: Diátaxis, Google style, STE, Global English | writing | [cursor/plugins (pstack)](https://github.com/cursor/plugins/tree/main/pstack) |
+| `benchmark-checklist` | Vet perf numbers with run evidence before reporting or acting | software-development | [cursor/plugins (pstack)](https://github.com/cursor/plugins/tree/main/pstack) |
+| `tdd` | Failing-test-first bug-fix cadence with impractical-test guardrails | software-development | [cursor/plugins (pstack)](https://github.com/cursor/plugins/tree/main/pstack) |
+| `blast-radius` | Find what a change breaks; prove the key safety fact by running code | software-development | [cursor/plugins (pstack)](https://github.com/cursor/plugins/tree/main/pstack) |
+| `correct` | Kill repeat agent mistakes at the highest level that works | software-development | [cursor/plugins (pstack)](https://github.com/cursor/plugins/tree/main/pstack) |
 
 ### Installing Skills
 

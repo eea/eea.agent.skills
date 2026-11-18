@@ -1,0 +1,21 @@
+{
+  "id": "benchmark-checklist",
+  "name": "Benchmark Checklist",
+  "description": "Vet a performance measurement (limiter, tuning, limits, errors, repeatability, end-to-end relevance) with evidence from a run before reporting or acting on it.",
+  "version": "1.0.0",
+  "eeaspecific": false,
+  "upstream": {
+    "source": "cursor/plugins",
+    "path": "pstack/skills/benchmark-checklist",
+    "url": "https://github.com/cursor/plugins"
+  },
+  "added_date": "2026-11-18",
+  "triggers": [
+    "benchmark",
+    "speedup",
+    "perf regression",
+    "measured a",
+    "performance number",
+    "how much faster"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "correct",
+  "name": "Correct",
+  "description": "Find the mistakes agents keep repeating in a repo and make each one impossible, fixing at the highest level that works: architecture, types, lint, test, docs last.",
+  "version": "1.0.0",
+  "eeaspecific": false,
+  "upstream": {
+    "source": "cursor/plugins",
+    "path": "pstack/skills/correct",
+    "url": "https://github.com/cursor/plugins"
+  },
+  "added_date": "2026-11-18",
+  "triggers": [
+    "correct",
+    "same mistake again",
+    "keeps repeating",
+    "stop agents from",
+    "encode the lesson"
+  ]
+}
