@@ -1,0 +1,21 @@
+{
+  "id": "technical-writing",
+  "name": "Technical Writing",
+  "description": "Layered technical-writing standard: Diátaxis structure, Google developer style sentences, STE instruction rules, and Global English syntax for docs, RFCs, readmes, PR descriptions, and commit messages.",
+  "version": "1.0.0",
+  "eeaspecific": false,
+  "upstream": {
+    "source": "cursor/plugins",
+    "path": "pstack/skills/technical-writing",
+    "url": "https://github.com/cursor/plugins"
+  },
+  "added_date": "2026-11-18",
+  "triggers": [
+    "technical writing",
+    "write docs",
+    "write a readme",
+    "write a pr description",
+    "commit message",
+    "rfc"
+  ]
+}
