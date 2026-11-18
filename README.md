@@ -304,7 +304,3 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 ## License
 
 MIT — See [LICENSE](LICENSE)
-
----
-
-*Last updated: 2026-09-18 after adding Plone/Volto and productivity skills*

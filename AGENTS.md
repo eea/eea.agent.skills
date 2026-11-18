@@ -133,7 +133,3 @@ Exit codes:
 > `~/.config/opencode/AGENTS.md` is for **personal** global instructions (individual preferences).
 > `~/.config/opencode/opencode.json` (`instructions` array) is for **org-wide** rules like the EEA harness.
 > Never copy the full EEA harness into `AGENTS.md` — it will go stale. Always reference the remote URL in `opencode.json`.
-
----
-
-*Last updated: 2026-05-21*
