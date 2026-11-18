@@ -6,6 +6,30 @@ This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic ve
 
 ---
 
+## 2026-11-18 — Add Six pstack Ported Skills (Quick Wins)
+
+### Added
+- Six new skills under `src/skills/`, frozen forks of [cursor/plugins](https://github.com/cursor/plugins) `pstack` (MIT, v0.15.43) as of 2026-11-18:
+  - `unslop` — cut AI tells from writing; stable rule-id catalog (new `writing` category)
+  - `technical-writing` — layered standard: Diátaxis + Google developer style + STE + Global English, for docs, RFCs, readmes, PR descriptions, commit messages (new `writing` category)
+  - `benchmark-checklist` — vet a measured performance number (limiter, tuning, arithmetic limits, errors, repeatability, end-to-end relevance) before reporting or acting on it
+  - `tdd` — failing-test-first bug-fix cadence with explicit guardrails for when a test is impractical
+  - `blast-radius` — find what a change breaks beyond the diff; prove the one safety fact by running code, five-level certainty ladder
+  - `correct` — find repeat agent mistake classes and fix each at the highest level that works (architecture, types, lint, test, docs last)
+- Each skill ships with `EEA-OVERRIDES.md` (EEA context: changelog/PR conventions, Docker/Jenkins measurement parity, Plone/Volto blast-radius hotspots, AGENTS.md rule-table location) and `metadata.json`.
+- `catalog.yaml` entries for all six skills.
+- `README.md` skills table rows for all six skills.
+
+### Why
+`pstack` (by Lauren Tan, Cursor + React core team) is a rigorous-engineering skill set. This is the first of a three-PR port: the six skills chosen are self-contained, fill gaps no existing EEA skill covers (writing style, measurement vetting, failing-test cadence, change-risk proof, mistake elimination), and are small enough to review easily. Later PRs: consolidated engineering-principles skill, `show-me-your-work`, `create-verification-skill`; then the rigor-mode playbooks, `interrogate`, and `how`/`why`.
+
+### Notes
+- Upstream bodies are byte-identical to pstack v0.15.43 (verified by diff). Frontmatter is normalized to `name` + `description` per repo convention (handoff precedent): the Cursor-only `disable-model-invocation` field is removed, and descriptions are enriched where the upstream ones were too thin for trigger matching (`unslop`, `tdd`).
+- `benchmark-checklist`'s "Other perf material" section and `blast-radius`'s `how`/`why` mention reference pstack skills/playbooks that are not yet ported (planned in later PRs); the references are descriptive, not links.
+- EEA-specific deltas live only in `EEA-OVERRIDES.md`; the org-wide harness is untouched.
+
+---
+
 ## 2026-11-16 — Add Security Audit Skill
 
 ### Added
