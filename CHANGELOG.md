@@ -6,6 +6,27 @@ This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic ve
 
 ---
 
+## 2026-11-18 — Add Three pstack Skills (Principles, Decision Trail, Verification Generator)
+
+### Added
+- Three new skills under `src/skills/` from [cursor/plugins](https://github.com/cursor/plugins) `pstack` (MIT, v0.15.43) as of 2026-11-18, per the second step of `docs/decisions/pstack-evaluation.md`:
+  - `engineering-principles` — the 24 pstack principle skills consolidated into one skill: inline index plus 24 leaf files (`principle-<title>.md`, rule text byte-identical to upstream) distributed via the `COMPANION-FILES.txt` manifest
+  - `show-me-your-work` — append-only TSV decision trail for long or unattended work with a cross-model audit of the trail; ships `references/decision-log-template.tsv` and `scripts/log.sh`
+  - `create-verification-skill` — generates a project-local `verify-<app>` skill (surface/run/drive/observe/isolate interview, plus a seeded feature map); ships `references/feature-map-example/`
+- Each skill ships `EEA-OVERRIDES.md` and `metadata.json`.
+- `scripts/build.sh`: create the destination subdirectory for each companion file listed in a `COMPANION-FILES.txt` manifest, so companions can live in subdirectories (`scripts/log.sh`). No behavior change for flat manifests.
+- `catalog.yaml` entries and `README.md` skills table rows for all three skills.
+
+### Why
+PR 1 (the six self-contained quick wins) is merged. This PR lands the second tier: the engineering-principles layer (consolidated so the catalog does not grow by 24), the auditable decision trail for unattended work, and the generator that gives EEA projects a scripted "drive the real app, capture evidence" harness.
+
+### Notes
+- `engineering-principles` is a consolidation, not a plain frozen fork: the single-skill form with an inline index is an EEA choice; upstream ships 24 separate skills. The index text is upstream's (from `poteto-mode`), the leaf files are upstream rule text unchanged.
+- `create-verification-skill` section 5 points at `/maintain-verification-skill`, which is not ported; the EEA override says to note manual feature-map re-checks until it is. The override also re-maps the generated-skill path from `.cursor/skills/` to `.opencode/skills/`.
+- `show-me-your-work`'s body names Cursor's `agent-transcripts/` directory; the EEA override re-maps the transcript audit to OpenCode sessions.
+
+---
+
 ## 2026-11-18 — Add Six pstack Ported Skills (Quick Wins)
 
 ### Added

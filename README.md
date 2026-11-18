@@ -159,6 +159,9 @@ The canonical org harness ([`harness/EEA-HARNESS.md`](harness/EEA-HARNESS.md)) i
 | `tdd` | Failing-test-first bug-fix cadence with impractical-test guardrails | software-development | [cursor/plugins (pstack)](https://github.com/cursor/plugins/tree/main/pstack) |
 | `blast-radius` | Find what a change breaks; prove the key safety fact by running code | software-development | [cursor/plugins (pstack)](https://github.com/cursor/plugins/tree/main/pstack) |
 | `correct` | Kill repeat agent mistakes at the highest level that works | software-development | [cursor/plugins (pstack)](https://github.com/cursor/plugins/tree/main/pstack) |
+| `engineering-principles` | 24 engineering principles; inline index + one rule per leaf file | software-development | [cursor/plugins (pstack)](https://github.com/cursor/plugins/tree/main/pstack) |
+| `show-me-your-work` | TSV decision trail for long or unattended work, cross-model audit | software-development | [cursor/plugins (pstack)](https://github.com/cursor/plugins/tree/main/pstack) |
+| `create-verification-skill` | Generate project-local verify skills with a seeded feature map | software-development | [cursor/plugins (pstack)](https://github.com/cursor/plugins/tree/main/pstack) |
 
 ### Installing Skills
 

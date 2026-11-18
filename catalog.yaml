@@ -453,6 +453,64 @@ skills:
     eeaspecific: false
     added_date: "2026-11-18"
     notes: Frozen fork of cursor/plugins pstack v0.15.43 as of 2026-11-18. Upstream `disable-model-invocation` frontmatter field removed.
+
+  - id: engineering-principles
+    name: Engineering Principles
+    description: Twenty-four engineering principles (core, architecture, verification, delegation, meta) as an inline index with the full rule in one leaf file per principle.
+    category: software-development
+    upstream:
+      source: cursor/plugins
+      path: pstack/skills/principle-* (24 skills consolidated)
+      url: https://github.com/cursor/plugins
+    triggers:
+      - engineering principles
+      - laziness protocol
+      - prove it works
+      - build the lever
+      - fix root cause
+      - guard the context window
+    version: "1.0.0"
+    eeaspecific: false
+    added_date: "2026-11-18"
+    notes: Consolidated port of the 24 pstack principle-leaf skills (v0.15.43) as of 2026-11-18. The single-skill form with an inline index is an EEA choice; upstream ships 24 separate skills. Leaf files are byte-identical to upstream rule text, distributed via the COMPANION-FILES.txt manifest.
+
+  - id: show-me-your-work
+    name: Show Me Your Work
+    description: Keep a reviewable decision trail for long-running or unattended work. One TSV row per decision (what, why, evidence, result), plus a cross-model audit of the trail.
+    category: software-development
+    upstream:
+      source: cursor/plugins
+      path: pstack/skills/show-me-your-work
+      url: https://github.com/cursor/plugins
+    triggers:
+      - decision trail
+      - audit trail
+      - decision log
+      - unattended work
+      - autonomous run
+    version: "1.0.0"
+    eeaspecific: false
+    added_date: "2026-11-18"
+    notes: Frozen fork of cursor/plugins pstack v0.15.43 as of 2026-11-18. Upstream `disable-model-invocation` frontmatter field removed. Ships references/decision-log-template.tsv (references/ copied whole) and scripts/log.sh via COMPANION-FILES.txt.
+
+  - id: create-verification-skill
+    name: Create Verification Skill
+    description: Generate a project-local verification skill that drives the app the way a user does, any language or platform, with a seeded feature map. Use when a project has no scripted way to prove behavior.
+    category: software-development
+    upstream:
+      source: cursor/plugins
+      path: pstack/skills/create-verification-skill
+      url: https://github.com/cursor/plugins
+    triggers:
+      - verification skill
+      - control skill
+      - drive the app
+      - feature map
+      - prove behavior
+    version: "1.0.0"
+    eeaspecific: false
+    added_date: "2026-11-18"
+    notes: Frozen fork of cursor/plugins pstack v0.15.43 as of 2026-11-18. Upstream `disable-model-invocation` frontmatter field removed. Section 5 points at /maintain-verification-skill, which is not ported. The EEA override re-maps the generated-skill path from .cursor/skills to .opencode/skills.
 # Future skills placeholder
 # - chart: Data visualization and chart generation
 # - doc: Technical documentation generation
