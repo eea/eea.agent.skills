@@ -1,0 +1,20 @@
+{
+  "id": "create-verification-skill",
+  "name": "Create Verification Skill",
+  "description": "Generate a project-local verification skill that drives the app the way a user does, any language or platform, with a seeded feature map. Use when a project has no scripted way to prove behavior.",
+  "version": "1.0.0",
+  "eeaspecific": false,
+  "upstream": {
+    "source": "cursor/plugins",
+    "path": "pstack/skills/create-verification-skill",
+    "url": "https://github.com/cursor/plugins"
+  },
+  "added_date": "2026-11-18",
+  "triggers": [
+    "verification skill",
+    "control skill",
+    "drive the app",
+    "feature map",
+    "prove behavior"
+  ]
+}

@@ -73,6 +73,7 @@ build_skill() {
                 echo "ERROR: companion file '$companion' listed for '$skill_name' not found"
                 exit 1
             fi
+            mkdir -p "$(dirname "$dist_skill_dir/$companion")"
             cp "$skill_dir/$companion" "$dist_skill_dir/$companion"
         done < "$skill_dir/COMPANION-FILES.txt"
     fi

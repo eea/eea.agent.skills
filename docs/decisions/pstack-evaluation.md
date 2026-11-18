@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-18
 **Decision Owner:** Antonio De Marinis
-**Status:** Accepted (PR 1 in review)
+**Status:** Accepted
 
 ## Context
 
@@ -34,8 +34,9 @@ Deferred: `statechart` (TLA+/TLC, needs Java, niche for the EEA stack), `arena`/
 
 ## Status
 
-- **PR 1:** [#11](https://github.com/eea/eea.agent.skills/pull/11) (branch `add-pstack-quick-win-skills`, head `d2e4cad`), all CI green, in review.
-- **PR 2, PR 3:** not started; forward references already noted in the PR 1 catalog entries for `benchmark-checklist` and `blast-radius`.
+- **PR 1:** [#11](https://github.com/eea/eea.agent.skills/pull/11) — merged 2026-11-18.
+- **PR 2:** branch `add-pstack-pr2-skills` — `engineering-principles`, `show-me-your-work`, `create-verification-skill`, plus a `build.sh` fix for subdirectory companion files. In review.
+- **PR 3:** not started (rigor-mode playbooks, `interrogate`, `how`/`why`); forward references already noted in the PR 1 and PR 2 catalog entries.
 
 ## Related
 

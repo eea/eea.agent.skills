@@ -1,0 +1,21 @@
+{
+  "id": "engineering-principles",
+  "name": "Engineering Principles",
+  "description": "Twenty-four engineering principles (core, architecture, verification, delegation, meta) as an inline index with the full rule in one leaf file per principle.",
+  "version": "1.0.0",
+  "eeaspecific": false,
+  "upstream": {
+    "source": "cursor/plugins",
+    "path": "pstack/skills/principle-* (24 skills consolidated)",
+    "url": "https://github.com/cursor/plugins"
+  },
+  "added_date": "2026-11-18",
+  "triggers": [
+    "engineering principles",
+    "laziness protocol",
+    "prove it works",
+    "build the lever",
+    "fix root cause",
+    "guard the context window"
+  ]
+}
