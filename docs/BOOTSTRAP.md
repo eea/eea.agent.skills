@@ -264,6 +264,7 @@ If you already have a personal `CLAUDE.md`, `opencode.json`, or other agent conf
 | `~/.hermes/HERMES.md` | Same backup + append pattern |
 | `~/.pi/agent/AGENTS.md` | Same backup + append pattern |
 | `~/.gemini/GEMINI.md` | Same backup + append pattern |
+| `~/.codex/AGENTS.md` or `AGENTS.override.md` (whichever is active) | **Back it up**, then append an EEA reference section; an existing link to the EEA harness is relinked instead |
 | Existing skills | Back up the old skill directory before overwriting (with `--force`) |
 
 ### Backup Naming
@@ -273,6 +274,12 @@ Backups are timestamped so they accumulate:
 ```
 ~/.claude/CLAUDE.md.backup-20260516-143052
 ~/.config/opencode/opencode.json.backup-20260516-143052
+```
+
+Skills replaced in `~/.agents/skills` are backed up outside that directory, so Codex does not discover them as skills:
+
+```
+~/.eea/agent-skill-backups/<skill>.XXXXXX/<skill>
 ```
 
 ### Restoring from Backup

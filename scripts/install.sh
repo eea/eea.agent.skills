@@ -518,18 +518,24 @@ install_codex() {
         codex_file="${codex_dir}/AGENTS.override.md"
     fi
 
-    if [ ! -e "${codex_file}" ] && [ ! -L "${codex_file}" ]; then
+    if [ -L "${codex_file}" ] && [ ! -e "${codex_file}" ]; then
+        log_warn "Removing broken Codex instruction symlink: ${codex_file}"
+        rm -f "${codex_file}"
+    fi
+
+    if [ ! -e "${codex_file}" ]; then
         ln -s "${harness_file}" "${codex_file}"
         log_success "Codex configured at ${codex_file}"
         return
     fi
 
-    if [ -L "${codex_file}" ] && [ "$(readlink "${codex_file}")" = "${harness_file}" ]; then
+    if is_linked_to_eea "${codex_file}"; then
+        ln -sfn "${harness_file}" "${codex_file}"
         log_info "Codex already linked to EEA harness"
         return
     fi
 
-    if grep -Fq "${harness_file}" "${codex_file}" 2>/dev/null; then
+    if grep -Fq '## EEA Global Harness' "${codex_file}" 2>/dev/null; then
         log_info "Codex already references EEA harness"
         return
     fi
@@ -543,7 +549,8 @@ install_codex() {
         local real_file
         real_file=$(readlink -f "${codex_file}" || true)
         if [ -z "${real_file}" ] || [ ! -f "${real_file}" ]; then
-            log_error "Codex instruction symlink is broken: ${codex_file}"
+            log_error "Codex instruction symlink does not point to a file: ${codex_file}"
+            log_info "Fix: rm ${codex_file} and re-run this script"
             return 1
         fi
         rm -f "${codex_file}"

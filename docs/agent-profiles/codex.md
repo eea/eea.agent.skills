@@ -10,6 +10,8 @@ Codex reads global instructions from `${CODEX_HOME:-~/.codex}/AGENTS.md`. If `AG
 
 The installer links the EEA harness as Codex's global instructions when no personal instruction file exists. If one exists, it backs it up and adds a short directive to read the local harness, leaving the personal instructions in place. It chooses `AGENTS.override.md` if that is the active global file. The script also copies merged skills from `skills/` into `~/.agents/skills`. `--agent codex` does not create OpenCode or Claude configuration.
 
+The link points into the checkout used for the install — the repository itself with `--local`, otherwise `~/.eea/agent-harness`. Moving or deleting that checkout breaks global Codex instructions, and the next run removes the broken link and creates a new one; you can also re-run the installer from the checkout's new location. Re-running never duplicates the wiring: an existing EEA link is relinked to the current checkout, and an existing EEA reference in a personal file is left alone.
+
 An existing skill directory is left untouched by default. After updating this repository, use `--update` to refresh installed EEA skills and add new ones. The installer skips a same-named skill that does not carry the EEA build marker. Replaced skill directories are backed up under `~/.eea/agent-skill-backups/`, outside Codex's skill discovery path, unless `--no-backup` is specified.
 
 ## Update after new repository changes
