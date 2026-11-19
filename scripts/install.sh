@@ -8,6 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 HARNESS_DIR="${HOME}/.eea/agent-harness"
 FORCE=false
+UPDATE=false
 GLOBAL=false
 LOCAL=false
 NO_BACKUP=false
@@ -28,8 +29,9 @@ usage() {
     echo "Options:"
     echo "  --global        Install globally for all projects (default)"
     echo "  --local         Use current repo instead of cloning from GitHub"
-    echo "  --agent <name>  Install only for specific agent (opencode, claude, hermes, gemini, pi)"
+    echo "  --agent <name>  Configure one agent (opencode, claude, hermes, gemini, pi, codex)"
     echo "  --force         Overwrite existing installations"
+    echo "  --update        Refresh only EEA-managed Codex skills (requires --agent codex)"
     echo "  --no-backup     Skip creating backups before modifying existing files"
     echo "  --help          Show this help message"
     echo ""
@@ -37,6 +39,8 @@ usage() {
     echo "  $0                          # Full install for all detected agents"
     echo "  $0 --local                  # Install from local repo (dev mode)"
     echo "  $0 --agent opencode         # Install only for OpenCode"
+    echo "  $0 --local --agent codex   # Configure Codex from this checkout"
+    echo "  $0 --local --agent codex --update  # Refresh Codex skills after git pull"
     echo "  $0 --force                  # Reinstall everything"
     echo "  $0 --no-backup              # Skip backups (not recommended)"
 }
@@ -76,6 +80,10 @@ while [[ $# -gt 0 ]]; do
             FORCE=true
             shift
             ;;
+        --update)
+            UPDATE=true
+            shift
+            ;;
         --no-backup)
             NO_BACKUP=true
             shift
@@ -92,6 +100,11 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+if [ "${UPDATE}" = true ] && { [ "${SPECIFIC_AGENT}" != "codex" ] || [ "${FORCE}" = true ]; }; then
+    log_error "--update requires --agent codex and cannot be combined with --force"
+    exit 1
+fi
+
 # Backup helper: creates a timestamped copy of any file or directory
 backup_file() {
     local file="$1"
@@ -101,6 +114,17 @@ backup_file() {
         cp -a "$file" "$backup"
         log_success "Backed up: ${file} → ${backup}"
     fi
+}
+
+# Keep skill backups outside ~/.agents/skills so Codex cannot discover them.
+backup_agent_skill() {
+    local skill_dir="$1"
+    local backup_root="${HOME}/.eea/agent-skill-backups"
+    mkdir -p "${backup_root}"
+    local backup_dir
+    backup_dir=$(mktemp -d "${backup_root}/$(basename "${skill_dir}").XXXXXX")
+    cp -a "${skill_dir}" "${backup_dir}/"
+    log_success "Backed up: ${skill_dir} → ${backup_dir}/"
 }
 
 # Check if a symlink already points to the EEA harness
@@ -480,6 +504,61 @@ install_gemini() {
     log_success "Gemini configured at ${gemini_file}"
 }
 
+# Codex reads ~/.codex/AGENTS.md (or AGENTS.override.md when present).
+# Preserve personal instructions and load the canonical harness from its local path.
+install_codex() {
+    log_info "Setting up Codex..."
+
+    local codex_dir="${CODEX_HOME:-${HOME}/.codex}"
+    local codex_file="${codex_dir}/AGENTS.md"
+    local harness_file="${HARNESS_DIR}/harness/EEA-HARNESS.md"
+    mkdir -p "${codex_dir}"
+
+    if [ -e "${codex_dir}/AGENTS.override.md" ] || [ -L "${codex_dir}/AGENTS.override.md" ]; then
+        codex_file="${codex_dir}/AGENTS.override.md"
+    fi
+
+    if [ ! -e "${codex_file}" ] && [ ! -L "${codex_file}" ]; then
+        ln -s "${harness_file}" "${codex_file}"
+        log_success "Codex configured at ${codex_file}"
+        return
+    fi
+
+    if [ -L "${codex_file}" ] && [ "$(readlink "${codex_file}")" = "${harness_file}" ]; then
+        log_info "Codex already linked to EEA harness"
+        return
+    fi
+
+    if grep -Fq "${harness_file}" "${codex_file}" 2>/dev/null; then
+        log_info "Codex already references EEA harness"
+        return
+    fi
+
+    if [ "${NO_BACKUP}" != true ]; then
+        backup_file "${codex_file}"
+    fi
+
+    # Replace a personal symlink with a real file so appending cannot alter its target.
+    if [ -L "${codex_file}" ]; then
+        local real_file
+        real_file=$(readlink -f "${codex_file}" || true)
+        if [ -z "${real_file}" ] || [ ! -f "${real_file}" ]; then
+            log_error "Codex instruction symlink is broken: ${codex_file}"
+            return 1
+        fi
+        rm -f "${codex_file}"
+        cp "${real_file}" "${codex_file}"
+    fi
+
+    cat >> "${codex_file}" <<EOF
+
+## EEA Global Harness
+
+Before working on EEA projects, read and follow ${harness_file}. Resolve its relative rule paths from that file's directory. Preserve the instructions above for all projects.
+EOF
+    log_success "Added EEA harness reference to ${codex_file}"
+}
+
 # Install skills
 install_skills() {
     log_info "Installing EEA skills..."
@@ -488,7 +567,8 @@ install_skills() {
     local claude_skills_dir="${HOME}/.claude/skills"
     local agents_skills_dir="${HOME}/.agents/skills"
 
-    # Install to OpenCode skills directory
+    # Codex-only installs should not create OpenCode or Claude configuration.
+    if [ "${SPECIFIC_AGENT}" != "codex" ]; then
     mkdir -p "${opencode_skills_dir}"
     for skill_dir in "${HARNESS_DIR}/skills"/*; do
         if [ -d "${skill_dir}" ]; then
@@ -534,6 +614,7 @@ install_skills() {
             log_success "Installed skill: ${skill_name} → ${target_dir}"
         fi
     done
+    fi
 
     # Install to .agents skills directory
     mkdir -p "${agents_skills_dir}"
@@ -544,11 +625,19 @@ install_skills() {
             local target_dir="${agents_skills_dir}/${skill_name}"
 
             if [ -d "${target_dir}" ]; then
-                if [ "${FORCE}" != true ]; then
+                if [ "${UPDATE}" = true ]; then
+                    if [ ! -f "${target_dir}/SKILL.md" ] || ! grep -Fq '<!-- Source: https://github.com/eea/eea.agent.skills -->' "${target_dir}/SKILL.md"; then
+                        log_warn "Skipping non-EEA skill at ${target_dir}"
+                        continue
+                    fi
+                    if diff -qr "${skill_dir}" "${target_dir}" >/dev/null 2>&1; then
+                        continue
+                    fi
+                elif [ "${FORCE}" != true ]; then
                     continue
                 fi
                 if [ "${NO_BACKUP}" != true ]; then
-                    backup_file "${target_dir}"
+                    backup_agent_skill "${target_dir}"
                 fi
                 rm -rf "${target_dir}"
             fi
@@ -584,6 +673,10 @@ link_rules_to_dir() {
 install_rules() {
     log_info "Installing EEA rules..."
 
+    if [ "${SPECIFIC_AGENT}" = "codex" ]; then
+        return
+    fi
+
     link_rules_to_dir "${HOME}/.claude/rules"
     link_rules_to_dir "${HOME}/.config/opencode/rules"
     link_rules_to_dir "${HOME}/.hermes/rules"
@@ -612,6 +705,10 @@ detect_agents() {
 
     if [ -d "${HOME}/.gemini" ] || command -v gemini &> /dev/null; then
         agents+=("gemini")
+    fi
+
+    if [ -d "${CODEX_HOME:-${HOME}/.codex}" ] || command -v codex &> /dev/null; then
+        agents+=("codex")
     fi
 
     echo "${agents[@]}"
@@ -645,6 +742,9 @@ main() {
             pi)
                 install_pi
                 ;;
+            codex)
+                install_codex
+                ;;
             *)
                 log_error "Unknown agent: ${SPECIFIC_AGENT}"
                 exit 1
@@ -676,6 +776,9 @@ main() {
                         ;;
                     gemini)
                         install_gemini
+                        ;;
+                    codex)
+                        install_codex
                         ;;
                 esac
             done

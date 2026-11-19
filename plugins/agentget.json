@@ -54,7 +54,8 @@
       "claude",
       "hermes",
       "gemini",
-      "pi"
+      "pi",
+      "codex"
     ]
   }
 }

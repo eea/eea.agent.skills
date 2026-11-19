@@ -2,7 +2,7 @@
 
 > **The canonical organization-wide AI harness for all EEA coding agents.**
 
-This repository is the single source of truth for how AI coding agents (OpenCode, Claude Code, Gemini, Copilot, etc.) behave across all European Environment Agency (EEA) projects.
+This repository is the single source of truth for how AI coding agents (OpenCode, Claude Code, Gemini, Copilot, Codex, etc.) behave across all European Environment Agency (EEA) projects.
 
 It contains org-wide rules, reusable skills, mandatory protocols, shared knowledge, and tool-specific wiring instructions.
 
@@ -51,6 +51,10 @@ After installing, run the health check to verify everything is wired correctly:
 ./scripts/verify.sh
 ```
 
+For **Codex**, install from a local clone with `./scripts/install.sh --local --agent codex`, then check it with `./scripts/verify.sh --agent codex --harness-dir "$(pwd)"`. This connects the EEA harness through Codex's global `AGENTS.md` (or an existing `AGENTS.override.md`) and installs skills in `~/.agents/skills`. See the [Codex profile](docs/agent-profiles/codex.md). The `agentget` manifest lists the shared skill directory, but Codex instruction wiring is performed by `install.sh`.
+
+After a `git pull`, refresh Codex's copied skills with `./scripts/install.sh --local --agent codex --update`.
+
 ### For Project Maintainers
 
 Create project-local instructions that add to the org harness:
@@ -61,6 +65,8 @@ cp ~/.eea/agent-harness/templates/dot-agents/AGENTS.md .agents/AGENTS.md
 # Edit .agents/AGENTS.md with project-specific rules
 cp ~/.eea/agent-harness/templates/dot-agents/opencode.json opencode.json
 ```
+
+For Codex, put project instructions in the repository root `AGENTS.md`; Codex does not discover `.agents/AGENTS.md`. See the [Codex profile](docs/agent-profiles/codex.md).
 
 ---
 
@@ -123,8 +129,8 @@ The canonical org harness ([`harness/EEA-HARNESS.md`](harness/EEA-HARNESS.md)) i
 
 | Method | Best For | Command | Agents Supported |
 |--------|----------|---------|------------------|
-| **A. Automated Global Install** | Most users — one command, all agents | `agentget install eea/eea.agent.skills` or `curl \| bash` | OpenCode, Claude, Hermes, Pi, Gemini |
-| **B. Manual Global Install** | Air-gapped or control-oriented users | `git clone ... && ./scripts/install.sh --local` | OpenCode, Claude, Hermes, Pi, Gemini |
+| **A. Automated Global Install** | Most users — one command, all agents | `agentget install eea/eea.agent.skills` or `curl \| bash` | OpenCode, Claude, Hermes, Pi, Gemini; Codex via `install.sh` |
+| **B. Manual Global Install** | Air-gapped or control-oriented users | `git clone ... && ./scripts/install.sh --local` | OpenCode, Claude, Hermes, Pi, Gemini, Codex |
 | **C. Project-Embedded** | No global setup, harness lives in one project | Remote URL, git submodule, or inline copy in project | Any agent |
 
 ---

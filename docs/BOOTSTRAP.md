@@ -11,7 +11,7 @@ The EEA AI Harness provides:
 - **Org-wide rules** — security, compliance, and quality standards
 - **Reusable skills** — expert capabilities for Docker, React, design review, etc.
 - **Mandatory protocols** — required actions at session end
-- **Tool-specific wiring** — setup instructions for OpenCode, Claude Code, Gemini, Pi, etc.
+- **Tool-specific wiring** — setup instructions for OpenCode, Claude Code, Gemini, Pi, Codex, etc.
 
 ---
 
@@ -47,7 +47,7 @@ curl -fsSL https://raw.githubusercontent.com/eea/eea.agent.skills/main/scripts/i
 
 Both options will:
 1. Clone the harness to `~/.eea/agent-harness`
-2. Detect your installed agents (OpenCode, Claude, Hermes, Pi, Gemini)
+2. Detect your installed agents (OpenCode, Claude, Hermes, Pi, Gemini, Codex)
 3. Create appropriate symlinks and copy skills/rules
 4. Set up global configurations
 
@@ -115,6 +115,18 @@ ln -sf ~/.eea/agent-harness/harness/EEA-HARNESS.md ~/.gemini/GEMINI.md
 ```
 
 See [`agent-profiles/gemini.md`](agent-profiles/gemini.md) for full details.
+
+#### Codex
+
+From the cloned repository, run:
+
+```bash
+./scripts/install.sh --local --agent codex
+```
+
+This preserves existing personal Codex instructions, connects the EEA harness through `~/.codex/AGENTS.md` (or `AGENTS.override.md` if present), and installs the merged skills in `~/.agents/skills`. See [`agent-profiles/codex.md`](agent-profiles/codex.md) for verification and limitations. Codex does not read `opencode.json` or the other agents' rules directories.
+
+For project-specific instructions in Codex, use `AGENTS.md` at the project root. The `.agents/AGENTS.md` template is not discovered automatically by Codex.
 
 ### Step 3: Install Skills
 
