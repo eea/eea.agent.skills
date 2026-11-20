@@ -39,7 +39,7 @@ Last, keep a table in the agent instruction file that pairs each rule with what 
 
 ## EEA enforcement layers
 
-- The agent instruction file in EEA repos is the repo-local `AGENTS.md`, plus the org-wide EEA harness loaded through `opencode.json` instructions. Keep the rule/enforcement table in `AGENTS.md`.
+- The agent instruction file in EEA repos is the repo-local `AGENTS.md`, plus the org-wide EEA harness loaded through the active agent's global configuration. OpenCode can use `opencode.json`; Codex uses `~/.codex/AGENTS.md` or `AGENTS.override.md`. Keep the rule/enforcement table in the repo-local `AGENTS.md`.
 - The top enforcement level for EEA repos is usually the Jenkins gate (ruff lint, mypy typing, Docker-based tests; see the `code-quality` and `jenkins-pipeline` skills). A rule enforced by Jenkins beats a rule enforced by prose.
 - Never add rules to `harness/EEA-HARNESS.md` from this skill. That file is org-wide policy affecting every EEA project; changes to it require an explicit user request.
 

@@ -6,6 +6,23 @@ This project uses **date-based versioning** (YYYY-MM-DD) rather than semantic ve
 
 ---
 
+## 2026-11-19 — Add Codex Support
+
+### Added
+- Codex detection, `--agent codex` installation, and verification. Existing global Codex instructions are preserved; merged skills use `~/.agents/skills`.
+- Codex `--update` refreshes EEA-managed skills after a repository update and stores backups outside Codex's skill discovery directory.
+- Codex setup profile and bootstrap documentation.
+
+### Changed
+- EEA overrides for ported skills now map generated skill paths and agent-specific transcript/delegation instructions to Codex.
+
+### Fixed
+- Re-running the Codex install relinks an existing EEA instruction link to the current checkout instead of copying the harness into `~/.codex/AGENTS.md`, and an existing EEA reference is detected without comparing checkout paths, so repeated runs no longer append duplicate harness sections.
+- A broken `~/.codex/AGENTS.md` or `AGENTS.override.md` symlink is replaced by a fresh link instead of stopping the install before skills are copied.
+- Codex profile and bootstrap docs describe the global harness link, skill backup location, and relink behavior.
+
+---
+
 ## 2026-11-18 — Add Three pstack Skills (Principles, Decision Trail, Verification Generator)
 
 ### Added

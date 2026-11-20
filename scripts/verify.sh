@@ -13,6 +13,7 @@ HARNESS_DIR="${HOME}/.eea/agent-harness"
 EEA_HARNESS_URL="https://raw.githubusercontent.com/eea/eea.agent.skills/main/harness/EEA-HARNESS.md"
 WARN_COUNT=0
 FAIL_COUNT=0
+SPECIFIC_AGENT=""
 
 # Colors (must be defined before usage)
 RED='\033[0;31m'
@@ -34,6 +35,7 @@ usage() {
     echo ""
     echo "Options:"
     echo "  --harness-dir <path>  Use a specific harness source directory"
+    echo "  --agent codex         Check Codex wiring without checking other agents"
     echo "  --help                Show this help message"
     echo ""
     echo "Examples:"
@@ -46,6 +48,14 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         --harness-dir)
             HARNESS_DIR="$2"
+            shift 2
+            ;;
+        --agent)
+            SPECIFIC_AGENT="${2:-}"
+            if [ "${SPECIFIC_AGENT}" != "codex" ]; then
+                echo "Only --agent codex is supported"
+                exit 1
+            fi
             shift 2
             ;;
         --help)
@@ -146,7 +156,36 @@ detect_agents() {
         agents+=("gemini")
     fi
 
+    if [ -d "${CODEX_HOME:-${HOME}/.codex}" ] || command -v codex &>/dev/null; then
+        agents+=("codex")
+    fi
+
     echo "${agents[@]}"
+}
+
+check_codex() {
+    log_section "Codex Configuration"
+
+    local codex_dir="${CODEX_HOME:-${HOME}/.codex}"
+    local codex_file="${codex_dir}/AGENTS.md"
+    if [ -e "${codex_dir}/AGENTS.override.md" ] || [ -L "${codex_dir}/AGENTS.override.md" ]; then
+        codex_file="${codex_dir}/AGENTS.override.md"
+    fi
+
+    if [ ! -f "${codex_file}" ]; then
+        log_warn "Codex instructions not found at ${codex_file}"
+        log_info "Fix: Run ./scripts/install.sh --local --agent codex"
+        return
+    fi
+
+    if [ -L "${codex_file}" ] && [[ "$(readlink "${codex_file}")" == "${HARNESS_DIR}/harness/EEA-HARNESS.md" ]]; then
+        log_pass "Codex instructions link to EEA harness"
+    elif grep -Fq "${HARNESS_DIR}/harness/EEA-HARNESS.md" "${codex_file}"; then
+        log_pass "Codex instructions reference EEA harness"
+    else
+        log_warn "Codex instructions do not reference EEA harness"
+        log_info "Fix: Run ./scripts/install.sh --local --agent codex"
+    fi
 }
 
 # ---------------------------------------------------------------------------
@@ -431,6 +470,10 @@ check_skills() {
         "${HOME}/.agents/skills"
     )
 
+    if [ "${SPECIFIC_AGENT}" = "codex" ]; then
+        agent_skill_dirs=("${HOME}/.agents/skills")
+    fi
+
     for agent_dir in "${agent_skill_dirs[@]}"; do
         if [ ! -d "${agent_dir}" ]; then
             log_info "Skill directory not found (agent may not be installed): ${agent_dir}"
@@ -476,6 +519,9 @@ check_skills() {
 # Rules
 # ---------------------------------------------------------------------------
 check_rules() {
+    if [ "${SPECIFIC_AGENT}" = "codex" ]; then
+        return
+    fi
     log_section "Rules Installation"
 
     if [ ! -d "${HARNESS_DIR}/rules" ]; then
@@ -853,7 +899,11 @@ main() {
     check_harness_repo
 
     local detected_agents
-    detected_agents=$(detect_agents)
+    if [ "${SPECIFIC_AGENT}" = "codex" ]; then
+        detected_agents="codex"
+    else
+        detected_agents=$(detect_agents)
+    fi
 
     if [ -z "${detected_agents}" ]; then
         log_info "No agents detected on this system"
@@ -867,12 +917,15 @@ main() {
                 hermes)   check_hermes ;;
                 pi)       check_pi ;;
                 gemini)   check_gemini ;;
+                codex)    check_codex ;;
             esac
         done
     fi
 
     # Additional OpenCode-specific check (runs regardless of detection)
-    check_opencode_agents_md
+    if [ "${SPECIFIC_AGENT}" != "codex" ]; then
+        check_opencode_agents_md
+    fi
 
     check_skills
     check_rules

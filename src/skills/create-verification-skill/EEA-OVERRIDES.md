@@ -5,6 +5,7 @@
 ## Where the generated skill lives
 
 - OpenCode has no `.cursor/skills/` directory. Generate the project-local skill at `.opencode/skills/verify-<app>/` (OpenCode's project skills directory) instead, and point the repo README there.
+- In Codex, generate it at `.agents/skills/verify-<app>/` in the project repository and point the repo README there. Use this path for the feature map too. Do not use the Cursor or OpenCode path in Codex.
 - For EEA Plone/Volto projects, drive the app through the same surfaces the `volto-cypress-writer` and `testing` skills already document (Cypress specs, the documented Docker test command); reuse those harnesses instead of inventing parallel ones.
 
 ## Not yet ported

@@ -11,7 +11,7 @@ The EEA AI Harness provides:
 - **Org-wide rules** — security, compliance, and quality standards
 - **Reusable skills** — expert capabilities for Docker, React, design review, etc.
 - **Mandatory protocols** — required actions at session end
-- **Tool-specific wiring** — setup instructions for OpenCode, Claude Code, Gemini, Pi, etc.
+- **Tool-specific wiring** — setup instructions for OpenCode, Claude Code, Gemini, Pi, Codex, etc.
 
 ---
 
@@ -47,7 +47,7 @@ curl -fsSL https://raw.githubusercontent.com/eea/eea.agent.skills/main/scripts/i
 
 Both options will:
 1. Clone the harness to `~/.eea/agent-harness`
-2. Detect your installed agents (OpenCode, Claude, Hermes, Pi, Gemini)
+2. Detect your installed agents (OpenCode, Claude, Hermes, Pi, Gemini, Codex)
 3. Create appropriate symlinks and copy skills/rules
 4. Set up global configurations
 
@@ -115,6 +115,18 @@ ln -sf ~/.eea/agent-harness/harness/EEA-HARNESS.md ~/.gemini/GEMINI.md
 ```
 
 See [`agent-profiles/gemini.md`](agent-profiles/gemini.md) for full details.
+
+#### Codex
+
+From the cloned repository, run:
+
+```bash
+./scripts/install.sh --local --agent codex
+```
+
+This preserves existing personal Codex instructions, connects the EEA harness through `~/.codex/AGENTS.md` (or `AGENTS.override.md` if present), and installs the merged skills in `~/.agents/skills`. See [`agent-profiles/codex.md`](agent-profiles/codex.md) for verification and limitations. Codex does not read `opencode.json` or the other agents' rules directories.
+
+For project-specific instructions in Codex, use `AGENTS.md` at the project root. The `.agents/AGENTS.md` template is not discovered automatically by Codex.
 
 ### Step 3: Install Skills
 
@@ -252,6 +264,7 @@ If you already have a personal `CLAUDE.md`, `opencode.json`, or other agent conf
 | `~/.hermes/HERMES.md` | Same backup + append pattern |
 | `~/.pi/agent/AGENTS.md` | Same backup + append pattern |
 | `~/.gemini/GEMINI.md` | Same backup + append pattern |
+| `~/.codex/AGENTS.md` or `AGENTS.override.md` (whichever is active) | **Back it up**, then append an EEA reference section; an existing link to the EEA harness is relinked instead |
 | Existing skills | Back up the old skill directory before overwriting (with `--force`) |
 
 ### Backup Naming
@@ -261,6 +274,12 @@ Backups are timestamped so they accumulate:
 ```
 ~/.claude/CLAUDE.md.backup-20260516-143052
 ~/.config/opencode/opencode.json.backup-20260516-143052
+```
+
+Skills replaced in `~/.agents/skills` are backed up outside that directory, so Codex does not discover them as skills:
+
+```
+~/.eea/agent-skill-backups/<skill>.XXXXXX/<skill>
 ```
 
 ### Restoring from Backup

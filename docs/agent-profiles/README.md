@@ -4,7 +4,7 @@ This directory contains **per-tool agent profiles** that explain how to wire the
 
 ## What Goes Here
 
-- Tool-specific setup instructions (OpenCode, Claude Code, Hermes, Gemini, Pi)
+- Tool-specific setup instructions (OpenCode, Claude Code, Hermes, Gemini, Pi, Codex)
 - Path conventions for each tool
 - Known limitations or special behaviors
 - Troubleshooting for common issues
@@ -24,6 +24,7 @@ This directory contains **per-tool agent profiles** that explain how to wire the
 | `hermes.md` | Hermes Agent | Ready |
 | `gemini.md` | Gemini (Google) | Ready |
 | `pi.md` | Pi (Earendil Works) | Ready |
+| `codex.md` | OpenAI Codex | Ready |
 
 ## Profile Format
 
